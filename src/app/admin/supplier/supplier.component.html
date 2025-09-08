@@ -1,0 +1,311 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a routerLink="admin/admin-dashboard">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+                    <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button class="float-right" color="primary" *ngIf="action.CanCreate"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Supplier Registration</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">S.No</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Join Date
+                                </th>
+                                <th style="cursor:pointer;" (click)="sort('SupplierName')">Supplier Name</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Address')">Address</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Contact No.
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Contact Person')">Contact
+                                    Person</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Alternate No
+                                    Name</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">State
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Tin No
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">DL No
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">GST No
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Pincode
+                                </th>
+                                
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Status
+                                </th>
+                                <!-- <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th> -->
+                                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of SupplierList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="text-center">{{item.JoinDate |date:'dd-MM-yyyy' }}</td>
+
+                                <td>{{item.SupplierName}}</td>
+                                <td class="text-center">{{item.Address}}</td>
+                                <td class="text-center">{{item.ContactNo}}</td>
+                                <td class="text-center">{{item.ContactPerson}}</td>
+                                <td class="text-center">{{item.AlternateNo}}</td>
+                                <td class="text-center">{{item.StateName}}</td>
+                                <td class="text-center">{{item.TinNo}}</td>
+                                <td class="text-center">{{item.DLNo}}</td>
+                                <td class="text-center">{{item.GSTNo}}</td>
+                                <td class="text-center">{{item.PinCode}}</td>
+                                <td class="text-center">
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                                <td class="text-center" *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editSupplier(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td class="text-center" *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteSupplier(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Supplier.SupplierId > 0 ? 'Update':'New'}}
+                        Supplier
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formSupplier="ngForm">
+                        <div class="container">
+                            <div class="row">
+
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Supplier Name</mat-label>
+                                    <input matInput #SupplierName="ngModel" name="SupplierName"
+                                        [(ngModel)]="Supplier.SupplierName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(SupplierName.dirty  || SupplierName.touched) || (SupplierName.invalid && isSubmitted)">
+                                        Supplier name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="Supplier.Address"
+                                        required autofocus></textarea>
+                                    <mat-error
+                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                        Address is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Email</mat-label>
+                                    <input matInput #Email="ngModel" name="Email" [(ngModel)]="Supplier.Email" required
+                                        autofocus>
+                                    <mat-error
+                                        *ngIf="(Email.dirty  || Email.touched) || (Email.invalid && isSubmitted)">
+                                        Email name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-lg-6">
+                                    <mat-label>State </mat-label>
+                                    <input matInput #StateId="ngModel" name="StateName"
+                                        (ngModelChange)="filterStateList($event)" placeholder="Search By State"
+                                        [(ngModel)]="Supplier.StateName" [matAutocomplete]="autoState" required />
+                                    <mat-autocomplete #autoState="matAutocomplete"
+                                        (optionSelected)="afterStateSelected($event)">
+                                        <mat-option *ngFor="let options of StateChargeList" [id]="options.StateId"
+                                            [value]="options.StateName">{{ options.StateName }}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Supplier.StateName" color="primary"
+                                        (click)="clearState()">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Contact No</mat-label>
+                                    <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
+                                        [(ngModel)]="Supplier.ContactNo" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999">
+                                    <mat-error
+                                        *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
+                                        ContactNo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Alternate No</mat-label>
+                                    <input type="tel" matInput #AlternateNo="ngModel" name="AlternateNo"
+                                        [(ngModel)]="Supplier.AlternateNo" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999">
+                                    <mat-error
+                                        *ngIf="(AlternateNo.dirty  || AlternateNo.touched) || (AlternateNo.invalid && isSubmitted)">
+                                        AlternateNo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Contact Person No</mat-label>
+                                    <input type="tel" matInput #ContactPerson="ngModel" name="ContactPerson"
+                                        [(ngModel)]="Supplier.ContactPerson" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999">
+                                    <mat-error
+                                        *ngIf="(ContactPerson.dirty  || ContactPerson.touched) || (ContactPerson.invalid && isSubmitted)">
+                                        Contact Person No is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-lg-6">
+                                    <mat-label>Join Date</mat-label>
+                                    <input matInput [matDatepicker]="picker" [(ngModel)]="Supplier.JoinDate"
+                                        name="JoinDate" required />
+                                    <mat-datepicker-toggle matSuffix [for]="picker"
+                                        class="small-datepicker-icon"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>TinNo</mat-label>
+                                    <input matInput #TinNo="ngModel" name="TinNo" [(ngModel)]="Supplier.TinNo" required
+                                        autofocus>
+                                    <mat-error
+                                        *ngIf="(TinNo.dirty  || TinNo.touched) || (TinNo.invalid && isSubmitted)">
+                                        TinNo name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>DLNo</mat-label>
+                                    <input matInput #DLNo="ngModel" name="DLNo" [(ngModel)]="Supplier.DLNo" required
+                                        autofocus>
+                                    <mat-error *ngIf="(DLNo.dirty  || DLNo.touched) || (DLNo.invalid && isSubmitted)">
+                                        DLNo name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>PinCode</mat-label>
+                                    <input matInput #PinCode="ngModel" name="PinCode" [(ngModel)]="Supplier.PinCode"
+                                        required autofocus>
+                                    <mat-error
+                                        *ngIf="(PinCode.dirty  || PinCode.touched) || (PinCode.invalid && isSubmitted)">
+                                        PinCode name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>GST No</mat-label>
+                                    <input matInput #GSTNo="ngModel" name="GSTNo" [(ngModel)]="Supplier.GSTNo" required
+                                        autofocus>
+                                    <mat-error
+                                        *ngIf="(GSTNo.dirty  || GSTNo.touched) || (GSTNo.invalid && isSubmitted)">
+                                        GSTNo name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>PAN No</mat-label>
+                                    <input matInput #PANNo="ngModel" name="PANNo" [(ngModel)]="Supplier.PANNo" required
+                                        autofocus>
+                                    <mat-error
+                                        *ngIf="(PANNo.dirty  || PANNo.touched) || (PANNo.invalid && isSubmitted)">
+                                        PAN No name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Supplier.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveSupplier()">{{Supplier.SupplierId >
+                        0 ? 'Update':'Submit'}}</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

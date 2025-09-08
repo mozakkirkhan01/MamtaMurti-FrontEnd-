@@ -1,0 +1,321 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a routerLink="admin/admin-dashboard">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+                    <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button class="float-right" color="primary" *ngIf="action.CanCreate"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Consent Registration</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="cursor: pointer" (click)="sort('Bill')">Bill </th>
+                                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                <th class="text-center">S.No</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">Consent No</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">Consent Date</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">UHID No.</th>
+                                <th style="cursor:pointer;" (click)="sort('PatientName')">Patient</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Age')">Age</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Gender')">Gender</th>
+                                <!-- <th class="text-center" style="cursor:pointer;" (click)="sort('Category')">Category</th> -->
+                                <!-- <th class="text-center" style="cursor:pointer;" (click)="sort('AadharNo')">Aadhar No
+                                </th> -->
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Contact No.</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Eye')">Eye</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Relation Name</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Relation Type</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Relation Date</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Counsellor Name</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Counsellor Date</th>
+                                <!-- <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th> -->
+                                
+                                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ConsentList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td class="text-center">
+                  <button class="btn btn-sm btn-success" (click)="getPrint(item)">
+                    <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+                                <td class="text-center" *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editPatient(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                
+                                <td class=" text-center">{{item.ConsentNo}}</td>
+                                <td class=" text-center">{{item.ConsentDate|date:'dd-MM-yyyy'}}</td>
+                                <td class="text-success text-center">{{item.UHID}}</td>
+
+                                <td>{{item.PatientName}}</td>
+                                <td class="text-center">{{item.Age}}</td>
+                                <td class="text-center">{{AllGenderList[item.Gender]}}</td>
+                                <!-- <td class="text-center">{{AllCategoryList[item.Category]}}</td> -->
+                                <!-- <td class="text-center">{{item.AadharNo}}</td> -->
+                                <td class="text-center">{{item.ContactNo}}</td>
+                                <td class="text-center">{{AllEyeList[item.Eye]}}</td>
+                                <td class="text-center">{{item.RelationName}}</td>
+                                <td class="text-center">{{item.Relationtype}}</td>
+                                <td class="text-center">{{item.RelationDate |date:'dd-MM-yyyy' }}</td>
+                                <td class="text-center">{{item.CounsellorName}}</td>
+                                <td class="text-center">{{item.CounsellorDate |date:'dd-MM-yyyy' }}</td>
+                                <!-- <td class="text-center">
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td> -->
+                                 
+                                <td class="text-center" *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteConsent(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Patient.PatientId > 0 ? 'Update':'New'}}
+                        Consent
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formPatient="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-lg-6">
+                                    <mat-label>Patient Name / Mobile / UHID</mat-label>
+                                    <input matInput name="PackageCollectionName" [(ngModel)]="Patient.PatientName"
+                                        (ngModelChange)="filterpatientList($event)"
+                                        [matAutocomplete]="autoTransportPackageCollection"
+                                        placeholder="Search By Package Collection" required />
+
+                                    <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
+                                        (optionSelected)="afterPatientSelected($event)">
+                                        <mat-option *ngFor="let option of filteredPatientList"
+                                            [value]="option.PatientName">
+                                            {{ option.PatientName }} / {{ option.UHID }} /
+                                            {{ option.ContactNo }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+
+                                    <button mat-icon-button matSuffix *ngIf="Patient.PatientName" color="primary"
+                                        (click)="clearPatient()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+
+                                    <mat-error *ngIf="!Patient.PatientName">Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Contact No</mat-label>
+                                    <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
+                                        [(ngModel)]="Patient.ContactNo" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999" readonly>
+                                    <mat-error
+                                        *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
+                                        ContactNo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Aadhar No</mat-label>
+                                    <input type="tel" matInput #AadharNo="ngModel" name="AadharNo"
+                                        [(ngModel)]="Patient.AadharNo" autofocus maxlength="12" min="000000000000"
+                                        max="999999999999" readonly>
+
+                                </mat-form-field>
+
+
+
+
+
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Age</mat-label>
+                                    <input matInput #Age="ngModel" name="Age" [(ngModel)]="Patient.Age" required
+                                        autofocus maxlength="2" min="0" max="99" readonly>
+                                    <mat-error *ngIf="(Age.dirty  || Age.touched) || (Age.invalid && isSubmitted)">
+                                        Age is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-lg-2">
+                                    <mat-label>Gender</mat-label>
+                                    <input matInput name="Gender" [value]="AllGenderList[Patient.Gender]" required
+                                        readonly="true" />
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-lg-2">
+                                    <mat-label>Category</mat-label>
+                                    <input matInput name="Category" [value]="AllCategoryList[Patient.Category]" required
+                                        readonly="true" />
+                                </mat-form-field>
+
+
+                                <!-- <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="Patient.Address"
+                                        required autofocus readonly></textarea>
+                                    <mat-error
+                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                        Address is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field> -->
+
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Select Eye</mat-label>
+                                    <mat-select #Eye="ngModel" name="Eye" [(ngModel)]="Patient.Eye"
+                                        required>
+                                        <mat-option [value]="Eye.Key"
+                                            *ngFor="let Eye of EyeList">{{Eye.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Eye.dirty  || Eye.touched) || (Eye.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-lg-3">
+                                    <mat-label>Consent Date</mat-label>
+                                    <input matInput [matDatepicker]="picker" [(ngModel)]="Patient.ConsentDate"
+                                        name="ConsentDate" required />
+                                    <mat-datepicker-toggle matSuffix [for]="picker"
+                                        class="small-datepicker-icon"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Patient/parent/guardian Name</mat-label>
+                                    <input matInput #RelationName="ngModel" name="RelationName"
+                                        [(ngModel)]="Patient.RelationName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(RelationName.dirty  || RelationName.touched) || (RelationName.invalid && isSubmitted)">
+                                        Patient name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Relation Type</mat-label>
+                                    <input matInput #RelationType="ngModel" name="RelationType"
+                                        [(ngModel)]="Patient.Relationtype" required autofocus>
+                                    <mat-error
+                                        *ngIf="(RelationType.dirty  || RelationType.touched) || (RelationType.invalid && isSubmitted)">
+                                        Patient name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                 <mat-form-field appearance="outline" class="col-lg-3">
+                                    <mat-label>Relation Date</mat-label>
+                                    <input matInput [matDatepicker]="pickers" [(ngModel)]="Patient.RelationDate"
+                                        name="RelationDate" required />
+                                    <mat-datepicker-toggle matSuffix [for]="pickers"
+                                        class="small-datepicker-icon"></mat-datepicker-toggle>
+                                    <mat-datepicker #pickers></mat-datepicker>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-lg-3">
+                                    <mat-label>Counsellor Date</mat-label>
+                                    <input matInput [matDatepicker]="pickeres" [(ngModel)]="Patient.CounsellorDate"
+                                        name="CounsellorDate" required />
+                                    <mat-datepicker-toggle matSuffix [for]="pickeres"
+                                        class="small-datepicker-icon"></mat-datepicker-toggle>
+                                    <mat-datepicker #pickeres></mat-datepicker>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Counsellor Name</mat-label>
+                                    <input matInput #CounsellorName="ngModel" name="CounsellorName"
+                                        [(ngModel)]="Patient.CounsellorName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(CounsellorName.dirty  || CounsellorName.touched) || (CounsellorName.invalid && isSubmitted)">
+                                        Patient name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Patient.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveConsent()">{{Patient.PatientId >
+                        0 ? 'Update':'Submit'}}</button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

@@ -1,0 +1,165 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'Prescription Item Master' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Prescription' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Manage Prescription Items' }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 text-end">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate"
+              data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+              (click)="newPrescriptionItem()">
+        Add New Prescription Item
+      </button>
+    </div>
+  </div>
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="dataTable-top">
+          <div class="dataTable-dropdown d-flex">
+            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+              <option *ngFor="let option of pageSize" [value]="option">{{option}} </option>
+            </select>
+            <span class="ms-2">Entries per page</span>
+          </div>
+          <div class="dataTable-search">
+            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                   placeholder="Search..." type="text">
+          </div>
+        </div>
+        <div class="table-container overflow-auto">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th class="text-center">S.No</th>
+                <th class="text-left" style="cursor:pointer;" (click)="sort('PrescriptionHeadName')">Head Name</th>
+                <th class="text-left" style="cursor:pointer;" (click)="sort('PrescriptionItemName')">Item Name</th>
+                <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of PrescriptionItemList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index;">
+                <td class="text-center">{{(itemPerPage * (p - 1)) + i + 1}}</td>
+                <td class="text-left">{{item.PrescriptionHeadName}}</td>
+                <td class="text-left">{{item.PrescriptionItemName}}</td>
+                <td class="text-center">
+                  <span class="p-1 badge" 
+                        [ngClass]="item.Status == 1 ? 'text-bg-success' : 'text-bg-danger'">
+                    {{AllStatusList[item.Status]}}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                          data-bs-target="#staticBackdrop" (click)="editPrescriptionItem(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="deletePrescriptionItem(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dataTable-bottom">
+          <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                               class="my-pagination"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div *ngIf="action.CanEdit || action.CanCreate"
+       class="modal fade" id="staticBackdrop"
+       data-bs-backdrop="static" data-bs-keyboard="false"
+       tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+            {{ PrescriptionItem.PrescriptionItemId > 0 ? 'Update' : 'New' }} Prescription Item
+          </h1>
+          <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"
+                  (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formHead="ngForm">
+            <div class="container">
+              <div class="row">
+                <!-- Prescription Head Selection -->
+                <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Select Prescription Head</mat-label>
+                  <input matInput #PrescriptionHeadName="ngModel" name="PrescriptionHeadName"
+                         (ngModelChange)="filterHeadList($event)"
+                         placeholder="Search prescription head"
+                         [(ngModel)]="PrescriptionItem.PrescriptionHeadName"
+                         [matAutocomplete]="autoHeadSelector" required />
+                  <mat-autocomplete #autoHeadSelector="matAutocomplete"
+                                    (optionSelected)="afterHeadSelected($event)">
+                    <mat-option *ngFor="let option of filteredHeadList" 
+                                [id]="option.PrescriptionHeadId"
+                                [value]="option.PrescriptionHeadName">
+                      {{ option.PrescriptionHeadName }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix 
+                          *ngIf="PrescriptionItem.PrescriptionHeadName" 
+                          color="primary"
+                          (click)="clearHeadSelection()">
+                    <mat-icon><i class="ri-close-circle-line"></i></mat-icon>
+                  </button>
+                  <mat-error *ngIf="PrescriptionHeadName.invalid && (PrescriptionHeadName.dirty || PrescriptionHeadName.touched || submitted)">
+                    Prescription Head is <strong>required</strong>
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Item Name -->
+                <mat-form-field appearance="outline" class="col-sm-6">
+                  <mat-label>Item Name</mat-label>
+                  <input matInput #PrescriptionItemName="ngModel" name="PrescriptionItemName"
+                         [(ngModel)]="PrescriptionItem.PrescriptionItemName" required autofocus>
+                  <mat-error *ngIf="PrescriptionItemName.invalid && (PrescriptionItemName.dirty || PrescriptionItemName.touched || submitted)">
+                    Item Name is <strong>required</strong>
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Status -->
+                <mat-form-field appearance="outline" class="col-sm-6">
+                    <mat-label>Status</mat-label>
+                    <mat-select #Status [(ngModel)]="PrescriptionItem.Status" name="Status" required>
+                      <mat-option value="">--Select Status--</mat-option>
+                      <mat-option *ngFor="let model of StatusList" [value]="model.Key">
+                        {{ model.Value }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button mat-raised-button color="warn" data-bs-dismiss="modal" (click)="resetForm()">
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" (click)="savePrescriptionItem()">
+            {{PrescriptionItem.PrescriptionItemId > 0 ? 'Update' : 'Submit'}}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

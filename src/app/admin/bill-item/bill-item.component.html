@@ -1,0 +1,165 @@
+
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+        <div class="col-sm-4 mb-3">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New Billing Item</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container overflow-auto">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">S.No</th>
+                                <th  style="cursor:pointer;" (click)="sort('BillingsName')">Billing Name</th>
+                                <th class="text-right" style="cursor:pointer;" (click)="sort('Rate')">Rate</th>
+                                <th  style="cursor:pointer;" (click)="sort('Description')">Description</th>
+                                <th style="cursor:pointer;" (click)="sort('CreatedBy')">Created By</th>
+                                <th style="cursor:pointer;" (click)="sort('UpdatedBy')">Updated By</th>
+                                 <th style="cursor:pointer;" (click)="sort('CreatedOn')">Created On</th>
+                                <th style="cursor:pointer;" (click)="sort('UpdatedOn')">Updated On</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of BillingList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>{{item.BillingName}}</td>
+                                 <td class="text-right">{{item.BillingPrice}}</td> 
+                                 <td>{{item.BillingDescription}}</td> 
+                                 <td>{{item.CreatedBy}}</td>
+                                 <td>{{item.UpdatedBy}}</td>
+                                 <td>{{ item.CreatedOn | date:'dd-MM-yyyy' }}</td>
+                                 <td>{{ item.UpdatedOn | date:'dd-MM-yyyy' }}</td>   
+                                 <td class="text-center">
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+
+                                <td class="text-center" *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editBillings(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td class="text-center" *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteBilling(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="modal fade" *ngIf="action.CanEdit || action.CanCreate" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Billing.BillingId > 0
+                        ?'Update':'New'}} Billing
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form #formBilling="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                        <div class="container">
+                            <div class="row">
+
+                                <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Billing Name</mat-label>
+                                    <input   matInput #formBilling="ngModel" name="BillingName"
+                                        [(ngModel)]="Billing.BillingName" required autofocus>
+                                    <mat-error>
+                                        Billing name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                 <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Price</mat-label>
+                                    <input matInput #formBilling="ngModel" name="DepartmentName"
+                                        [(ngModel)]="Billing.BillingPrice"  autofocus>
+                                </mat-form-field>
+
+                                 <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Description</mat-label>
+                                    <textarea matInput #formBilling="ngModel" name="BillingDescription"
+                                        [(ngModel)]="Billing.BillingDescription" autofocus> </textarea>
+                                </mat-form-field>
+
+                                
+
+
+                                <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Billing.Status"
+                                        required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveBilling()">{{Billing.BillingId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

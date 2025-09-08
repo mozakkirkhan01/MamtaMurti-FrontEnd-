@@ -1,0 +1,232 @@
+<app-progress *ngIf=""></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>Return Medicine</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item active">Return Medicine</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+
+                    <div class="card-body" style="min-height: 500px;">
+                        <!-- <h5 class="card-title">Return Medicine
+                            <a style="float: right;" routerLink="/admin/sell-list">Sell List</a>
+                        </h5> -->
+
+                        <form #myForm="ngForm" #myFormElement>
+                            <div class="row">
+
+                                <!-- <div class="col-lg-3 form-group">
+                                    <label class="form-label">Receipt No.<span class="text-danger">*</span></label>
+                                    <input type="number" placeholder="Receipt No." #ReceiptNo="ngModel"
+                                        [(ngModel)]="medicine.ReceiptNo" name="ReceiptNo" class="form-control">
+                                </div> -->
+
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Receipt No.</mat-label>
+                                    <input matInput #ReceiptNo="ngModel" name="ReceiptNo"
+                                        [(ngModel)]="medicine.ReceiptNo" required autofocus>
+                                    <mat-error
+                                        *ngIf="(ReceiptNo.dirty  || ReceiptNo.touched) || (ReceiptNo.invalid && submitted)">
+                                        Medicine Name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <div class="col-lg-1 row" style="margin-top: 5px;">
+                                    <!-- <label class="form-label">Search</label>
+                                    <button class="btn btn-primary btn-sm" (click)="getBillDetailList()"><i
+                                            class="bi bi-search"></i></button> -->
+
+                                    <button mat-raised-button color="primary"
+                                        (click)="getBillDetailList()">Search</button>
+
+                                </div>
+
+
+
+                                <!-- <div class="col-lg-2 form-group">
+                                    <label class="form-label">Return Date<span class="text-danger">*</span></label>
+                                    <input type="date" #ReturnDate="ngModel" [(ngModel)]="returnItem.ReturnDate"
+                                        name="ReturnDate" class="form-control">
+                                </div> -->
+
+                                <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label>Return Date</mat-label>
+                                        <input matInput [matDatepicker]="picker"
+                                            [(ngModel)]="returnItem.ReturnDate" name="ReturnDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"
+                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+                            </div>
+                            <div class="list-group">
+                                <a  aria-current="true">
+                                    Medicines
+                                </a>
+                                    <div class="row">
+                                        <div class="col-lg-12 table-responsive">
+                                            <table class="table table-bordered table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center">#</th>
+                                                        <th class="text-center">Return</th>
+                                                        <!-- <th>Return Qty.</th> -->
+                                                        <!-- <th>Stock Code</th> -->
+                                                        <th class="text-center">Medicine</th>
+                                                        <th class="text-center">HSN Code</th>
+                                                        <th class="text-center">MRP</th>
+                                                        <th class="text-center">Qty.</th>
+                                                        <th class="text-center">Unit</th>
+                                                        <th class="text-right">Discount (%)</th>
+                                                        <th class="text-right">Discount (₹)</th>
+                                                        <th class="text-right">Taxable Amount</th>
+                                                        <th class="text-right">GST (%)</th>
+                                                        <th class="text-right">CGST</th>
+                                                        <th class="text-right">SGST</th>
+                                                        <th class="text-right">IGST</th>
+                                                        <th class="text-right">Gross Amount</th>
+                                                        <th class="text-center">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let model of BillDetailList; let i = index">
+                                                        <td class="text-center">{{i+ 1}}</td>
+                                                        <td class="text-center"><button (click)="addReturnList(model)"
+                                                                class="btn btn-primary"><i
+                                                                    class="bi bi-arrow-counterclockwise"></i></button></td>
+                                                        <!-- <td><input type="number" placeholder="Qty." class="form-control" name="ReturnQuantity"
+                                                        #ReturnQuantity="ngModel" [(ngModel)]="model.ReturnQuantity" ></td> -->
+                                                        <!-- <td>{{model.StockCode}}</td> -->
+                                                        <td>{{model.MedicineName}}</td>
+                                                        <td class="text-center">{{model.HSNCode}}</td>
+                                                        <td class="text-center">{{model.Amount}}</td>
+                                                        <td class="text-center">{{model.Quantity}}</td>
+                                                        <td class="text-center">{{model.UnitName}}</td>
+                                                        <td class="text-right">{{model.DiscountPercentages}}</td>
+                                                        <td class="text-right">{{model.DiscountAmount}}</td>
+                                                        <td class="text-right">{{model.TaxableAmount}}</td>
+                                                        <td class="text-right">{{model.GSTValue}}</td>
+                                                        <td class="text-right">{{model.CGSTAmount}}</td>
+                                                        <td class="text-right">{{model.SGSTAmount}}</td>
+                                                        <td class="text-right">{{model.IGSTAmount}}</td>
+                                                        <td class="text-right">{{model.TotalAmount}}</td>
+                                                        <!-- <td
+                                                            ng-class="model.SellingStatus==1?'text-primary':'text-danger'">
+                                                            {{model.SellingStatus==1?'SOLD':'RETURN'}}</td> -->
+                                                        <td class="text-center"
+                                                            [ngClass]="model.SellingStatus==1?'text-primary':'text-danger'">
+                                                            {{model.SellingStatus==1?'SOLD':'RETURN'}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                            </div>
+                        </form>
+                        <br>
+                        <div class="row" *ngIf="ReturnList.length != 0">
+                            <div class="col-lg-12 table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Medicine</th>
+                                            <th>HSN Code</th>
+                                            <th>MRP</th>
+                                            <th>Quantity</th>
+                                            <th>Return Qty.</th>
+                                            <th>Unit</th>
+                                            <th>Discount (%)</th>
+                                            <th>Discount (₹)</th>
+                                            <th>Taxable Amount</th>
+                                            <th>GST (%)</th>
+                                            <th>CGST</th>
+                                            <th>SGST</th>
+                                            <th>IGST</th>
+                                            <th>Gross Amount</th>
+                                            <th>Status</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let model of ReturnList; let i = index">
+                                            <td>{{i+ 1}}</td>
+                                            <td>{{model.Name}}</td>
+                                            <td>{{model.HSNCode}}</td>
+                                            <td>{{model.Amount}}</td>
+                                            <td>
+                                                {{model.Quantity}}
+                                                <!-- <input type="text" class="input_money"
+                                                [(ngModel)]="model.ReturnQuantity" (change)="changeReturnSellingPrice(model)"> -->
+                                            </td>
+                                            <td>
+                                                <input type="text" class="input_money"
+                                                    [(ngModel)]="model.ReturnQuantity"
+                                                    (change)="changeReturnSellingPrice(model)">
+                                            </td>
+                                            <td>{{model.UnitName}}</td>
+                                            <td>{{model.DiscountPercentages}}</td>
+                                            <td>{{model.DiscountAmount}}</td>
+                                            <td>{{model.TaxableAmount}}</td>
+                                            <td>{{model.GSTValue}}</td>
+                                            <td>{{model.CGSTAmount}}</td>
+                                            <td>{{model.SGSTAmount}}</td>
+                                            <td>{{model.IGSTAmount}}</td>
+                                            <td>{{model.TotalAmount}}</td>
+                                            <!-- <td
+                                                ng-class="model.SellingStatus==1?'text-primary':'text-danger'">
+                                                {{model.SellingStatus==1?'SOLD':'RETURN'}}</td> -->
+                                            <td [ngClass]="model.SellingStatus==1?'text-primary':'text-danger'">
+                                                {{model.SellingStatus==1?'SOLD':'RETURN'}}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-danger" (click)="removeRetutnList(i)"><i
+                                                        class="bi bi-trash-fill"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center" *ngIf="ReturnList.length != 0">
+                            <!-- <button class="btn btn-primary" (click)="ShowHide()">Exchange</button>&nbsp;&nbsp; -->
+                            <button *ngIf="action.CanCreate" class="btn btn-primary"
+                                (click)="openPopup()">Return</button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<div id="modal_popUp" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div style="background-color: rgb(255, 81, 0);" class="modal-header">
+                <h3 class="modal-title">ALERT!!!</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <h4>Are you sure want to <b>Return Medicine</b>. !!!!!</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" (click)="SaveReturnProduct()" class="btn btn-primary">Confirm</button>
+            </div>
+
+        </div>
+    </div>
+</div>

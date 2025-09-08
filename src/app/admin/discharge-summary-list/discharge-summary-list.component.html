@@ -1,0 +1,242 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <mat-form-field appearance="outline" class="col-sm-2">
+                <mat-label>Entries per page</mat-label>
+                <mat-select [(ngModel)]="itemPerPage">
+                  <mat-option *ngFor="let option of PageSize" [value]="option">{{ option }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '30px' }">
+                <mat-label>Start data</mat-label>
+                <input matInput [matDatepicker]="pickers" name="StartFrom " required #StartFrom="ngModel"
+                  [(ngModel)]="filterModel.StartFrom" />
+                <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #pickers></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '10px' }">
+                <mat-label>End data</mat-label>
+                <input matInput [matDatepicker]="picker" name="endFrom " required #endFrom="ngModel"
+                  [(ngModel)]="filterModel.EndFrom" />
+                <mat-datepicker-toggle matSuffix [for]="picker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <button style="margin-top: 5px; margin-left: 10px" (click)="getDischargeSummary()" mat-raised-button
+                color="primary">
+                Search
+              </button>
+              <mat-form-field appearance="outline" class="col-sm-3" [style]="{ 'margin-left': '10px' }">
+                <mat-label>Search</mat-label>
+                <input matInput [(ngModel)]="Search" placeholder="Search..." />
+              </mat-form-field>
+            </div>
+            <div class="dataTable-search"></div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <!-- <th>Print Bill</th> -->
+                <th class="text-center" style="cursor: pointer" (click)="sort('SurgeryDate')">
+                  Surgery Date
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('DischargeDate')">
+                  Discharge Date
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('DischargeCode')">
+                  Discharge Code
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('UHID')">
+                  UHID
+                </th>
+                <th style="cursor: pointer" (click)="sort('PatientName')">
+                  Patient Name
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Age')">
+                  Age
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Gender')">
+                  Gender
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('ContactNo')">
+                  Contact
+                </th>
+                <th class="text-right" style="cursor: pointer" (click)="sort('DoctorName')">
+                  Doctor Name
+                </th>
+                <th class="text-right" style="cursor: pointer" (click)="sort('DepartmentName')">
+                  Department Name
+                </th>
+                <th class="text-right" style="cursor: pointer" (click)="sort('RefferedBy')">
+                  Reffered By
+                </th>
+                
+                
+                <th class="text-center" style="cursor: pointer" (click)="sort('PaymentStatus')">
+                  Status
+                </th>
+                
+                <th class="text-center" style="cursor: pointer" (click)="sort('Bill')">
+                  Bill
+                </th>
+                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of TotalRecords
+                    | filter : Search
+                    | orderBy : sortKey : false
+                    | paginate : { itemsPerPage: itemPerPage, currentPage: p };
+                  let i = index
+                ">
+                <!-- <td><Button (click)="PrintBill(item)">🖨️</Button></td> -->
+                <td class="text-center">{{ itemPerPage * (p - 1) + i + 1 }}</td>
+                <td class="text-center">
+                  {{ item.SurgeryDate | date : "dd-MM-yyyy" }}
+                </td>
+                <td class="text-center">
+                  {{ item.DischargeDate | date : "dd-MM-yyyy" }}
+                </td>
+                <td class="text-center">{{ item.DischargeSummaryNo }}</td>
+                <td class="text-center">{{ item.UHID }}</td>
+                <td>{{ item.PatientName }}</td>
+                <td class="text-center">{{ item.Age }}</td>
+                <td class="text-center">{{ AllGenderList[item.Gender] }}</td>
+                <td class="text-center">{{ item.ContactNo }}</td>
+                <td class="text-right">{{ item.DoctorName }}</td>
+                <td class="text-right">{{ item.DepartmentName }}</td>
+                <td class="text-right">{{ item.RefferedBy }}</td>
+               
+                <!-- <td>{{ item.PaidAmount }}</td> -->
+                <!-- <td>{{ item.CreatedOn | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ item.UpdatedOn | date: 'dd-MM-yyyy' }}</td> -->
+                <td class="text-center">
+                  <span class="p-1" [ngClass]="
+                      item.Status == 1
+                        ? 'badge text-bg-success'
+                        : 'badge text-bg-danger'
+                    ">
+                    {{ AllStatusList[item.Status] }}
+                  </span>
+                </td>
+
+                <!-- Show Pay Due button only if PaymentStatus == 0 (due) -->
+             
+
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" (click)="getPrint(item.DischargeSummaryId)">
+                    <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+
+
+                <td class="text-center" *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editPackageCollection(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="deleteDischargeSummaryList(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th class=""></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="text-end">{{ SurgeryTotal.AmountTotal }}</th>
+                <th class="text-end">{{ SurgeryTotal.DiscountAmountTotal }}</th>
+                <th class="text-end">{{ SurgeryTotal.TotalPayableAmount }}</th>
+                <th class="text-end">{{ SurgeryTotal.PaidAmount }}</th>
+                <th class="text-end">{{ SurgeryTotal.DueAmountTotal }}</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right"
+              class="my-pagination"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Form -->
+
+  <div class="modal fade" id="viewDueModal" tabindex="-2" aria-labelledby="viewDueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewDueModalLabel">Due Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div style="padding: 30px">
+          <mat-form-field appearance="outline" class="col-lg-2">
+            <mat-label>Payment date</mat-label>
+            <input matInput [matDatepicker]="pickers" name="PaymentDate " required #PaymentDate="ngModel"
+              [(ngModel)]="DueBill.PaymentDate" />
+            <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #pickers></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-lg-2">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
+              readonly="true" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-sm-3">
+            <mat-label>Payment Mode</mat-label>
+            <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="DueBill.PaymentMode" required
+              class="no-spinner">
+              <mat-option [value]="PaymentMode.Key" *ngFor="let PaymentMode of PaymentModeList">{{ PaymentMode.Value
+                }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="
+                PaymentMode.dirty ||
+                PaymentMode.touched ||
+                (PaymentMode.invalid && isSubmitted)
+              ">
+              Payment Mode is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

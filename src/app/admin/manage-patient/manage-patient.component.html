@@ -1,0 +1,223 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button class="float-right" color="primary" *ngIf="action.CanCreate"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Patient Registration</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center" >S.No</th>
+                                <th class="text-center" *ngIf="action.CanCreate">Booking</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">UHID No.</th>
+                                <th style="cursor:pointer;" (click)="sort('PatientName')">Patient</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Age')">Age</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Gender')">Gender</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Category')">Category</th>
+                                <th style="cursor:pointer;" (click)="sort('Address')">Address</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('AadharNo')">Aadhar No</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Contact No.</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr 
+                                *ngFor="let item of PatientList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="text-center" *ngIf="action.CanCreate">
+                                    <button class="btn btn-sm btn-success" (click)="GotoOPDBooking(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td  class="text-success text-center">{{item.UHID}}</td>
+
+                                <td>{{item.PatientName}}</td>
+                                <td class="text-center">{{item.Age}}</td>
+                                <td class="text-center">{{AllGenderList[item.Gender]}}</td>
+                                <td class="text-center">{{AllCategoryList[item.Category]}}</td>
+                                <td>{{item.Address}}</td>
+                                <td class="text-center">{{item.AadharNo}}</td>
+                                <td class="text-center">{{item.ContactNo}}</td>
+                                <td class="text-center">
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                                <td class="text-center" *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editPatient(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td >
+                                <td class="text-center" *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deletePatient(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Patient.PatientID > 0 ? 'Update':'New'}}
+                        Patient
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formPatient="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Patient Name</mat-label>
+                                    <input matInput #PatientName="ngModel" name="PatientName"
+                                        [(ngModel)]="Patient.PatientName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(PatientName.dirty  || PatientName.touched) || (PatientName.invalid && isSubmitted)">
+                                        Patient name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Patient Guardian Name</mat-label>
+                                    <input matInput #PatientGuardianName="ngModel" name="PatientGuardianName"
+                                        [(ngModel)]="Patient.PatientGuardianName"  autofocus>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Age</mat-label>
+                                    <input matInput #Age="ngModel" name="Age" [(ngModel)]="Patient.Age" required
+                                        autofocus maxlength="2" min="0" max="99">
+                                    <mat-error *ngIf="(Age.dirty  || Age.touched) || (Age.invalid && isSubmitted)">
+                                        Age is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="Patient.Address"
+                                        required autofocus></textarea>
+                                    <mat-error
+                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                        Address is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Contact No</mat-label>
+                                    <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
+                                        [(ngModel)]="Patient.ContactNo" required autofocus maxlength="10" min="0000000000" max="9999999999" >
+                                    <mat-error
+                                        *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
+                                        ContactNo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Aadhar No</mat-label>
+                                    <input type="tel" matInput #AadharNo="ngModel" name="AadharNo"
+                                        [(ngModel)]="Patient.AadharNo" autofocus maxlength="12" min="000000000000" max="999999999999" >
+                                    
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Gender</mat-label>
+                                    <mat-select #Gender="ngModel" name="Gender" [(ngModel)]="Patient.Gender" required>
+                                        <mat-option [value]="Gender.Key"
+                                            *ngFor="let Gender of GenderList">{{Gender.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Gender.dirty  || Gender.touched) || (Gender.invalid && isSubmitted)">
+                                        Gender is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Category</mat-label>
+                                    <mat-select #Category="ngModel" name="Category" [(ngModel)]="Patient.Category" required>
+                                        <mat-option [value]="Category.Key"
+                                            *ngFor="let Category of CategoryList">{{Category.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Category.dirty  || Category.touched) || (Category.invalid && isSubmitted)">
+                                        Gender is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Patient.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="savePatient()">{{Patient.PatientID >
+                        0 ? 'Update':'Submit'}}</button>
+                    <button mat-raised-button color="primary" (click)="savePatientAndRediectToOPD()">OPD
+                        Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

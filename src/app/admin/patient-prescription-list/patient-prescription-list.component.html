@@ -1,0 +1,454 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <mat-form-field appearance="outline" class="col-sm-2">
+                <mat-label>Entries per page</mat-label>
+                <mat-select [(ngModel)]="itemPerPage">
+                  <mat-option *ngFor="let option of PageSize" [value]="option">{{ option }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="col-lg-3" [style]="{ 'margin-left': '30px' }">
+                <mat-label>Start data</mat-label>
+                <input matInput [matDatepicker]="pickers" name="StartFrom " required #StartFrom="ngModel"
+                  [(ngModel)]="filterModel.StartFrom" />
+                <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #pickers></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-lg-3" [style]="{ 'margin-left': '10px' }">
+                <mat-label>End data</mat-label>
+                <input matInput [matDatepicker]="picker" name="endFrom " required #endFrom="ngModel"
+                  [(ngModel)]="filterModel.EndFrom" />
+                <mat-datepicker-toggle matSuffix [for]="picker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <button style="margin-top: 5px; margin-left: 10px" (click)="GetPrescriptionList()" mat-raised-button
+                color="primary">
+                Search
+              </button>
+              <mat-form-field appearance="outline" class="col-sm-4" [style]="{ 'margin-left': '10px' }">
+                <mat-label>Search</mat-label>
+                <input matInput [(ngModel)]="Search" placeholder="Search..." />
+              </mat-form-field>
+            </div>
+            <div class="dataTable-search"></div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th style="text-align: center">S.No</th>
+                <th style="cursor: pointer; text-align: center" (click)="sort('PrescriptionDate')">
+                  Prescription Date
+                </th>
+                <th style="cursor: pointer; text-align: center" (click)="sort('PrescriptionNO')">
+                    Prescription No.
+                </th>
+                <th style="cursor: pointer" (click)="sort('UHID')">
+                  UHID
+                </th>
+                <th style="cursor: pointer" (click)="sort('PatientName')">
+                  Patient Name
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Age')">
+                  Age
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('ContactNo')">
+                  Contact
+                </th>
+                <th class="text-center" style="cursor: pointer">
+                  Bill
+                </th>
+                <th class="text-center" style="cursor: pointer">
+                  View
+                </th>
+                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of PatientPrescriptionList
+                    | filter : Search
+                    | orderBy : sortKey : false
+                    | paginate : { itemsPerPage: itemPerPage, currentPage: p };
+                  let i = index
+                ">
+                <td style="text-align: center">
+                  {{ itemPerPage * (p - 1) + i + 1 }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.PrescriptionDate | date : "dd-MM-yyyy" }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.PrescriptionNO }}
+                </td>
+                <td>{{ item.UHID }}</td>
+                <td>{{ item.PatientName }}</td>
+                <td class="text-center">{{ item.Age }}</td>
+                <td class="text-center">{{ item.ContactNo }}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" (click)="getPrint(item)">
+                    <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn btn-primary" (click)="openViewModal(item)">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editPackageCollection(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="DeletePatientPrescription(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right"
+              class="my-pagination"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Form -->
+  <!-- View Details Modal -->
+  <div class="modal fade" id="viewPrescriptionDetailsModal" tabindex="-1" aria-labelledby="viewPrescriptionDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewPrescriptionDetailsModalLabel">
+            Prescription Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="selectedPrescription" class="container-fluid">
+            
+            <!-- Patient Information Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">Patient Information</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-2">
+                  <div class="col-4">
+                    <strong>Prescription Date:</strong>
+                    {{ selectedPrescription.PrescriptionDate | date : "dd-MM-yyyy" }}
+                  </div>
+                  <div class="col-4">
+                    <strong>Prescription No.:</strong>
+                    {{ selectedPrescription.PrescriptionNO }}
+                  </div>
+                  <div class="col-4">
+                    <strong>Patient Name:</strong> {{ selectedPrescription.PatientName }}
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4">
+                    <strong>Contact:</strong> {{ selectedPrescription.ContactNo }}
+                  </div>
+                  <div class="col-4">
+                    <strong>UHID:</strong> {{ selectedPrescription.UHID }}
+                  </div>
+                  <div class="col-4">
+                    <strong>Age:</strong> {{ selectedPrescription.Age }}
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4">
+                    <strong>Gender:</strong> {{ AllGenderList[selectedPrescription.Gender] }}
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+
+            <!-- Clinical Notes Section -->
+            <div class="card mb-3" *ngIf="selectedPrescription.C_OItem || selectedPrescription.O_EItem || selectedPrescription.AdvItem || selectedPrescription.ExtraRemarks">
+              <div class="card-header bg-info text-white">
+                <h6 class="mb-0">Clinical Notes</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-2" *ngIf="selectedPrescription.C_OItem">
+                  <div class="col-12">
+                    <strong>C/O Item:</strong> {{ selectedPrescription.C_OItem }}
+                  </div>
+                </div>
+                <div class="row mb-2" *ngIf="selectedPrescription.O_EItem">
+                  <div class="col-12">
+                    <strong>O/E Item:</strong> {{ selectedPrescription.O_EItem }}
+                  </div>
+                </div>
+                <div class="row mb-2" *ngIf="selectedPrescription.AdvItem">
+                  <div class="col-12">
+                    <strong>Advice Item:</strong> {{ selectedPrescription.AdvItem }}
+                  </div>
+                </div>
+                <div class="row mb-2" *ngIf="selectedPrescription.ExtraRemarks">
+                  <div class="col-12">
+                    <strong>Extra Remarks:</strong> {{ selectedPrescription.ExtraRemarks }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medical Test Results Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-success text-white">
+                <h6 class="mb-0">Medical Test Results</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-2">
+                  <div class="col-3" *ngIf="selectedPrescription.BloodPressure">
+                    <strong>Blood Pressure:</strong> {{ selectedPrescription.BloodPressure }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.BloodSugarF">
+                    <strong>Blood Sugar (F):</strong> {{ selectedPrescription.BloodSugarF }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.BloodSugarPP">
+                    <strong>Blood Sugar (PP):</strong> {{ selectedPrescription.BloodSugarPP }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.BloodSugarRandom">
+                    <strong>Blood Sugar (Random):</strong> {{ selectedPrescription.BloodSugarRandom }}
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-3" *ngIf="selectedPrescription.TLC">
+                    <strong>TLC:</strong> {{ selectedPrescription.TLC }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.DLC">
+                    <strong>DLC:</strong> {{ selectedPrescription.DLC }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.ESR">
+                    <strong>ESR:</strong> {{ selectedPrescription.ESR }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.HBPercentage">
+                    <strong>HB%:</strong> {{ selectedPrescription.HBPercentage }}
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-3" *ngIf="selectedPrescription.CSCulture">
+                    <strong>CS Culture:</strong> {{ selectedPrescription.CSCulture }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.XsTest">
+                    <strong>Xs Test:</strong> {{ selectedPrescription.XsTest }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.ECG">
+                    <strong>ECG:</strong> {{ selectedPrescription.ECG }}
+                  </div>
+                  <div class="col-3" *ngIf="selectedPrescription.HBsAg">
+                    <strong>HBsAg:</strong> {{ selectedPrescription.HBsAg }}
+                  </div>
+                </div>
+                <div class="row mb-2" *ngIf="selectedPrescription.HIVTest">
+                  <div class="col-3">
+                    <strong>HIV Test:</strong> {{ selectedPrescription.HIVTest }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+ <!-- prescription items -->
+            <div class="card mb-3" *ngIf="PatientPrescriptionItems?.length > 0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">Prescription Items</h6>
+               
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                      <thead class="">
+                        <tr>
+                          <th scope="col" style="width: 5%" class="text-center">#</th>
+                          <th scope="col" style="width: 25%">Head Name</th>
+                          <th scope="col" style="width: 30%">Item Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of PatientPrescriptionItems; let i = index">
+                          <td class="text-center">{{ i + 1 }}</td>
+                          <td>
+                            <span class="fw-medium">{{ item.PrescriptionHeadName || 'N/A' }}</span>
+                            <small class="text-muted d-block" *ngIf="item.PrescriptionHeadId">
+                            </small>
+                          </td>
+                          <td>
+                            <span class="fw-medium">{{ item.PrescriptionItemName || 'N/A' }}</span>
+                            <small class="text-muted d-block" *ngIf="item.PrescriptionItemId">
+                            </small>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            <!-- Eye Examination Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">Eye Examination</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-6">
+                    <strong>IOP (Intraocular Pressure):</strong>
+                    <div class="ms-2">
+                      <div *ngIf="selectedPrescription.IOP_R">Right: {{ selectedPrescription.IOP_R }}</div>
+                      <div *ngIf="selectedPrescription.IOP_L">Left: {{ selectedPrescription.IOP_L }}</div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <strong>Keratometry:</strong>
+                    <div class="ms-2">
+                      <div *ngIf="selectedPrescription.K_K1">K1: {{ selectedPrescription.K_K1 }}</div>
+                      <div *ngIf="selectedPrescription.K_K2">K2: {{ selectedPrescription.K_K2 }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-4" *ngIf="selectedPrescription.Vn_R">
+                    <strong>Vn_R:</strong> {{ selectedPrescription.Vn_R }}
+                  </div>
+                  <div class="col-4" *ngIf="selectedPrescription.Vn_L">
+                    <strong>Vn_L:</strong> {{ selectedPrescription.Vn_L }}
+                  </div>
+                  <div class="col-4" *ngIf="selectedPrescription.Nv">
+                    <strong>Nv:</strong> {{ selectedPrescription.Nv }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prescription Details Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0">Prescription Details</h6>
+              </div>
+              <div class="card-body">
+                <!-- Right Eye -->
+                <div class="row mb-3">
+                  <div class="col-12">
+                    <h6 class="text-primary">Right Eye (RE)</h6>
+                    <div class="row">
+                      <div class="col-6">
+                        <strong>Distance Vision (DV):</strong>
+                        <div class="ms-2">
+                          <div *ngIf="selectedPrescription.RE_DV_SPH">SPH: {{ selectedPrescription.RE_DV_SPH }}</div>
+                          <div *ngIf="selectedPrescription.RE_DV_CYL">CYL: {{ selectedPrescription.RE_DV_CYL }}</div>
+                          <div *ngIf="selectedPrescription.RE_DV_AXIS">AXIS: {{ selectedPrescription.RE_DV_AXIS }}</div>
+                          <div *ngIf="selectedPrescription.RE_DV_V">V: {{ selectedPrescription.RE_DV_V }}</div>
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <strong>Near Vision (NV):</strong>
+                        <div class="ms-2">
+                          <div *ngIf="selectedPrescription.RE_NV_SPH">SPH: {{ selectedPrescription.RE_NV_SPH }}</div>
+                          <div *ngIf="selectedPrescription.RE_NV_CYL">CYL: {{ selectedPrescription.RE_NV_CYL }}</div>
+                          <div *ngIf="selectedPrescription.RE_NV_AXIS">AXIS: {{ selectedPrescription.RE_NV_AXIS }}</div>
+                          <div *ngIf="selectedPrescription.RE_NV_V">V: {{ selectedPrescription.RE_NV_V }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Left Eye -->
+                <div class="row mb-3">
+                  <div class="col-12">
+                    <h6 class="text-primary">Left Eye (LE)</h6>
+                    <div class="row">
+                      <div class="col-6">
+                        <strong>Distance Vision (DV):</strong>
+                        <div class="ms-2">
+                          <div *ngIf="selectedPrescription.LE_DV_SPH">SPH: {{ selectedPrescription.LE_DV_SPH }}</div>
+                          <div *ngIf="selectedPrescription.LE_DV_CYL">CYL: {{ selectedPrescription.LE_DV_CYL }}</div>
+                          <div *ngIf="selectedPrescription.LE_DV_AXIS">AXIS: {{ selectedPrescription.LE_DV_AXIS }}</div>
+                          <div *ngIf="selectedPrescription.LE_DV_V">V: {{ selectedPrescription.LE_DV_V }}</div>
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <strong>Near Vision (NV):</strong>
+                        <div class="ms-2">
+                          <div *ngIf="selectedPrescription.LE_NV_SPH">SPH: {{ selectedPrescription.LE_NV_SPH }}</div>
+                          <div *ngIf="selectedPrescription.LE_NV_CYL">CYL: {{ selectedPrescription.LE_NV_CYL }}</div>
+                          <div *ngIf="selectedPrescription.LE_NV_AXIS">AXIS: {{ selectedPrescription.LE_NV_AXIS }}</div>
+                          <div *ngIf="selectedPrescription.LE_NV_V">V: {{ selectedPrescription.LE_NV_V }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="row mb-2">
+                  <div class="col-4" *ngIf="selectedPrescription.PD">
+                    <strong>PD (Pupillary Distance):</strong> {{ selectedPrescription.PD }}
+                  </div>
+                  <div class="col-8" *ngIf="selectedPrescription.Lens">
+                    <strong>Lens:</strong> {{ selectedPrescription.Lens }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+              
+              <!-- If no prescription items found -->
+              <div class="card mb-3" *ngIf="PatientPrescriptionItems?.length === 0">
+                <div class="card-header bg-warning text-dark">
+                  <h6 class="mb-0">Prescription Items</h6>
+                </div>
+                <div class="card-body">
+                  <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No prescription items found for this prescription.
+                  </div>
+                </div>
+              </div>
+            
+
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="!selectedPrescription" class="alert alert-warning mt-3">
+            No prescription details found.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

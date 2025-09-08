@@ -1,0 +1,288 @@
+
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>Medicine Master
+            <!-- <button *ngIf="action.CanCreate" class="btn btn-primary btn-sm" style="float: right;" (click)="newMedicine()"> Add
+                New</button> -->
+                <button mat-raised-button class="float-right" color="primary" *ngIf="action.CanCreate"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="newMedicine()">
+                New Medicine</button>
+        </h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active">Medicine Master</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="dataTable-top">
+                                <div class="dataTable-dropdown">
+                                    <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                        <option *ngFor="let option of pageSize" [value]="option">{{option}} </option>
+                                    </select>
+                                  &nbsp;  entries per page
+                                </div>
+                                <div class="dataTable-search"><input
+                                        class="dataTable-input form-control form-control-sm" [(ngModel)]="Search" placeholder="Search..."
+                                        type="text"></div>
+                            </div>
+                            <div class="col-lg-12 table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                        <th class="text-center">#</th>
+                                        <th style="cursor: pointer;" (click)="sort('Name')">Medicine Name</th>
+                                        <th class="text-center" style="cursor: pointer;" (click)="sort('HSNCode')">HSN Code</th>
+                                        <th style="cursor: pointer;" (click)="sort('CategoryName')">Category Name</th>
+                                        <th style="cursor: pointer;" (click)="sort('ManufacturerName')">Manufacturer Name</th>
+                                        <th style="cursor: pointer;" (click)="sort('UnitName')">Unit Name</th>
+                                        <th class="text-center" style="cursor: pointer;" (click)="sort('GSTValue')">GST</th>
+                                        <th class="text-center" style="cursor: pointer;" (click)="sort('StatusName')">Status</th>
+                                        <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                        <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let model of MedicineList|filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index">
+                                            <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                            <td>{{model.MedicineName}}</td>
+                                            <td class="text-center">{{model.HSNCode}}</td>
+                                            <td>{{model.CategoryName}}</td>
+                                            <td>{{model.ManufacturerName}}</td>
+                                            <td>{{model.UnitName}}</td>
+                                            <td class="text-center">{{model.GSTValue}} %</td>
+                                            <td class="text-center" ><span [ngClass]="model.Status == 2 ?'badge bg-warning':'badge bg-success'">
+                                                    {{AllStatusList[model.Status]}}</span></td>
+                                            <td class="text-center" *ngIf="action.CanEdit">
+                                                <button class="btn btn-sm btn-warning" (click)="editMedicine(model)"><i
+                                                        class="bi bi-pencil-square"></i> </button>
+                                            </td>
+                                            <td class="text-center" *ngIf="action.CanDelete">
+                                                <button class="btn btn-sm btn-danger" (click)="deleteMedicine(model)"><i
+                                                        class="bi bi-trash-fill"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                            <div class="dataTable-bottom">
+                                <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right;"
+                                class="my-pagination"></pagination-controls>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<div id="modal_popUp" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{Medicine.MedicineId > 0 ? 'Update' : 'New'}} Medicine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form #formMedicine="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Medicine Name</mat-label>
+                                    <input matInput #MedicineName="ngModel" name="MedicineName"
+                                        [(ngModel)]="Medicine.MedicineName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(MedicineName.dirty  || MedicineName.touched) || (MedicineName.invalid && submitted)">
+                                        Medicine Name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>HSN Code</mat-label>
+                                    <input matInput #HSNCode="ngModel" name="HSNCode"
+                                        [(ngModel)]="Medicine.HSNCode" required autofocus>
+                                    <mat-error
+                                        *ngIf="(HSNCode.dirty  || HSNCode.touched) || (HSNCode.invalid && submitted)">
+                                        HSN Code is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Select Gst  </mat-label>
+                  <input matInput #GSTId="ngModel" name="GSTName"
+                    (ngModelChange)="filterGstList($event)"
+                    placeholder="Search By GST" [(ngModel)]="Medicine.GSTName"
+                    [matAutocomplete]="autoGST" required />
+                  <mat-autocomplete #autoGST="matAutocomplete"
+                    (optionSelected)="afterGSTSelected($event)">
+                    <mat-option *ngFor="let option of GstChargeList" [id]="option.GSTId"
+                      [value]="option.GSTName">{{ option.GSTName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Medicine.GSTName" color="primary"
+                    (click)="clearGST()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+                        
+<!-- 
+                        <div class="col-sm-4 form-group">
+                            <label class="form-label">GST</label>
+                            <select class="form-select" #GSTId="ngModel" [(ngModel)]="Medicine.GSTId" name="GSTId"
+                                [ngClass]="{'is-invalid':submitted && GSTId.invalid}" required autofocus required [autofocus]="true">
+                                <option value="">--Select GST--</option>
+                                <option [value]="model.GSTId" *ngFor="let model of GSTList">
+                                    {{model.GSTName}}</option>
+                            </select>
+                            <div *ngIf="GSTId.invalid && (GSTId.dirty || GSTId.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="GSTId.errors?.['required']">
+                                    GST is required.
+                                </div>
+                            </div>
+                        </div> -->
+
+
+
+                        <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Category </mat-label>
+                  <input matInput #CategoryId="ngModel" name="CategoryName"
+                    (ngModelChange)="filterCategoryList($event)"
+                    placeholder="Search By Category" [(ngModel)]="Medicine.CategoryName"
+                    [matAutocomplete]="autoCategory" required />
+                  <mat-autocomplete #autoCategory="matAutocomplete"
+                    (optionSelected)="afterCategorySelected($event)">
+                    <mat-option *ngFor="let options of CategoryChargeList" [id]="options.CategoryId"
+                      [value]="options.CategoryName">{{ options.CategoryName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Medicine.CategoryName" color="primary"
+                    (click)="clearCategory()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Unit </mat-label>
+                  <input matInput #UnitId="ngModel" name="UnitName"
+                    (ngModelChange)="filterUnitList($event)"
+                    placeholder="Search By Unit" [(ngModel)]="Medicine.UnitName"
+                    [matAutocomplete]="autoUnit" required />
+                  <mat-autocomplete #autoUnit="matAutocomplete"
+                    (optionSelected)="afterUnitSelected($event)">
+                    <mat-option *ngFor="let options of UnitChargeList" [id]="options.UnitId"
+                      [value]="options.UnitName">{{ options.UnitName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Medicine.UnitName" color="primary"
+                    (click)="clearUnit()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+
+                        <!-- <div class="col-sm-4 form-group">
+                            <label class="form-label">Unit</label>
+                            <select class="form-select" #UnitId="ngModel" [(ngModel)]="Medicine.UnitId" name="UnitId"
+                                [ngClass]="{'is-invalid':submitted && UnitId.invalid}" required autofocus required [autofocus]="true">
+                                <option value="">--Select Unit--</option>
+                                <option [value]="model.UnitId" *ngFor="let model of MedicineList">
+                                    {{model.UnitName}}</option>
+                            </select>
+                            <div *ngIf="UnitId.invalid && (UnitId.dirty || UnitId.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="UnitId.errors?.['required']">
+                                    Unit is required.
+                                </div>
+                            </div>
+                        </div> -->
+                              <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Manufacturer </mat-label>
+                  <input matInput #ManufacturerId="ngModel" name="ManufacturerName"
+                    (ngModelChange)="filterManufacturerList($event)"
+                    placeholder="Search By Manufacturer" [(ngModel)]="Medicine.ManufacturerName"
+                    [matAutocomplete]="autoManufacturer" required />
+                  <mat-autocomplete #autoManufacturer="matAutocomplete"
+                    (optionSelected)="afterManufacturerSelected($event)">
+                    <mat-option *ngFor="let options of ManufacturerChargeList" [id]="options.ManufacturerId"
+                      [value]="options.ManufacturerName">{{ options.ManufacturerName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Medicine.ManufacturerName" color="primary"
+                    (click)="clearManufacturer()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+
+
+                        <!-- <div class="col-sm-4 form-group">
+                            <label class="form-label">Manufacturer</label>
+                            <select class="form-select" #ManufacturerId="ngModel" [(ngModel)]="Medicine.ManufacturerId" name="ManufacturerId"
+                                [ngClass]="{'is-invalid':submitted && ManufacturerId.invalid}" required autofocus required [autofocus]="true">
+                                <option value="">--Select Manufacturer--</option>
+                                <option [value]="model.ManufacturerId" *ngFor="let model of ManufacturerList">
+                                    {{model.ManufacturerName}}</option>
+                            </select>
+                            <div *ngIf="ManufacturerId.invalid && (ManufacturerId.dirty || ManufacturerId.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="ManufacturerId.errors?.['required']">
+                                    Manufacturer is required.
+                                </div>
+                            </div>
+                        </div> -->
+
+
+                        <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Medicine Type </mat-label>
+                  <input matInput #MedicineTypeId="ngModel" name="MedicineTypeName"
+                    (ngModelChange)="filterMedicineTypeList($event)"
+                    placeholder="Search By MedicineType" [(ngModel)]="Medicine.MedicineTypeName"
+                    [matAutocomplete]="autoMedicineType" required />
+                  <mat-autocomplete #autoMedicineType="matAutocomplete"
+                    (optionSelected)="afterMedicineTypeSelected($event)">
+                    <mat-option *ngFor="let options of MedicineTypeChargeList" [id]="options.MedicineTypeId"
+                      [value]="options.MedicineTypeName">{{ options.MedicineTypeName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Medicine.MedicineTypeName" color="primary"
+                    (click)="clearMedicineType()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+                        
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                  <mat-label>Status</mat-label>
+                  <mat-select #Status [(ngModel)]="Medicine.Status" name="Status" required>
+                    <mat-option value="">--Select Status--</mat-option>
+                    <mat-option *ngFor="let model of StatusList" [value]="model.Key">
+                      {{ model.Value }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" (click)="saveMedicine()">{{Medicine.MedicineId > 0 ?"Update": "Save"}}</button> -->
+          <button mat-raised-button color="warn" data-bs-dismiss="modal">Close</button>
+          <button mat-raised-button color="primary" (click)="saveMedicine()">{{Medicine.MedicineId > 0 ? 'Update':'Submit'}}</button>
+            </div>
+
+        </div>
+    </div>
+</div>

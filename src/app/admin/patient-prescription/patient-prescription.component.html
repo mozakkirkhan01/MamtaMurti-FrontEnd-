@@ -1,0 +1,611 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Patient Details</h5>
+            <div class="d-flex flex-wrap gap-1">
+              <form #formPatientDetails="ngForm">
+                <div class="row">
+
+                  <!-- Patient Name / Mobile / UHID -->
+                  <mat-form-field appearance="outline" class="col-lg-3">
+                    <mat-label>Patient Name / Mobile / UHID</mat-label>
+                    <input matInput name="PackageCollectionName" [(ngModel)]="Patient.PatientName"
+                      (ngModelChange)="filterpatientList($event)" [matAutocomplete]="autoTransportPackageCollection"
+                      placeholder="Search By Package Collection"  />
+
+                    <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
+                      (optionSelected)="afterPatientSelected($event)">
+                      <mat-option *ngFor="let option of filteredPatientList" [value]="option.PatientName">
+                        {{ option.PatientName }} / {{ option.UHID }} /
+                        {{ option.ContactNo }}
+                      </mat-option>
+                    </mat-autocomplete>
+
+                    <button mat-icon-button matSuffix *ngIf="Patient.PatientName" color="primary"
+                      (click)="clearPatient()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+
+                    <mat-error *ngIf="!Patient.PatientName"> field !!</mat-error>
+                  </mat-form-field>
+
+                  <!-- Age -->
+                  <mat-form-field appearance="outline" class="col-lg-1">
+                    <mat-label>Age</mat-label>
+                    <input matInput type="number" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" 
+                      readonly="true" />
+                  </mat-form-field>
+
+                  <!-- Gender -->
+                  <mat-form-field appearance="outline" class="col-lg-1">
+                    <mat-label>Gender</mat-label>
+                    <input matInput name="Gender" [value]="
+                        Patient.Gender != null
+                          ? AllGenderList[Patient.Gender]
+                          : 'Select Gender'
+                      " readonly="true"  />
+                  </mat-form-field>
+
+                  <!-- Category -->
+                  <mat-form-field appearance="outline" class="col-lg-1">
+                    <mat-label>Category</mat-label>
+                    <input matInput name="Category" [value]="
+                        Patient.Category != null
+                          ? AllCategoryList[Patient.Category]
+                          : 'Select Category'
+                      " readonly="true"  />
+                  </mat-form-field>
+
+                  <!-- Contact No -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Contact No</mat-label>
+                    <input matInput type="tel" name="ContactNo" [(ngModel)]="Patient.ContactNo" 
+                      readonly="true" />
+                  </mat-form-field>
+
+                  <!-- Aadhar No -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Aadhar No</mat-label>
+                    <input matInput type="tel" name="AadharNo" [(ngModel)]="Patient.AadharNo" 
+                      readonly="true" />
+                  </mat-form-field>
+
+                  <!-- Address -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Address</mat-label>
+                    <textarea matInput name="Address" [(ngModel)]="Patient.Address"  readonly="true"></textarea>
+                  </mat-form-field>
+
+                  <!-- //IOP_R -->
+                  <mat-form-field appearance="outline" class="col-lg-1">
+                    <mat-label>IOP_R</mat-label>
+                    <input matInput type="text" name="IOP_R" [(ngModel)]="Patient.IOP_R" class="no-spinner" 
+                       />
+                  </mat-form-field>
+                  
+                  <!-- //IOP_L -->
+                  <mat-form-field appearance="outline" class="col-lg-1">
+                    <mat-label>IOP_L</mat-label>
+                    <input matInput type="text" name="IOP_L" [(ngModel)]="Patient.IOP_L" class="no-spinner" 
+                       />
+                  </mat-form-field>
+                  
+                  <!-- //K_K1 -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>K_K1</mat-label>
+                    <input matInput type="text" name="K_K1" [(ngModel)]="Patient.K_K1" class="no-spinner" 
+                       />
+                  </mat-form-field>
+
+                  <!-- //K_K2 -->                  
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>K_K2</mat-label>
+                    <input matInput type="text" name="K_K2" [(ngModel)]="Patient.K_K2" class="no-spinner" 
+                       />
+                  </mat-form-field>
+
+                  <!-- //Vn_R -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Vn_R</mat-label>
+                    <input matInput type="text" name="Vn_R" [(ngModel)]="Patient.Vn_R" class="no-spinner" 
+                       />
+                  </mat-form-field>
+
+                  <!-- //Vn_L -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Vn_L</mat-label>
+                    <input matInput type="text" name="Vn_L" [(ngModel)]="Patient.Vn_L" class="no-spinner" 
+                       />
+                  </mat-form-field>
+
+                  <!-- //Nv -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Nv</mat-label>
+                    <input matInput type="text" name="Nv" [(ngModel)]="Patient.Nv" class="no-spinner" 
+                       />
+                  </mat-form-field>
+
+                  <!-- //Prescription Date -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Prescription Date</mat-label>
+                    <input matInput [matDatepicker]="picker" [(ngModel)]="Patient.PrescriptionDate" name="PrescriptionDate"
+                       />
+                    <mat-datepicker-toggle matSuffix [for]="picker"
+                      class="small-datepicker-icon"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
+
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Add Prescription</h5>
+            <form #formPaymentDetails="ngForm">
+              <div class="row">
+                <mat-form-field appearance="outline" class="col-lg-4">
+                    <mat-label>Select Prescription Head</mat-label>
+                    <input matInput #PrescriptionHeadName="ngModel" name="PrescriptionHeadName"
+                           (ngModelChange)="filterHeadList($event)"
+                           placeholder="Search prescription head"
+                           [(ngModel)]="PrescriptionItem.PrescriptionHeadName"
+                           [matAutocomplete]="autoHeadSelector"  />
+                    <mat-autocomplete #autoHeadSelector="matAutocomplete"
+                                      (optionSelected)="afterHeadSelected($event)">
+                      <mat-option *ngFor="let option of filteredHeadList" 
+                                  [id]="option.PrescriptionHeadId"
+                                  [value]="option.PrescriptionHeadName">
+                        {{ option.PrescriptionHeadName }}
+                      </mat-option>
+                    </mat-autocomplete>
+                    <button mat-icon-button matSuffix 
+                            *ngIf="PrescriptionItem.PrescriptionHeadName" 
+                            color="primary"
+                            (click)="clearHeadSelection()">
+                      <mat-icon><i class="ri-close-circle-line"></i></mat-icon>
+                    </button>
+                    <!-- <mat-error *ngIf="PrescriptionHeadName.invalid && (PrescriptionHeadName.dirty || PrescriptionHeadName.touched || isSubmitted)">
+                      Prescription Head is <strong></strong>
+                    </mat-error> -->
+                  </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-lg-4">
+                  <mat-label>Select Optical Name </mat-label>
+                  <input matInput #RegistrationChargeId="ngModel" name="RegistrationChargeId"
+                    (ngModelChange)="filterPrescriptionItemList($event)"
+                    placeholder="Search By Item Name" [(ngModel)]="PrescriptionItem.PrescriptionItemName"
+                    [matAutocomplete]="autoTransportSupplier"/>
+                  <mat-autocomplete #autoTransportSupplier="matAutocomplete"
+                    (optionSelected)="afterPrescriptionItemSelected($event)">
+                    <mat-option *ngFor="let option of ChargeList" [id]="option.PrescriptionItemId"
+                      [value]="option.PrescriptionItemName">{{ option.PrescriptionItemName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="PrescriptionItem.PrescriptionItemName" color="primary"
+                    (click)="clearPrescriptionItemSelection()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error> field !!</mat-error>
+                </mat-form-field>
+                
+                <div appearance="outline" class="col-sm-1">
+                  <button mat-flat-button color="primary" (click)="addPrescriptionDetail()">
+                    ADD
+                  </button>
+                </div>
+              </div>
+              <a class="list-group-item list-group-item-action" *ngIf="SelectedPrescriptionList.length > 0">
+                <div class="row">
+                  <div class="col-sm-19 table-responsive">
+                    <table class="table table-bordered table-hover table-lg" id="table_list">
+                      <thead class="thead-light">
+                        <tr>
+                          <th class="text-center">#</th>
+                          <th>Head Name</th>
+                          <th>Item Name</th>
+                          
+                          
+                          <th class="text-center">Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr *ngFor="
+                            let model of SelectedPrescriptionList;
+                            let i = index
+                          ">
+                          <td class="text-center">{{ i + 1 }}</td>
+
+                          <td>
+                            {{ model.PrescriptionHeadName }}
+                          </td>
+                          <td>
+                            {{ model.PrescriptionItemName }}
+                          </td>
+                          <td class="text-center">
+                            <button (click)="RemoveHotel(i)" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash-fill"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Inv</h5>
+            <form #formPatientDetails="ngForm">
+              <div class="row">
+
+                <!-- Blood Pressure -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Blood Pressure</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.BloodPressure" name="BloodPressure" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- Blood Sugar F -->
+                <mat-form-field appearance="outline" class="col-lg-3" style="min-width: 200px">
+                  <mat-label>B/sugar F</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.BloodSugarF" name="BloodSugarF" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- Blood Sugar PP --> 
+                <mat-form-field appearance="outline" class="col-lg-3" style="min-width: 200px">
+                  <mat-label>B/sugar PP</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.BloodSugarPP" name="BloodSugarPP" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- Blood Sugar Random -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>B/sugar Random</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.BloodSugarRandom" name="BloodSugarRandom" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- TLC -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>TLC</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.TLC" name="TLC" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- DLC -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>DLC</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.DLC" name="DLC" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- ESR -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>ESR</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.ESR" name="ESR" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- Hb % -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Hb %</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.HbPercentage" name="HbPercentage" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- C.S. Culture -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>C.S. Culture</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.CSCulture" name="CSCulture" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- X/s - Test -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>X/s - Test</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.XsTest" name="XsTest" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- E.C.G -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>E.C.G</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.ECG" name="ECG" 
+                    class="no-spinner"  />
+                </mat-form-field>
+                
+                <!-- HBsAg -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>HBsAg</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.HBsAg" name="HBsAg" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- HIV Test -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>HIV Test</mat-label>
+                  <input matInput type="text" [(ngModel)]="Patient.HIVTest" name="HIVTest" 
+                    class="no-spinner"  />
+                </mat-form-field>
+
+                <!-- Lens Entry -->
+                <div class="col-lg-2">
+                  <button type="button" mat-raised-button color="accent" (click)="addLensEntry()">
+                    Lens Entry
+                  </button>
+                </div>
+                
+                <div class="col-lg-2">  
+                  <button type="button" mat-raised-button  color="warn" (click)="clearForm()">
+                    Clear
+                  </button>
+                </div>
+                
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center items-center">
+    <button type="submit" mat-raised-button class="mdc-button-final" color="primary" (click)="savePatientPrescription()">
+      Submit
+    </button>
+  </div>
+</main>
+
+<div class="modal fade" id="lensEntryModal" tabindex="-1" aria-labelledby="lensEntryModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="lensEntryModalLabel">LENS ENTRY</h5>
+        <button type="button" class="btn-close" (click)="closeLensEntryModal()" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <form #lensEntryForm="ngForm">
+          <div class="row">
+            <!-- Right Eye (RE) Section -->
+            <div class="col-md-6">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white text-center">
+                  <h6 class="mb-0 fw-bold">RE</h6>
+                </div>
+                <div class="card-body">
+                  <!-- DV Row -->
+                  <div class="row mb-2">
+                    <div class="col-2">
+                      <label class="form-label fw-bold text-primary">DV</label>
+                    </div>
+                    <div class="col-2">
+                      <label class="form-label small">SPH</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_DV_SPH" 
+                             name="RE_DV_SPH" 
+                             placeholder="">
+                    </div>
+                    <div class="col-2">
+                      <label class="form-label small">CYL</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_DV_CYL" 
+                             name="RE_DV_CYL" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <label class="form-label small">AXIS</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_DV_AXIS" 
+                             name="RE_DV_AXIS" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <label class="form-label small">V</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_DV_V" 
+                             name="RE_V_DV" 
+                             placeholder="">
+                    </div>
+                  </div>
+                  
+                  <!-- NV Row -->
+                  <div class="row mb-3">
+                    <div class="col-2">
+                      <label class="form-label fw-bold text-primary">NV</label>
+                    </div>
+                    <div class="col-2">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_NV_SPH" 
+                             name="RE_NV_SPH" 
+                             placeholder="">
+                    </div>
+                    <div class="col-2">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_NV_CYL" 
+                             name="RE_NV_CYL" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_NV_AXIS" 
+                             name="RE_NV_AXIS" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.RE_NV_V" 
+                             name="RE_NV_V" 
+                             placeholder="">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Left Eye (LE) Section -->
+            <div class="col-md-6">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white text-center">
+                  <h6 class="mb-0 fw-bold">LE</h6>
+                </div>
+                <div class="card-body">
+                  <!-- DV Row -->
+                  <div class="row mb-2">
+                    <div class="col-2">
+                      <label class="form-label fw-bold text-primary">DV</label>
+                    </div>
+                    <div class="col-2">
+                      <label class="form-label small">SPH</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_DV_SPH" 
+                             name="LE_DV_SPH" 
+                             placeholder="">
+                    </div>
+                    <div class="col-2">
+                      <label class="form-label small">CYL</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_DV_CYL" 
+                             name="LE_DV_CYL" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <label class="form-label small">AXIS</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_DV_AXIS" 
+                             name="LE_DV_AXIS" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <label class="form-label small">V</label>
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_DV_V" 
+                             name="LE_DV_V" 
+                             placeholder="">
+                    </div>
+                  </div>
+                  
+                  <!-- NV Row -->
+                  <div class="row mb-3">
+                    <div class="col-2">
+                      <label class="form-label fw-bold text-primary">NV</label>
+                    </div>
+                    <div class="col-2">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_NV_SPH" 
+                             name="LE_NV_SPH" 
+                             placeholder="">
+                    </div>
+                    <div class="col-2">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_NV_CYL" 
+                             name="LE_NV_CYL" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_NV_AXIS" 
+                             name="LE_NV_AXIS" 
+                             placeholder="">
+                    </div>
+                    <div class="col-3">
+                      <input type="text" class="form-control form-control-sm" 
+                             [(ngModel)]="lensEntry.LE_NV_V" 
+                             name="LE_NV_V" 
+                             placeholder="">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- PD and Lens Section -->
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="card border-info">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-12">
+                      <label class="form-label fw-bold text-info">PD</label>
+                      <textarea class="form-control" 
+                                [(ngModel)]="lensEntry.PD" 
+                                name="PD" 
+                                rows="3" 
+                                placeholder="Enter PD details..."></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="card border-info">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-12">
+                      <label class="form-label fw-bold text-info">Lens</label>
+                      <textarea class="form-control" 
+                                [(ngModel)]="lensEntry.Lens" 
+                                name="Lens" 
+                                rows="3" 
+                                placeholder="Enter lens details..."></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success fw-bold px-4" (click)="saveLensEntry()">
+          <i class="bi bi-check-circle me-1"></i>SAVE
+        </button>
+        <button type="button" class="btn btn-danger fw-bold px-4" (click)="clearLensEntry()">
+          <i class="bi bi-arrow-clockwise me-1"></i>CLEAR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

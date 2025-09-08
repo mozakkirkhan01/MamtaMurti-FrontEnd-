@@ -1,0 +1,243 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <mat-form-field appearance="outline" class="col-sm-2">
+                <mat-label>Entries per page</mat-label>
+                <mat-select [(ngModel)]="itemPerPage">
+                  <mat-option *ngFor="let option of PageSize" [value]="option">{{ option }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '30px' }">
+                <mat-label>Start data</mat-label>
+                <input matInput [matDatepicker]="pickers" name="StartFrom " required #StartFrom="ngModel"
+                  [(ngModel)]="filterModel.StartFrom" />
+                <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #pickers></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '10px' }">
+                <mat-label>End data</mat-label>
+                <input matInput [matDatepicker]="picker" name="endFrom " required #endFrom="ngModel"
+                  [(ngModel)]="filterModel.EndFrom" />
+                <mat-datepicker-toggle matSuffix [for]="picker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-1" [style]="{ 'margin-left': '10px' }">
+                <mat-label> Status</mat-label>
+                <mat-select [(ngModel)]="filterModel.PaymentStatus" name="PaymentStatus">
+                  <!-- ✅ FIXED -->
+                  <mat-option [value]="0">All</mat-option>
+                  <!-- Optional default filter -->
+                  <mat-option [value]="status.Key" *ngFor="let status of AmountPaymentStatusList">{{ status.Value
+                    }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button style="margin-top: 5px; margin-left: 10px" (click)="getCateenBillList()" mat-raised-button
+                color="primary">
+                Search
+              </button>
+              <mat-form-field appearance="outline" class="col-sm-3" [style]="{ 'margin-left': '10px' }">
+                <mat-label>Search</mat-label>
+                <input matInput [(ngModel)]="Search" placeholder="Search..." />
+              </mat-form-field>
+            </div>
+            <div class="dataTable-search"></div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th style="text-align: center">S.No</th>
+                <!-- <th>Print Bill</th> -->
+                <th style="cursor: pointer; text-align: center" (click)="sort('BillingDate')">
+                  Invoice Date
+                </th>
+                <th style="cursor: pointer; text-align: center" (click)="sort('CanteenBillingCode')">
+                  Receipt No.
+                </th>
+                <th style="cursor: pointer" (click)="sort('UHID')">
+                  Customer Name
+                </th>
+                <th style="cursor: pointer" (click)="sort('TotalAmount')">
+                  Total Amount
+                </th>
+                <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('PaymentStatus')">
+                  Payment Status
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Description')">
+                  Bill
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Description')">
+                  View
+                </th>
+                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of TotalRecords
+                    | filter : Search
+                    | orderBy : sortKey : false
+                    | paginate : { itemsPerPage: itemPerPage, currentPage: p };
+                  let i = index
+                ">
+                <td style="text-align: center">
+                  {{ itemPerPage * (p - 1) + i + 1 }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.InvoiceDate | date : "dd-MM-yyyy" }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.ReceiptNo }}
+                </td>
+                <td>{{ item.CustomerName }}</td>
+                <td class="text-end">{{ item.TotalAmount }}</td>
+                <td class="text-center">
+                  <span class="p-1" [ngClass]="
+                      item.PaymentStatus == 1
+                        ? 'badge text-bg-success'
+                        : 'badge text-bg-danger'
+                    ">
+                    {{ AllStatusList[item.PaymentStatus] }}
+                  </span>
+                </td>
+
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" (click)="getPrint(item)">
+                    <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn btn-primary" (click)="openViewModal(item)">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editPackageCollection(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="DeleteCanteenBilling(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th class=""></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="text-end">{{ CanteenTotal.TotalAmount }}</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right"
+              class="my-pagination"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Form -->
+  <!-- View Details Modal -->
+  <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewDetailsModalLabel">
+            Billing Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="DueBill" class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Invoice Date:</strong>
+                {{ selectedBill.InvoiceDate | date : "dd-MM-yyyy" }}
+              </div>
+              <div class="col-6">
+                <strong>Receipt No.:</strong>
+                {{ selectedBill.ReceiptNo }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Customer Name:</strong> {{ selectedBill.CustomerName }}
+              </div>
+              <div class="col-6">
+                <strong>Status :</strong>
+                {{ AllStatusList[selectedBill.PaymentStatus] }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Canteen Items Table -->
+          <div *ngIf="CanteenSellListALL?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Item Name</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of CanteenSellListALL; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.ItemName }}</td>
+                  <td>{{ item.Rate | number : "1.2-2" }}</td>
+                  <td>{{ item.Quantity }}</td>
+                  <td>{{ item.TotalAmount | number : "1.2-2" }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="CanteenSellListALL?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+</main>

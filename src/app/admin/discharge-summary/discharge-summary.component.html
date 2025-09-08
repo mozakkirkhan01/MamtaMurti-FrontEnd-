@@ -1,0 +1,241 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{ action.MenuTitle }}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a routerLink="admin/admin-dashboard">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+                    <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Patient Details</h5>
+                        <div class="d-flex flex-wrap gap-1">
+                            <form #formPatientDetails="ngForm">
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label>Patient Name / Mobile / UHID</mat-label>
+                                        <input matInput name="PackageCollectionName" [(ngModel)]="Patient.PatientName"
+                                            (ngModelChange)="filterpatientList($event)"
+                                            [matAutocomplete]="autoTransportPackageCollection"
+                                            placeholder="Search By Package Collection" required />
+
+                                        <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
+                                            (optionSelected)="afterPatientSelected($event)">
+                                            <mat-option *ngFor="let option of filteredPatientList"
+                                                [value]="option.PatientName">
+                                                {{ option.PatientName }} / {{ option.UHID }} /
+                                                {{ option.ContactNo }}
+                                            </mat-option>
+                                        </mat-autocomplete>
+
+                                        <button mat-icon-button matSuffix *ngIf="Patient.PatientName" color="primary"
+                                            (click)="clearPatient()">
+                                            <mat-icon>close</mat-icon>
+                                        </button>
+
+                                        <mat-error *ngIf="!Patient.PatientName">Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                        <mat-label>Age</mat-label>
+                                        <input matInput readonly type="number" name="Age" [(ngModel)]="Patient.Age"
+                                            required />
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                        <mat-label>Gender</mat-label>
+                                        <input matInput readonly name="Gender" [value]="
+                        Patient.Gender !== undefined &&
+                        AllGenderList[Patient.Gender]
+                          ? AllCategoryList[Patient.Gender]
+                          : ''
+                      " required />
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                        <mat-label>Category</mat-label>
+                                        <input matInput name="Category" [value]="
+                        Patient.Category != null
+                          ? AllCategoryList[Patient.Category]
+                          : 'Category'
+                      " readonly="true" required />
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label>Contact No</mat-label>
+                                        <input matInput readonly type="tel" name="ContactNo"
+                                            [(ngModel)]="Patient.ContactNo" required />
+                                    </mat-form-field>
+
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Address </mat-label>
+                                        <input matInput #Address="ngModel" name="Address" [(ngModel)]="Patient.Address"
+                                            required autofocus>
+                                        <mat-error
+                                            *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                            Address name is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label>Surgery Date</mat-label>
+                                        <input matInput [matDatepicker]="picker" [(ngModel)]="Patient.SurgeryDate"
+                                            name="SurgeryDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"
+                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label>Discharge Date</mat-label>
+                                        <input matInput [matDatepicker]="pickers" [(ngModel)]="Patient.DischargeDate"
+                                            name="DischargeDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="pickers"
+                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                        <mat-datepicker #pickers></mat-datepicker>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Ward </mat-label>
+                                        <input matInput #Ward="ngModel" name="Ward" [(ngModel)]="Patient.Ward" required
+                                            autofocus>
+                                        <mat-error
+                                            *ngIf="(Ward.dirty  || Ward.touched) || (Ward.invalid && isSubmitted)">
+                                            Ward name is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>visit </mat-label>
+                                        <input matInput #visit="ngModel" name="visit" [(ngModel)]="Patient.Visit"
+                                            required autofocus>
+                                        <mat-error
+                                            *ngIf="(visit.dirty  || visit.touched) || (visit.invalid && isSubmitted)">
+                                            visit name is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3 no-spinner">
+                                        <mat-label>Department</mat-label>
+                                        <mat-select  #Department="ngModel" name="Department"
+                                            [(ngModel)]="Patient.DepartmentId" required>
+                                            <mat-option [value]="Department.DepartmentId"
+                                                *ngFor="let Department of DepartmentList">{{Department.DepartmentName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="(Department.dirty  || Department.touched) || (Department.invalid && isSubmitted)">
+                                            Department is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Reffered By </mat-label>
+                                        <input matInput #RefferedBy="ngModel" name="RefferedBy"
+                                            [(ngModel)]="Patient.RefferedBy" required autofocus>
+                                        <mat-error
+                                            *ngIf="(RefferedBy.dirty  || RefferedBy.touched) || (RefferedBy.invalid && isSubmitted)">
+                                            Reffered By name is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Consulting Doctor</mat-label>
+                                        <mat-select #ConsultingDoctor="ngModel" name="ConsultingDoctor"
+                                            [(ngModel)]="Patient.DoctorId" required>
+                                            <mat-option [value]="Doctor.DoctorId"
+                                                *ngFor="let Doctor of DoctorList">{{Doctor.DoctorName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="(ConsultingDoctor.dirty  || ConsultingDoctor.touched) || (ConsultingDoctor.invalid && isSubmitted)">
+                                            Consulting  Doctor is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                     <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Patient.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                     <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Final Diagnosis</mat-label>
+                                        <textarea matInput #FinalDiagnosis="ngModel" name="FinalDiagnosis"
+                                            [(ngModel)]="Patient.FinalDiagnosis"  autofocus></textarea>
+                                    </mat-form-field>
+
+
+                                     <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>History </mat-label>
+                                        <textarea matInput #History="ngModel" name="History"
+                                            [(ngModel)]="Patient.History"  autofocus></textarea>
+                                        
+                                    </mat-form-field>
+
+                                     <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Examination Admission </mat-label>
+                                        <textarea matInput #ExaminationAdmission="ngModel" name="ExaminationAdmission"
+                                            [(ngModel)]="Patient.ExaminationAdmission"  autofocus></textarea>
+                                        
+                                    </mat-form-field>
+
+                                     <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Course Of The Event In The Hospital </mat-label>
+                                        <textarea matInput #CourseOfTheEventInTheHospital="ngModel" name="CourseOfTheEventInTheHospital"
+                                            [(ngModel)]="Patient.CourseOfTheEventInTheHospital"  autofocus></textarea>
+                                        
+                                    </mat-form-field>
+                                    
+                                     <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Advice On Discharge</mat-label>
+                                        <textarea  matInput #AdviceOnDischarge="ngModel" name="AdviceOnDischarge"
+                                            [(ngModel)]="Patient.AdviceOnDischarge"  autofocus></textarea>
+                                        
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Follow Up</mat-label>
+                                        <textarea matInput #FollowUp="ngModel" name="FollowUp"
+                                            [(ngModel)]="Patient.FollowUp"  autofocus></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <div class="d-flex justify-content-center items-center">
+        <button type="submit" mat-raised-button class="mdc-button-final" color="primary" (click)="saveDischargeSummary()">
+            Submit
+        </button>
+    </div>
+</main>
