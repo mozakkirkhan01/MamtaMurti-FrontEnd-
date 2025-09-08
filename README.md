@@ -47,6 +47,7 @@ This is a **Hospital ERP System** designed specifically for **Eye Hospitals**. I
 
 ## 📂 Project Structure  
 
+```
 akashkumar9508-mmn_hospital/
 │── src/
 │ ├── app/
@@ -59,7 +60,7 @@ akashkumar9508-mmn_hospital/
 │ ├── index.html
 │ └── styles.css
 └── angular.json
-
+```
 
 ---
 
