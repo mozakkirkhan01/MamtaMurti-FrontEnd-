@@ -219,13 +219,13 @@ export class OpdBookingComponent implements OnInit {
   }
 
   filterpatientList(value: string) {
-    const filterValue = value?.toLowerCase() || '';
+    const filterPatientValue = value?.toLowerCase() || '';
 
     this.filteredPatientList = this.PatientListAll.filter(
       (option: any) =>
-        option.PatientName?.toLowerCase().includes(filterValue) ||
-        option.UHID?.toLowerCase().includes(filterValue) ||
-        option.ContactNo?.toLowerCase().includes(filterValue)
+        option.PatientName?.toLowerCase().includes(filterPatientValue) ||
+        option.UHID?.toLowerCase().includes(filterPatientValue) ||
+        option.ContactNo?.toLowerCase().includes(filterPatientValue)
     );
   }
 
@@ -247,7 +247,7 @@ export class OpdBookingComponent implements OnInit {
   }
 
   clearPatient() {
-    this.ChargeList = this.PatientListAll;
+    this.filteredPatientList = this.PatientListAll;
     this.Patient.PatientName = '';
     this.resetPaymentAmounts();
   }

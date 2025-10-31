@@ -490,6 +490,7 @@ export class MedicineReturnComponent implements OnInit {
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
+          $('#modal_popUp').modal('hide');
           this.toastr.success("Your item is return successfully!!");
           //this.service.printNewSellInvoice(response.SellId);
           if (this.redUrl) this.router.navigate([this.redUrl]);
@@ -499,7 +500,6 @@ export class MedicineReturnComponent implements OnInit {
           this.resetForm();
           this.returnItem.EmployeeId = empId;
           this.resetReturn();
-          $('#modal_popUp').modal('hide');
           //this.getProductStockDetailList();
         } else {
           this.toastr.error(response.Message);

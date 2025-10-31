@@ -53,7 +53,7 @@ export class MedicineSaleListComponent implements OnInit {
 
     // Create worksheet data
     const data = [
-      [{ t: 's', s: { bold: true, fontSize: 24 }, v: 'MJM MULTISPECIALITY HOSPITAL PHARMACY REPORT' }],
+      [{ t: 's', s: { bold: true, fontSize: 24 }, v: 'MAMTA MURTI NATRALAYA PHARMACY REPORT' }],
       [],
       ['BillDate', 'ReceiptNo', 'PatientName', 'Disc.Amt.', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'PayableAmount', 'PaidAmount', 'DueAmount'],
       ...this.PaymentMedicineCollectionList.map(item => [

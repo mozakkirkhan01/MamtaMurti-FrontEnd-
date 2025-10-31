@@ -434,8 +434,7 @@ dataLoading: boolean = false;
           this.toastr.success(
             this.Patient.OpdId > 0 ? 'Booking updated successfully' : 'Booking added successfully'
           );
-          
-          // this.service.PrintSurgeryBill(response.SurgeryId);
+          this.service.PrintSurgeryBill(response.SurgeryId);
           this.resetAllForms();
           $('hashtag#staticBackdrop').modal('hide');
         } else {
@@ -461,7 +460,7 @@ dataLoading: boolean = false;
 
   filterpatientList(value: string) {
     const filterValue = value?.toLowerCase() || '';
-    this.filteredPatientList = this.PatientListAll.filter(
+    this.filteredPatientList =this.PatientListAll.filter(
       (option: any) =>
         option.PatientName?.toLowerCase().includes(filterValue) ||
         option.UHID?.toLowerCase().includes(filterValue) ||
@@ -469,12 +468,7 @@ dataLoading: boolean = false;
     );
   }
 
-  clearPatient() {
-    this.Patient = {};
-    this.filteredPatientList = [...this.PatientListAll];
-  }
-
-  afterPatientSelected(event: any) {
+    afterPatientSelected(event: any) {
     const selectedName = event.option.value;
     const selected = this.PatientListAll.find(
       (x: any) => x.PatientName === selectedName
@@ -485,6 +479,14 @@ dataLoading: boolean = false;
       this.getPatientList(this.Patient.PatientID);
     }
   }
+
+  clearPatient() {
+    this.filteredPatientList = this.PatientListAll;
+    this.Patient = {};
+
+  }
+
+
 
   getPackageList(PackageDetailId: number) {
     var data = {

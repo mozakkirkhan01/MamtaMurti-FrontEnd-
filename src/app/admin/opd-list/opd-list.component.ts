@@ -32,7 +32,8 @@ export class OpdListComponent {
    AmountPaymentStatusList = this.loadData.GetEnumList(PaymentStatus);
        PaymentModeList = this.loadData.GetEnumList(PaymentMode);
     isSubmitted = false;
-   
+   PaymentMode = this.loadData.GetEnumList(PaymentMode);
+PaymentModeAll = PaymentMode;
   AllStatusList = Status;
   AllGenderList = Gender;
    filterModel: any = {};
@@ -109,51 +110,42 @@ export class OpdListComponent {
 
 
   getOpdList() {
-    if (this.filterModel.StartFrom) {
-      this.filterModel.StartFrom = this.loadData.loadDateYMD(
-        this.filterModel.StartFrom
-      );
-    }
-    if (this.filterModel.EndFrom) {
-      this.filterModel.EndFrom = this.loadData.loadDateYMD(
-        this.filterModel.EndFrom
-      );
-    }
-
-    const requestPayload = JSON.stringify(this.filterModel);
-    const data = {
-      requestPayload,
-      Page: this.p,
-      PageSize: this.itemPerPage,
-    };
-
-    const request: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify(data)).toString()
-    };
-
-    this.dataLoading = true;
-
-    this.service.getOpdList(request).subscribe({
-      next: (r1) => {
-        let response = r1 as any;
-        if (response.Message === ConstantData.SuccessMessage) {
-          this.opdList = response.OpdBookingList;
-
-          this.OpdTotal.PaidAmount = response.PaidAmountTotal;
-          this.totalRecords = response.TotalRecords;
-           this.OpdTotal.TotalPayableAmount = response.TotalPayableAmount;
-          this.OpdTotal.DueAmountTotal = response.DueAmountTotal;
-        } else {
-          this.toastr.error(response.Message);
-        }
-        this.dataLoading = false;
-      },
-      error: (err) => {
-        this.toastr.error("Error while fetching records");
-        this.dataLoading = false;
-      }
-    });
+  if (this.filterModel.StartFrom) {
+    this.filterModel.StartFrom = this.loadData.loadDateYMD(this.filterModel.StartFrom);
   }
+  if (this.filterModel.EndFrom) {
+    this.filterModel.EndFrom = this.loadData.loadDateYMD(this.filterModel.EndFrom);
+  }
+
+  const jsonData = JSON.stringify(this.filterModel);
+
+  const req: RequestModel = {
+    request: this.localService.encrypt(jsonData).toString()
+  };
+
+  this.dataLoading = true;
+
+  this.service.getOpdList(req).subscribe({
+    next: (r1) => {
+      const response = r1 as any;
+      if (response.Message === ConstantData.SuccessMessage) {
+        this.opdList = response.OpdBookingList;
+        this.OpdTotal.PaidAmount = response.PaidAmountTotal;
+        this.totalRecords = response.TotalRecords;
+        this.OpdTotal.TotalPayableAmount = response.TotalPayableAmount;
+        this.OpdTotal.DueAmountTotal = response.DueAmountTotal;
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    },
+    error: () => {
+      this.toastr.error("Error while fetching records");
+      this.dataLoading = false;
+    }
+  });
+}
+
 
 DeleteOpdBilling(obj: any) {
     if (confirm('Are your sure you want to delete this recored')) {

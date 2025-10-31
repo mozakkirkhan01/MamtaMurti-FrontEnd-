@@ -28,7 +28,7 @@
                     <mat-label>Patient Name / Mobile / UHID</mat-label>
                     <input matInput name="PackageCollectionName" [(ngModel)]="Patient.PatientName"
                       (ngModelChange)="filterpatientList($event)" [matAutocomplete]="autoTransportPackageCollection"
-                      placeholder="Search By Package Collection" required />
+                      placeholder="Search By Patient Name / Mobile / UHID " required />
 
                     <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
                       (optionSelected)="afterPatientSelected($event)">
@@ -173,7 +173,7 @@
                           <th class="text-center">Quantity</th>
                           <th class="text-right">Discount Amount</th>
                           <th class="text-right">Line Amount</th>
-                          <th>Action</th>
+                          <th class="text-center" >Action</th>
                         </tr>
                       </thead>
 
@@ -203,7 +203,7 @@
                             {{ model.LineTotal }}
                           </td>
 
-                          <td>
+                          <td class="text-center">
                             <button (click)="RemoveHotel(i)" class="btn btn-sm btn-danger">
                               <i class="bi bi-trash-fill"></i>
                             </button>
@@ -282,24 +282,24 @@
                   <mat-label>Amount</mat-label>
                   <input matInput type="number" name="PaidAmount" [(ngModel)]="currentPayment.PaidAmount" required
                     class="no-spinner" />
-                </mat-form-field>
+                </mat-form-field> 
 
                 <!-- PaymentMode -->
-                <mat-form-field appearance="outline" class="col-sm-3">
-                  <mat-label>Payment Mode</mat-label>
-                  <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="currentPayment.PaymentMode"
-                    required class="no-spinner">
-                    <mat-option [value]="PaymentMode.Key" *ngFor="let PaymentMode of PaymentModeList">{{
-                      PaymentMode.Value }}</mat-option>
-                  </mat-select>
-                  <mat-error *ngIf="
-                      PaymentMode.dirty ||
-                      PaymentMode.touched ||
-                      (PaymentMode.invalid && isSubmitted)
-                    ">
-                    Payment Mode is <strong>required</strong>
-                  </mat-error>
-                </mat-form-field>
+                  <mat-form-field appearance="outline" class="col-sm-3">
+                    <mat-label>Payment Mode</mat-label>
+                    <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="currentPayment.PaymentMode"
+                      required class="no-spinner">
+                      <mat-option [value]="PaymentMode.Key" *ngFor="let PaymentMode of PaymentModeList">{{
+                        PaymentMode.Value }}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="
+                        PaymentMode.dirty ||
+                        PaymentMode.touched ||
+                        (PaymentMode.invalid && isSubmitted)
+                      ">
+                      Payment Mode is <strong>required</strong>
+                    </mat-error>
+                  </mat-form-field>
 
                 <!-- Add Button -->
                 <div class="col-sm-1 align-items-end">
@@ -319,7 +319,7 @@
                         <th>Remarks</th>
                         <th>Amount</th>
                         <th>Payment Mode</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -331,7 +331,7 @@
                         <td>{{ item.Remarks }}</td>
                         <td>{{ item.PaidAmount }}</td>
                         <td>{{ AllPaymentModeList[item.PaymentMode] }}</td>
-                        <td>
+                        <td class="text-center">
                           <button class="btn btn-sm btn-danger" (click)="removePaymentItem(i)">
                             <i class="bi bi-trash-fill"></i>
                           </button>

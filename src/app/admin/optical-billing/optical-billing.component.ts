@@ -208,6 +208,7 @@ export class OpticalBillingComponent {
     this.Payment.Description = Transport.Description;
     this.Payment.Quantity = 1;
     this.Payment.OpticalId = Transport.OpticalId;
+    this.onRateChange();
   }
 
   filterTransportSupplierList(value: any) {
@@ -425,9 +426,9 @@ addToPaymentList() {
     };
 
     // Optional: Notify if payment completed
-    if (newRemainingAmount <= 0) {
-      alert('All payments are completed!');
-    }
+    // if (newRemainingAmount <= 0) {
+    //   alert('All payments are completed!');
+    // }
 
   } else {
     alert('Please fill all fields!');
@@ -506,8 +507,7 @@ addToPaymentList() {
   }
 
   clearPatient() {
-    this.ChargeList = this.PatientListAll;
-    // this.Patient.PackageCollectionId = null;
+    this.filteredPatientList = this.PatientListAll;
     this.Patient.PatientName = '';
   }
 

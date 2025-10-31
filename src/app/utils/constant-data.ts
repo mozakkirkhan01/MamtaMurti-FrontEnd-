@@ -3,13 +3,14 @@ export class ConstantData {
     public static AccessDenied = "Access Denied";
     private static readonly noImageUrl =  "assets/img/no-image.avif";
     public static RowChangesMessage = "Allow to changes all row while changing first row";
-    public static PageSizes = [10, 20, 100, 200, 500, 1000, 2000, 5000];
+    public static PageSizes = [25,50, 100, 200, 500, 1000, 2000, 5000];
     public static StatusList = [{ Key: 1, Value: "Active" }, { Key: 2, Value: "Inactive" }];
     public static DestinationTypeList = [{ Key: 1, Value: "Domestic" }, { Key: 2, Value: "International" }];
     public static BoolList = [{ Key: true, Value: "Yes" }, { Key: false, Value: "No" }];
     private static readonly adminKey = "52F4785C-7EE7-426E-A1AE-C2300972E70A";
     private static readonly baseUrl: string = "http://localhost:44302/";
-    // private static readonly baseUrl: string = "https://api.mmnetralaya.com/";
+    //private static readonly baseUrl: string = "https://api.mmnetralaya.com/";
+    //  private static readonly baseUrl: string = "https://api.mmnetralaya.in/";
     //private static readonly baseUrl: string = "http://192.168.192.39:7777/";
     
     public static getBaseUrl(): string {

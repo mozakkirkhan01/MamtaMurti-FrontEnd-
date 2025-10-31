@@ -42,7 +42,7 @@ export class MedicineStockListComponent implements OnInit {
     const finalCP = this.MedicineStockList.reduce((acc, item) => acc + item.FinalCP, 0);
 
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([
-      [{ t: 's', s: { bold: true, sz: 24 }, v: 'MJM MULTISPECIALITY HOSPITAL PHARMACY STOCK REPORT' }], // Header row with big font
+      [{ t: 's', s: { bold: true, sz: 24 }, v: 'MAMTA MURTI NATRALAYA PHARMACY STOCK REPORT' }], // Header row with big font
       [], // Empty row for spacing
       // Data rows
       ['Medicine','HSN','Batch', 'Exp. Date','MRP','C.P','Available Stock(In Pcs)','Unit','Total MRP','Total C.P'],

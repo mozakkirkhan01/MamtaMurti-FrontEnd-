@@ -109,6 +109,7 @@
                 <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('PaymentStatus')">
                   Payment Status
                 </th>
+                <th class="text-center">Payment Mode</th>
                 <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('Status')">
                   Pay
                 </th>
@@ -175,6 +176,8 @@
                     {{ AllStatusList[item.PaymentStatus] }}
                   </span>
                 </td>
+                <td class="text-center">{{ item.PaymentModeName}}</td>
+
 
                 <!-- Show Pay Due button only if PaymentStatus == 0 (due) -->
                 <td class="text-center">
@@ -189,6 +192,7 @@
                     </button>
                   </ng-template>
                 </td>
+
                 <td class="text-center">
                   <button class="btn btn-sm btn-success" (click)="getPrint(item)">
                     <i class="bi bi-printer"></i>
@@ -220,10 +224,17 @@
                 <th></th>
                 <th></th>
                 <th></th>
-                <th></th>
+                <th style="font-weight: 600;" class="text-right">Total</th>
                 <th class="text-end">{{ OpticalTotal.TotalPayableAmount }}</th>
                 <th class="text-end">{{ OpticalTotal.PaidAmount }}</th>
-                <th class="text-end">{{ OpticalTotal.DueAmountTotal }}</th>
+                <th class="text-end" style="color: red;">{{ OpticalTotal.DueAmountTotal }}</th>
+
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -303,7 +314,9 @@
               </div>
             </div>
           </div>
-
+          <div class="">
+            Opticals Details
+          </div>
           <!-- Optical Items Table -->
           <div *ngIf="OpticalSellListALL?.length > 0">
             <table class="table table-bordered table-hover">
@@ -336,6 +349,39 @@
           <div *ngIf="OpticalSellListALL?.length === 0" class="alert alert-warning mt-3">
             No item details found for this bill.
           </div>
+
+
+          <div class="">
+            Payments Details
+          </div>
+
+
+          <div *ngIf="OpticalSellListPayments?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of OpticalSellListPayments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{PaymentModeAll[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="OpticalSellListALL?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
         </div>
       </div>
     </div>
@@ -344,56 +390,45 @@
   <!-- view model for due  -->
   <div class="modal fade" id="viewDueModal" tabindex="-2" aria-labelledby="viewDueModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content"  >
-        <div class="modal-header" >
+      <div class="modal-content">
+        <div class="modal-header">
           <h5 class="modal-title" id="viewDueModalLabel">Due Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div style="padding: 30px;">
           <mat-form-field appearance="outline" class="col-lg-2 ">
-          <mat-label>Payment date</mat-label>
-          <input matInput [matDatepicker]="pickers" name="PaymentDate " required #PaymentDate="ngModel"
-            [(ngModel)]="DueBill.PaymentDate" />
-          <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
-          <mat-datepicker #pickers></mat-datepicker>
-        </mat-form-field>
+            <mat-label>Payment date</mat-label>
+            <input matInput [matDatepicker]="pickers" name="PaymentDate " required #PaymentDate="ngModel"
+              [(ngModel)]="DueBill.PaymentDate" />
+            <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #pickers></mat-datepicker>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-lg-2">
-          <mat-label>Amount</mat-label>
-          <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
-             />
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-lg-2">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
+              readonly />
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-sm-3">
-                  <mat-label>Payment Mode</mat-label>
-                  <mat-select
-                    #PaymentMode="ngModel"
-                    name="PaymentMode"
-                    [(ngModel)]="DueBill.PaymentMode"
-                    required
-                    class="no-spinner"
-                  >
-                    <mat-option
-                      [value]="PaymentMode.Key"
-                      *ngFor="let PaymentMode of PaymentModeList"
-                      >{{ PaymentMode.Value }}</mat-option
-                    >
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
+          <mat-form-field appearance="outline" class="col-sm-3">
+            <mat-label>Payment Mode</mat-label>
+            <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="DueBill.PaymentMode" required
+              class="no-spinner">
+              <mat-option [value]="PaymentMode.Key" *ngFor="let PaymentMode of PaymentModeList">{{ PaymentMode.Value
+                }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="
                       PaymentMode.dirty ||
                       PaymentMode.touched ||
                       (PaymentMode.invalid && isSubmitted)
-                    "
-                  >
-                    Payment Mode is <strong>required</strong>
-                  </mat-error>
-                </mat-form-field>
-        <button  (click)="ClearDueAmount(DueBill)" mat-raised-button
-          color="primary">
-          Make Payment
-        </button>
-      </div>
+                    ">
+              Payment Mode is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <button (click)="ClearDueAmount(DueBill)" mat-raised-button color="primary">
+            Make Payment
+          </button>
+        </div>
 
       </div>
     </div>
@@ -404,55 +439,44 @@
 
   <div class="modal fade" id="DeliveryModal" tabindex="-2" aria-labelledby="viewDueModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content"  >
-        <div class="modal-header" >
+      <div class="modal-content">
+        <div class="modal-header">
           <h5 class="modal-title" id="viewDueModalLabel">Due Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div style="padding: 30px;">
           <mat-form-field appearance="outline" class="col-lg-2 ">
-          <mat-label>Delivery date</mat-label>
-          <input matInput [matDatepicker]="picker" name="DeliveryDate " required #DeliveryDate="ngModel"
-            [(ngModel)]="Deliverystatus.DeliveryDate" />
-          <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+            <mat-label>Delivery date</mat-label>
+            <input matInput [matDatepicker]="picker" name="DeliveryDate " required #DeliveryDate="ngModel"
+              [(ngModel)]="Deliverystatus.DeliveryDate" />
+            <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
 
 
 
-        <mat-form-field appearance="outline" class="col-sm-3">
-                  <mat-label>Delivery Status</mat-label>
-                  <mat-select
-                    #PaymentMode="ngModel"
-                    name="PaymentMode"
-                    [(ngModel)]="Deliverystatus.DeliveryStatus"
-                    required
-                    class="no-spinner"
-                  >
-                    <mat-option
-                      [value]="DeliveryStatus.Key"
-                      *ngFor="let DeliveryStatus of DeliveryStatusList"
-                      >{{ DeliveryStatus.Value }}</mat-option
-                    >
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
+          <mat-form-field appearance="outline" class="col-sm-3">
+            <mat-label>Delivery Status</mat-label>
+            <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="Deliverystatus.DeliveryStatus" required
+              class="no-spinner">
+              <mat-option [value]="DeliveryStatus.Key" *ngFor="let DeliveryStatus of DeliveryStatusList">{{
+                DeliveryStatus.Value }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="
                       PaymentMode.dirty ||
                       PaymentMode.touched ||
                       (PaymentMode.invalid && isSubmitted)
-                    "
-                  >
-                    Payment Mode is <strong>required</strong>
-                  </mat-error>
-                </mat-form-field>
-        <button  (click)="DeliveryStatusUpdate(Deliverystatus)" mat-raised-button
-          color="primary">
-          Delivery Optical
-        </button>
-      </div>
+                    ">
+              Payment Mode is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <button (click)="DeliveryStatusUpdate(Deliverystatus)" mat-raised-button color="primary">
+            Delivery Optical
+          </button>
+        </div>
 
       </div>
     </div>
   </div>
- 
+
 </main>

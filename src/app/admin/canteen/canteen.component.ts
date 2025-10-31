@@ -121,6 +121,7 @@ export class CanteenComponent {
       if (response.Message == ConstantData.SuccessMessage) {
         if (this.Canteen.CanteenId > 0) {
           this.toastr.success("Canteen detail updated successfully")
+          this.service.PrintCanteenBillItem(response.CanteenBillingId);
           
         } else {
           this.toastr.success("Canteen added successfully")

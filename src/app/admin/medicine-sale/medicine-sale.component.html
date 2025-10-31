@@ -4,7 +4,8 @@
 
     <div class="pagetitle">
         <h1>Medicine Sale
-            <a class="text-link" style="float: right;font-size: 14px;" [routerLink]="'/admin/medicine-sale-list'">
+            <a class="text-link" style="float: right;font-size: 14px;"
+                [routerLink]="'/admin/patient-medicine-sale-list'">
                 Medicine
                 Sale List</a>
         </h1>
@@ -52,7 +53,7 @@
                             <mat-form-field appearance="outline" class="col-lg-3">
                                 <mat-label> Select Medicine </mat-label>
                                 <input matInput #MedicineId="ngModel" name="MedicineName"
-                                  (ngModelChange)="onSearchInput($event)" placeholder="Search By Medicine"
+                                    (ngModelChange)="onSearchInput($event)" placeholder="Search By Medicine"
                                     [(ngModel)]="PaymentMedicine.MedicineName" [matAutocomplete]="autoMedicine"
                                     required />
                                 <mat-autocomplete #autoMedicine="matAutocomplete"
@@ -68,6 +69,10 @@
                                 <mat-error>Required field !!</mat-error>
                             </mat-form-field>
                         </div>
+                        <div *ngIf="MedicineStockMessage" class="alert alert-warning text-center mt-2">
+                            {{ MedicineStockMessage }}
+                        </div>
+
                         <div *ngIf="MedicineStockList.length>0">
                             <div class="form-group row">
                                 <h6>Available Stocks</h6>
@@ -103,13 +108,14 @@
                                                 <td>{{model.AvailableQuantity}}</td>
                                                 <td>{{model.UnitName}}</td>
                                                 <td>
-                                                    <select class="form-select" (change)="changeQuantity(model)">
-                                                        <option value="24">Pics</option>
-                                                        <option *ngFor="let unit of UnitList" [value]="unit.UnitId">
-                                                            {{ unit.UnitName }}
+                                                    <select [(ngModel)]="model.UnitId"
+                                                        (ngModelChange)="changeQuantity(model)" name="unitId">
+                                                        <option *ngFor="let p1 of model.UnitList" [ngValue]="p1.UnitId">
+                                                            {{ p1.UnitName }}
                                                         </option>
                                                     </select>
                                                 </td>
+
                                                 <td>
                                                     <input type="number" class="no-spinner" [(ngModel)]="model.Quantity"
                                                         (change)="changeQuantity(model)" style="width:100%" />
@@ -228,8 +234,8 @@
                                             <h5 class="card-title">Payment Details</h5>
                                             <form #formPaymentCollection="ngForm">
                                                 <div class="row">
-                                                   
-                                                        <!-- <div class="col-sm-2 form-group">
+
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Billing Of <span
                                                     class="text-danger">*</span></label>
                                             <select #BillingOf="ngModel" [(ngModel)]="PaymentCollection.BillingOf"
@@ -250,7 +256,7 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 1)">
+                                                    <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 1)">
                                             <label class="form-label">Select OPD Patient <span
                                                     class="text-danger">*</span></label>
                                             <ng-autocomplete [data]="AllPatientList" [searchKeyword]="'SearchPatient'"
@@ -281,36 +287,36 @@
                                             </div>
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Patient Name / Mobile / UHID</mat-label>
-                                                            <input matInput name="PackageCollectionName"
-                                                                [(ngModel)]="PaymentCollection.PatientName"
-                                                                (ngModelChange)="filterpatientList($event)"
-                                                                [matAutocomplete]="autoTransportPackageCollection"
-                                                                placeholder="Search By Package Collection" required />
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Patient Name / Mobile / UHID</mat-label>
+                                                        <input matInput name="PackageCollectionName"
+                                                            [(ngModel)]="PaymentCollection.PatientName"
+                                                            (ngModelChange)="filterpatientList($event)"
+                                                            [matAutocomplete]="autoTransportPackageCollection"
+                                                            placeholder="Search By Package Collection" required />
 
-                                                            <mat-autocomplete
-                                                                #autoTransportPackageCollection="matAutocomplete"
-                                                                (optionSelected)="afterPatientSelected($event)">
-                                                                <mat-option *ngFor="let option of filteredPatientList"
-                                                                    [value]="option.PatientName">
-                                                                    {{ option.PatientName }} / {{ option.UHID }} /
-                                                                    {{ option.ContactNo }}
-                                                                </mat-option>
-                                                            </mat-autocomplete>
+                                                        <mat-autocomplete
+                                                            #autoTransportPackageCollection="matAutocomplete"
+                                                            (optionSelected)="afterPatientSelected($event)">
+                                                            <mat-option *ngFor="let option of filteredPatientList"
+                                                                [value]="option.PatientName">
+                                                                {{ option.PatientName }} / {{ option.UHID }} /
+                                                                {{ option.ContactNo }}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
 
-                                                            <button mat-icon-button matSuffix
-                                                                *ngIf="PaymentMedicine.PatientName" color="primary"
-                                                                (click)="clearPatient()">
-                                                                <mat-icon>close</mat-icon>
-                                                            </button>
+                                                        <button mat-icon-button matSuffix
+                                                            *ngIf="PaymentMedicine.PatientName" color="primary"
+                                                            (click)="clearPatient()">
+                                                            <mat-icon>close</mat-icon>
+                                                        </button>
 
-                                                            <mat-error *ngIf="!PaymentMedicine.PatientName">Required
-                                                                field
-                                                                !!</mat-error>
-                                                        </mat-form-field>
+                                                        <mat-error *ngIf="!PaymentMedicine.PatientName">Required
+                                                            field
+                                                            !!</mat-error>
+                                                    </mat-form-field>
 
-                                                        <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 2)">
+                                                    <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 2)">
                                             <label class="form-label">Select IPD Patient <span
                                                     class="text-danger">*</span></label>
                                             <ng-autocomplete [data]="AllIPDPatientList"
@@ -387,7 +393,7 @@
                                                 class="form-control">
                                         </div> -->
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Total CGST <span
                                                     class="text-danger">*</span></label>
                                             <input type="text" disabled="disabled" #CGSTAmount="ngModel"
@@ -395,15 +401,14 @@
                                                 class="form-control">
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Total CGST</mat-label>
-                                                            <input matInput type="number" #CGSTAmount="ngModel"
-                                                                name="CGSTAmount"
-                                                                [(ngModel)]="PaymentCollection.CGSTAmount" required
-                                                                readonly="true" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total CGST</mat-label>
+                                                        <input matInput type="number" #CGSTAmount="ngModel"
+                                                            name="CGSTAmount" [(ngModel)]="PaymentCollection.CGSTAmount"
+                                                            required readonly="true" />
+                                                    </mat-form-field>
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Total SGST <span
                                                     class="text-danger">*</span></label>
                                             <input type="text" disabled="disabled" #SGSTAmount="ngModel"
@@ -411,15 +416,14 @@
                                                 class="form-control">
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Total SGST</mat-label>
-                                                            <input matInput type="number" #SGSTAmount="ngModel"
-                                                                name="SGSTAmount"
-                                                                [(ngModel)]="PaymentCollection.SGSTAmount" required
-                                                                readonly="true" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total SGST</mat-label>
+                                                        <input matInput type="number" #SGSTAmount="ngModel"
+                                                            name="SGSTAmount" [(ngModel)]="PaymentCollection.SGSTAmount"
+                                                            required readonly="true" />
+                                                    </mat-form-field>
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Total IGST <span
                                                     class="text-danger">*</span></label>
                                             <input type="text" disabled="disabled" #IGSTAmount="ngModel"
@@ -427,15 +431,14 @@
                                                 class="form-control">
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Total IGST</mat-label>
-                                                            <input matInput type="number" #IGSTAmount="ngModel"
-                                                                name="IGSTAmount"
-                                                                [(ngModel)]="PaymentCollection.IGSTAmount" required
-                                                                readonly="true" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total IGST</mat-label>
+                                                        <input matInput type="number" #IGSTAmount="ngModel"
+                                                            name="IGSTAmount" [(ngModel)]="PaymentCollection.IGSTAmount"
+                                                            required readonly="true" />
+                                                    </mat-form-field>
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Total Payable Amount <span
                                                     class="text-danger">*</span></label>
                                             <input type="text" disabled="disabled" #PayableAmount="ngModel"
@@ -444,7 +447,7 @@
                                         </div> -->
 
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Net Amount <span
                                                     class="text-danger">*</span></label>
                                             <input type="text" disabled="disabled" #NetPayableAmount="ngModel"
@@ -452,15 +455,15 @@
                                                 class="form-control">
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Net Amount </mat-label>
-                                                            <input matInput type="number" #NetPayableAmount="ngModel"
-                                                                name="NetPayableAmount"
-                                                                [(ngModel)]="PaymentCollection.NetPayableAmount"
-                                                                required readonly="true" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Net Amount </mat-label>
+                                                        <input matInput type="number" #NetPayableAmount="ngModel"
+                                                            name="NetPayableAmount"
+                                                            [(ngModel)]="PaymentCollection.NetPayableAmount" required
+                                                            readonly="true" />
+                                                    </mat-form-field>
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Disc. on Bill <span
                                                     class="text-danger">*</span></label>
                                             <input type="number" placeholder="Disc." #DiscOnBill="ngModel"
@@ -468,7 +471,7 @@
                                                 (change)="calulateTotal()" class="form-control">
 
                                         </div> -->
-<!-- 
+                                                    <!-- 
                                                         <mat-form-field appearance="outline" class="col-lg-3">
                                                             <mat-label>Disc. on Bill </mat-label>
                                                             <input matInput type="number" #DiscOnBill="ngModel"
@@ -477,7 +480,7 @@
                                                                 (change)="calulateTotal()" />
                                                         </mat-form-field> -->
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Paid Amount <span
                                                     class="text-danger">*</span></label>
                                             <input type="number" placeholder="Paid Amount" #PaidAmount="ngModel"
@@ -493,18 +496,18 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Payable Amount </mat-label>
-                                                            <input class="no-spinner" matInput type="number"
-                                                                #PayableAmount="ngModel" name="PayableAmount"
-                                                                [(ngModel)]="PaymentCollection.PayableAmount" required
-                                                                (change)="calulateTotal(true)" />
-                                                            <mat-error
-                                                                *ngIf=" PayableAmount.dirty || PayableAmount.touched ||(PayableAmount.invalid &&submitted)">
-                                                                Payable Amount is <strong>required</strong>
-                                                            </mat-error>
-                                                        </mat-form-field>
-                                                        <!-- 
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Payable Amount </mat-label>
+                                                        <input class="no-spinner" matInput type="number"
+                                                            #PayableAmount="ngModel" name="PayableAmount"
+                                                            [(ngModel)]="PaymentCollection.PayableAmount" required
+                                                            (change)="calulateTotal(true)" />
+                                                        <mat-error
+                                                            *ngIf=" PayableAmount.dirty || PayableAmount.touched ||(PayableAmount.invalid &&submitted)">
+                                                            Payable Amount is <strong>required</strong>
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                    <!-- 
                                         <div class="col-sm-2 form-group">
                                             <label class="form-label">Dues Amount <span
                                                     class="text-danger">*</span></label>
@@ -512,7 +515,7 @@
                                                 [(ngModel)]="PaymentCollection.DueAmount" name="DueAmount"
                                                 class="form-control">
                                         </div> -->
-<!-- 
+                                                    <!-- 
                                                         <mat-form-field appearance="outline" class="col-lg-3">
                                                             <mat-label>Dues Amount </mat-label>
                                                             <input matInput type="number" #DueAmount="ngModel"
@@ -521,16 +524,15 @@
                                                                 readonly="true" />
                                                         </mat-form-field> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Due Amount </mat-label>
-                                                            <input matInput type="number" #DueAmount="ngModel"
-                                                                name="DueAmount"
-                                                                [(ngModel)]="PaymentCollection.DueAmount"
-                                                                required readonly="true" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Due Amount </mat-label>
+                                                        <input matInput type="number" #DueAmount="ngModel"
+                                                            name="DueAmount" [(ngModel)]="PaymentCollection.DueAmount"
+                                                            required readonly="true" />
+                                                    </mat-form-field>
 
 
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Payment Mode <span
                                                     class="text-danger">*</span></label>
                                             <select #PaymentMode="ngModel" [(ngModel)]="PaymentCollection.PaymentMode"
@@ -549,7 +551,7 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Transaction No (if Any)</label>
                                             <input type="text" placeholder="Transaction No" #TransactionNo="ngModel"
                                                 [(ngModel)]="PaymentCollection.TransactionNo" name="TransactionNo"
@@ -563,7 +565,7 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Payment Date <span
                                                     class="text-danger">*</span></label>
                                             <input type="date" placeholder="Payment Date" #PaymentDate="ngModel"
@@ -580,16 +582,16 @@
                                             </div>
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Payment Date</mat-label>
-                                                            <input matInput [matDatepicker]="pickers"
-                                                                [(ngModel)]="PaymentCollection.PaymentDate"
-                                                                name="PaymentDate" required />
-                                                            <mat-datepicker-toggle matSuffix [for]="pickers"
-                                                                class="small-datepicker-icon"></mat-datepicker-toggle>
-                                                            <mat-datepicker #pickers></mat-datepicker>
-                                                        </mat-form-field>
-                                                        <!-- <div class="col-sm-12 form-group">
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Payment Date</mat-label>
+                                                        <input matInput [matDatepicker]="pickers"
+                                                            [(ngModel)]="PaymentCollection.PaymentDate"
+                                                            name="PaymentDate" required />
+                                                        <mat-datepicker-toggle matSuffix [for]="pickers"
+                                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                                        <mat-datepicker #pickers></mat-datepicker>
+                                                    </mat-form-field>
+                                                    <!-- <div class="col-sm-12 form-group">
                                             <label class="form-label">Remark</label>
                                             <textarea placeholder="Remarks" #Remarks="ngModel"
                                                 [(ngModel)]="PaymentCollection.Remarks" name="Remarks"
@@ -603,14 +605,14 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <mat-form-field appearance="outline" class="col-lg-6">
-                                                            <mat-label>Doctor Remarks</mat-label>
-                                                            <input matInput name="Remarks"
-                                                                [(ngModel)]="PaymentCollection.Remarks" />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-6">
+                                                        <mat-label>Doctor Remarks</mat-label>
+                                                        <input matInput name="Remarks"
+                                                            [(ngModel)]="PaymentCollection.Remarks" />
+                                                    </mat-form-field>
 
 
-                                                        <!-- <div class="col-sm-2 form-group" *ngIf="(PaymentCollection.BillingOf != 3)">
+                                                    <!-- <div class="col-sm-2 form-group" *ngIf="(PaymentCollection.BillingOf != 3)">
                                             <label class="form-label">Doctor</label>
                                             <ng-autocomplete [data]="DoctorList" [searchKeyword]="'DoctorName'"
                                                 placeholder="Enter Doctor Name" id="DoctorAutoComplete"
@@ -640,28 +642,27 @@
                                             </div>
                                         </div> -->
 
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Doctor Name </mat-label>
-                                                            <input matInput #UnitId="ngModel" name="UnitName"
-                                                                (ngModelChange)="filterDoctorList($event)"
-                                                                placeholder="Search By Doctor"
-                                                                [(ngModel)]="PaymentCollection.DoctorName"
-                                                                [matAutocomplete]="autoDoctor" />
-                                                            <mat-autocomplete #autoDoctor="matAutocomplete"
-                                                                (optionSelected)="afterDoctorSelected($event)">
-                                                                <mat-option *ngFor="let options of DoctorDetailList"
-                                                                    [id]="options.DoctorId"
-                                                                    [value]="options.DoctorName">{{
-                                                                    options.DoctorName }}</mat-option>
-                                                            </mat-autocomplete>
-                                                            <button mat-icon-button matSuffix
-                                                                *ngIf="PaymentCollection.DoctorName" color="primary"
-                                                                (click)="clearDoctor()">
-                                                                <mat-icon><i class="ri-close-circle-line"></i>
-                                                                </mat-icon>
-                                                            </button>
-                                                        </mat-form-field>
-                                                        <!-- <div class="col-sm-2 form-group">
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Doctor Name </mat-label>
+                                                        <input matInput #UnitId="ngModel" name="UnitName"
+                                                            (ngModelChange)="filterDoctorList($event)"
+                                                            placeholder="Search By Doctor"
+                                                            [(ngModel)]="PaymentCollection.DoctorName"
+                                                            [matAutocomplete]="autoDoctor" />
+                                                        <mat-autocomplete #autoDoctor="matAutocomplete"
+                                                            (optionSelected)="afterDoctorSelected($event)">
+                                                            <mat-option *ngFor="let options of DoctorDetailList"
+                                                                [id]="options.DoctorId" [value]="options.DoctorName">{{
+                                                                options.DoctorName }}</mat-option>
+                                                        </mat-autocomplete>
+                                                        <button mat-icon-button matSuffix
+                                                            *ngIf="PaymentCollection.DoctorName" color="primary"
+                                                            (click)="clearDoctor()">
+                                                            <mat-icon><i class="ri-close-circle-line"></i>
+                                                            </mat-icon>
+                                                        </button>
+                                                    </mat-form-field>
+                                                    <!-- <div class="col-sm-2 form-group">
                                             <label class="form-label">Reffered Name<span
                                                     class="text-danger">*</span></label>
                                             <input type="text" placeholder="RefferedByName" #RefferedByName="ngModel"
@@ -677,15 +678,14 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                                        <mat-form-field appearance="outline" class="col-lg-3">
-                                                            <mat-label>Reffered Name </mat-label>
-                                                            <input matInput type="text" #RefferedByName="ngModel"
-                                                                name="RefferedByName"
-                                                                [(ngModel)]="PaymentCollection.RefferedByName"
-                                                                required />
-                                                        </mat-form-field>
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Reffered Name </mat-label>
+                                                        <input matInput type="text" #RefferedByName="ngModel"
+                                                            name="RefferedByName"
+                                                            [(ngModel)]="PaymentCollection.RefferedByName" required />
+                                                    </mat-form-field>
 
-                                                    </div>
+                                                </div>
                                             </form>
                                         </div>
                                     </div>

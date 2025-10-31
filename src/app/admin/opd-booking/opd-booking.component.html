@@ -28,11 +28,11 @@
                     <mat-label>Patient Name / Mobile / UHID</mat-label>
                     <input
                       matInput
-                      name="PackageCollectionName"
+                      name="PatientName"
                       [(ngModel)]="Patient.PatientName"
                       (ngModelChange)="filterpatientList($event)"
                       [matAutocomplete]="autoTransportPackageCollection"
-                      placeholder="Search By Package Collection"
+                      placeholder="Search By Patient Name/Mobile/UHID"
                       required
                     />
 

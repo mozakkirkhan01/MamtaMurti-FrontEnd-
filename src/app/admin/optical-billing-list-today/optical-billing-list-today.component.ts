@@ -21,10 +21,7 @@ declare var $: any;
 export class OpticalBillingListTodayComponent {
    DueDate: any;
    DuePayment: any;
-     Deliverystatus: any;
-   clearPayment() {
-   throw new Error('Method not implemented.');
-   }
+     Deliverystatus: any={};
      dataLoading: boolean = false;
      PackageDetialList: any = [];
      PackageDetial: any = {};
@@ -36,6 +33,8 @@ export class OpticalBillingListTodayComponent {
      PaymentModeList = this.loadData.GetEnumList(PaymentMode);
      PageSize = ConstantData.PageSizes;
      p: number = 1;
+       PaymentMode = this.loadData.GetEnumList(PaymentMode);
+PaymentModeAll = PaymentMode;
      Search: string = '';
      reverse: boolean = true;
      sortKey: string = '';
@@ -56,7 +55,9 @@ export class OpticalBillingListTodayComponent {
      OpticalTotal: any = {};
      selectedBill: any = {};
      OpticalSellListALL: any = {};
+     OpticalSellListPayments: any = {};
      DueBill: any={};
+   
      constructor(
        private service: AppService,
        private toastr: ToastrService,
@@ -69,15 +70,15 @@ export class OpticalBillingListTodayComponent {
        this.staffLogin = this.localService.getEmployeeDetail();
        this.validiateMenu();
        this.resetForm();
-      const date = new Date();
+   
        // Initialize pagination defaults
        this.p = 1;
        this.itemPerPage = 10; // Or your default
    
        // Initialize filter model
        this.filterModel = {
-         StartFrom: date,
-         EndFrom: date,
+         StartFrom: new Date(),
+         EndFrom: new Date(),
          PaymentStatus: 0,
        };
    
@@ -195,7 +196,6 @@ export class OpticalBillingListTodayComponent {
        this.PackageDetial.CreatedBy = this.staffLogin.StaffId;
        this.PackageDetial.UpdatedBy = this.staffLogin.StaffId;
    
-       console.log(this.PackageDetial);
    
        var obj: RequestModel = {
          request: this.localService
@@ -230,7 +230,6 @@ export class OpticalBillingListTodayComponent {
          var request: RequestModel = {
            request: this.localService.encrypt(JSON.stringify(obj)).toString(),
          };
-         console.log(obj);
    
          this.dataLoading = true;
          this.service.DeleteOpticalBilling(request).subscribe(
@@ -287,6 +286,7 @@ export class OpticalBillingListTodayComponent {
        this.selectedBill = item;
        $('#viewDetailsModal').modal('show');
        this.OpticalSellList(item);
+       this.OpticalSellListPayment(item);
      }
    
      OpticalSellList(obj: any) {
@@ -311,6 +311,28 @@ export class OpticalBillingListTodayComponent {
          }
        );
      }
+
+       OpticalSellListPayment(obj: any) {
+       var request: RequestModel = {
+         request: this.localService.encrypt(JSON.stringify(obj)).toString(),
+       };
+       this.dataLoading = true;
+       this.service.OpticalSellListPayment(request).subscribe(
+         (r1) => {
+           let response = r1 as any;
+           if (response.Message == ConstantData.SuccessMessage) {
+             this.OpticalSellListPayments = response.OpticalSellListPayment;
+             this.dataLoading = false;
+           } else {
+             this.toastr.error('Error occured while Fetching  the recored');
+           }
+         },
+         (err) => {
+           this.toastr.error('Error occured while Fetching  the recored');
+           this.dataLoading = false;
+         }
+       );
+     }
    
      openViewModalForDue(item: any) {
        this.DueBill = item;
@@ -320,9 +342,15 @@ export class OpticalBillingListTodayComponent {
    
        DeliveryModal(item: any) {
        this.Deliverystatus = item;
+       
+        this.Deliverystatus.DeliveryDate=new Date();
+       $('#DeliveryModal').modal('show');
+     }
    
-       confirm('Are you sure you want to Delivery this record?');
-         this.Deliverystatus.DeliveryStatuss = 1;
+     DeliveryStatusUpdate(obj:any){
+       this.Deliverystatus.DeliveryStatuss = obj.DeliveryStatus;  
+       this.Deliverystatus.DeliveryDate= this.loadData.loadDateYMD(this.Deliverystatus.DeliveryDate);
+       
          var request: RequestModel = {
          request: this.localService.encrypt(JSON.stringify(this.Deliverystatus)).toString(),
        };
@@ -333,6 +361,7 @@ export class OpticalBillingListTodayComponent {
            if (response.Message == ConstantData.SuccessMessage) {
              this.dataLoading = false;
              this.toastr.success("Optical Delivered successfully");
+       $('#DeliveryModal').modal('hide');
              this.getOpticalsBillList();
            } else {
              this.toastr.error('Error occured while Fetching  the recored');
@@ -363,7 +392,8 @@ export class OpticalBillingListTodayComponent {
            if (response.Message == ConstantData.SuccessMessage) {
              this.dataLoading = false;
              this.toastr.success("Due amount cleared successfully");
-   
+             $('#viewDueModal').modal('hide')
+             this.getOpticalsBillList();
            } else {
              this.toastr.error('Error occured while Clearing  the Due');
            }
@@ -374,7 +404,6 @@ export class OpticalBillingListTodayComponent {
          }
        );
      }
-  
       
   
 }

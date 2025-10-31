@@ -115,7 +115,7 @@ export class SupplierComponent {
           // console.log("API Response:", r1);
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
-            this.SupplierList = response.SupplierList;
+            this.SupplierList = response.SupplierList.reverse();
             console.log(this.SupplierList);
             
             

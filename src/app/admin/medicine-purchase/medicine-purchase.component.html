@@ -173,7 +173,7 @@
 
 
 
-                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                    <!-- <mat-form-field appearance="outline" class="col-lg-3">
                                         <mat-label>Medicine </mat-label>
                                         <input matInput #MedicineId="ngModel" name="MedicineName"
                                             (ngModelChange)="filterMedicineList($event)"
@@ -186,6 +186,25 @@
                                                 options.MedicineName }}</mat-option>
                                         </mat-autocomplete>
                                         <button mat-icon-button matSuffix *ngIf="Medicine.MedicineName" color="primary"
+                                            (click)="clearMedicine()">
+                                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                        </button>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field> -->
+
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label> Select Medicine </mat-label>
+                                        <input matInput #MedicineId="ngModel" name="MedicineName"
+                                          (ngModelChange)="onSearchInput($event)" placeholder="Search By Medicine"
+                                            [(ngModel)]="PurchaseProduct.MedicineName" [matAutocomplete]="autoMedicine"
+                                            required />
+                                        <mat-autocomplete #autoMedicine="matAutocomplete"
+                                            (optionSelected)="afterMedicineSelected($event)">
+                                            <mat-option *ngFor="let options of MedicineDetailList" [id]="options.MedicineId"
+                                                [value]="options.MedicineName">{{
+                                                options.MedicineName }}</mat-option>
+                                        </mat-autocomplete>
+                                        <button mat-icon-button matSuffix *ngIf="PurchaseProduct.MedicineName" color="primary"
                                             (click)="clearMedicine()">
                                             <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
                                         </button>
@@ -210,7 +229,7 @@
                                         </div> -->
 
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-2">
                                         <mat-label>Batch No</mat-label>
                                         <input matInput #BatchNo="ngModel" name="BatchNo"
                                             [(ngModel)]="PurchaseProduct.BatchNo" required autofocus>
@@ -237,13 +256,13 @@
                                         </div>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
-                                        <mat-label>HSN Code</mat-label>
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>HSN </mat-label>
                                         <input matInput #HSNCode="ngModel" name="HSNCode"
                                             [(ngModel)]="PurchaseProduct.HSNCode" required autofocus>
                                         <mat-error
                                             *ngIf="(HSNCode.dirty  || HSNCode.touched) || (HSNCode.invalid && submitted)">
-                                            Batch No is <strong>required</strong>
+                                            HSN is <strong>required</strong>
                                         </mat-error>
                                     </mat-form-field>
                                     <!-- <div class="col-sm-1 form-group">
@@ -260,12 +279,12 @@
                                         </div>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-1">
                                         <mat-label>MRP </mat-label>
                                         <input type="number" class="no-spinner" matInput #MRP="ngModel" name="MRP"
                                             [(ngModel)]="PurchaseProduct.MRP" required autofocus>
                                         <mat-error *ngIf="(MRP.dirty  || MRP.touched) || (MRP.invalid && submitted)">
-                                            Batch No is <strong>required</strong>
+                                            MRP is <strong>required</strong>
                                         </mat-error>
                                     </mat-form-field>
                                     <!-- <div class="col-sm-1 form-group">
@@ -283,12 +302,12 @@
                                         </div>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-1">
                                         <mat-label>Rate </mat-label>
                                         <input type="number" class="no-spinner" matInput #Rate="ngModel" name="Rate"
                                             [(ngModel)]="PurchaseProduct.Rate" (change)="changeCostAmount(PurchaseProduct)" required autofocus>
                                         <mat-error *ngIf="(Rate.dirty  || Rate.touched) || (Rate.invalid && submitted)">
-                                            Batch No is <strong>required</strong>
+                                            Rate is <strong>required</strong>
                                         </mat-error>
                                     </mat-form-field>
                                     <!-- <div class="col-sm-1 form-group">
@@ -307,12 +326,12 @@
                                         </div>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-1">
                                         <mat-label>Qty. </mat-label>
                                         <input type="number" class="no-spinner" matInput #Qty="ngModel" name="Quantity"
                                             [(ngModel)]="PurchaseProduct.Quantity" (change)="changeCostAmount(PurchaseProduct)" required autofocus>
                                         <mat-error *ngIf="(Qty.dirty  || Qty.touched) || (Qty.invalid && submitted)">
-                                            Batch No is <strong>required</strong>
+                                            Qty is <strong>required</strong>
                                         </mat-error>
                                     </mat-form-field>
                                     <!-- <div class="col-sm-1 form-group">
@@ -331,7 +350,7 @@
                                         </div>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-1">
                                         <mat-label>Free Qty. </mat-label>
                                         <input type="number" class="no-spinner" matInput #FreeQunatity="ngModel"
                                             name="FreeQunatity" [(ngModel)]="PurchaseProduct.FreeQunatity" (change)="changeCostAmount(PurchaseProduct)" autofocus>
@@ -346,8 +365,8 @@
                                             class="form-control">
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
-                                        <mat-label>Discount (%) </mat-label>
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Disc. (%) </mat-label>
                                         <input type="number" class="no-spinner" matInput #DiscountPercent="ngModel"
                                             name="DiscountPercent" [(ngModel)]="PurchaseProduct.DiscountPercent" (change)="changeCostAmount(PurchaseProduct)"
                                             autofocus>
@@ -363,8 +382,8 @@
                                             class="form-control">
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
-                                        <mat-label>Discount (₹) </mat-label>
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Disc. (₹) </mat-label>
                                         <input type="number" class="no-spinner" matInput #DiscountAmount="ngModel"
                                             name="DiscountAmount" [(ngModel)]="PurchaseProduct.DiscountAmount" (change)="changeDiscountAmount(PurchaseProduct)"
                                             autofocus>
@@ -382,7 +401,7 @@
                                         </select>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
                                         <mat-label>Unit</mat-label>
                                         <mat-select #UnitId="ngModel" [(ngModel)]="PurchaseProduct.UnitId" name="UnitId"
                                             (Change)="changeCostAmount(PurchaseProduct)" [disabled]="true" required
@@ -406,7 +425,7 @@
                                     </div> -->
 
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-2">
                                         <mat-label>Taxable </mat-label>
                                         <input type="number" class="no-spinner" matInput #Taxable="ngModel"
                                             name="Taxable" [(ngModel)]="PurchaseProduct.TaxableAmount" readonly
@@ -425,7 +444,7 @@
                                         </select>
                                     </div> -->
 
-                                    <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-form-field appearance="outline" class="col-sm-1 form-group">
                                         <mat-label>GST %</mat-label>
                                         <mat-select #GSTId="ngModel" name="GSTId" [(ngModel)]="PurchaseProduct.GSTId"
                                             (Change)="gstPercentChange(PurchaseProduct)" [disabled]="true">
@@ -454,7 +473,7 @@
                                             </div>
                                         </div>
                                     </div> -->
-                                    <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-form-field appearance="outline" class="col-sm-1 form-group">
                                         <mat-label>Cost<span class="text-danger"></span></mat-label>
                                         <input matInput type="number" placeholder="Cost Amount" #CostAmount="ngModel"
                                             name="CostAmount" [(ngModel)]="PurchaseProduct.CostAmount"
@@ -470,7 +489,7 @@
                                     </div> -->
 
 
-                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-form-field appearance="outline" class="col-sm-1">
                                         <mat-label>GST ₹ </mat-label>
                                         <input type="number" class="no-spinner" readonly matInput #Taxable="ngModel"
                                             name="TotalGSTAmount" [(ngModel)]="PurchaseProduct.TotalGSTAmount"
@@ -522,7 +541,7 @@
                                             </div>
                                         </div>
                                     </div> -->
-                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                    <mat-form-field appearance="outline" class="col-lg-2">
                                         <mat-label>Expired Date</mat-label>
                                         <input matInput [matDatepicker]="picker"
                                             [(ngModel)]="PurchaseProduct.ExpiredDate" name="ExpiredDate" required />

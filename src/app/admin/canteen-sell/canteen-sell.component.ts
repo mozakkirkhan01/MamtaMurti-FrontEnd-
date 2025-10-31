@@ -360,9 +360,13 @@ export class CanteenSellComponent {
           if (response.Message === ConstantData.SuccessMessage) {
             if (this.Canteen.CanteenBillingId > 0) {
               this.toastr.success('Item Updated successfully');
+          this.service.PrintCanteenBillItem(response.CanteenBillingId);
+
               $('hashtag#staticBackdrop').modal('hide');
             } else {
-              this.toastr.success('Item added successfully');
+              this.toastr.success('Item Sell successfully');
+          this.service.PrintCanteenBillItem(response.CanteenBillingId);
+
             }
             //  this.service.PrintOpticlalBill(response.OpticalBillingId);
             this.SelectedPaymentDetailList = [];

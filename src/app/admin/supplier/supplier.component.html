@@ -133,46 +133,34 @@
 
 
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Supplier Name</mat-label>
                                     <input matInput #SupplierName="ngModel" name="SupplierName"
                                         [(ngModel)]="Supplier.SupplierName" required autofocus>
                                     <mat-error
                                         *ngIf="(SupplierName.dirty  || SupplierName.touched) || (SupplierName.invalid && isSubmitted)">
-                                        Supplier name is <strong>required</strong>
+                                        Supplier name is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
 
 
-
-
-                                <mat-form-field appearance="outline" class="col-sm-6">
-                                    <mat-label>Address</mat-label>
-                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="Supplier.Address"
-                                        required autofocus></textarea>
-                                    <mat-error
-                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
-                                        Address is <strong>required</strong>
-                                    </mat-error>
-                                </mat-form-field>
-
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Email</mat-label>
-                                    <input matInput #Email="ngModel" name="Email" [(ngModel)]="Supplier.Email" required
+                                    <input matInput #Email="ngModel" name="Email" [(ngModel)]="Supplier.Email" 
                                         autofocus>
                                     <mat-error
                                         *ngIf="(Email.dirty  || Email.touched) || (Email.invalid && isSubmitted)">
-                                        Email name is <strong>required</strong>
+                                        Email name is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
 
-                                <mat-form-field appearance="outline" class="col-lg-6">
+                                <mat-form-field appearance="outline" class="col-lg-4">
                                     <mat-label>State </mat-label>
                                     <input matInput #StateId="ngModel" name="StateName"
                                         (ngModelChange)="filterStateList($event)" placeholder="Search By State"
-                                        [(ngModel)]="Supplier.StateName" [matAutocomplete]="autoState" required />
+                                        [(ngModel)]="Supplier.StateName" [matAutocomplete]="autoState" />
                                     <mat-autocomplete #autoState="matAutocomplete"
                                         (optionSelected)="afterStateSelected($event)">
                                         <mat-option *ngFor="let options of StateChargeList" [id]="options.StateId"
@@ -188,110 +176,122 @@
 
 
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Contact No</mat-label>
                                     <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
                                         [(ngModel)]="Supplier.ContactNo" required autofocus maxlength="10"
                                         min="0000000000" max="9999999999">
                                     <mat-error
                                         *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
-                                        ContactNo is <strong>required</strong>
+                                        Contact No is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Alternate No</mat-label>
                                     <input type="tel" matInput #AlternateNo="ngModel" name="AlternateNo"
-                                        [(ngModel)]="Supplier.AlternateNo" required autofocus maxlength="10"
+                                        [(ngModel)]="Supplier.AlternateNo"  autofocus maxlength="10"
                                         min="0000000000" max="9999999999">
                                     <mat-error
                                         *ngIf="(AlternateNo.dirty  || AlternateNo.touched) || (AlternateNo.invalid && isSubmitted)">
-                                        AlternateNo is <strong>required</strong>
+                                        Alternate No is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Contact Person No</mat-label>
                                     <input type="tel" matInput #ContactPerson="ngModel" name="ContactPerson"
-                                        [(ngModel)]="Supplier.ContactPerson" required autofocus maxlength="10"
+                                        [(ngModel)]="Supplier.ContactPerson"  autofocus maxlength="10"
                                         min="0000000000" max="9999999999">
                                     <mat-error
                                         *ngIf="(ContactPerson.dirty  || ContactPerson.touched) || (ContactPerson.invalid && isSubmitted)">
-                                        Contact Person No is <strong>required</strong>
+                                        Contact Person No is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
 
-                                <mat-form-field appearance="outline" class="col-lg-6">
+                                <mat-form-field appearance="outline" class="col-lg-4">
                                     <mat-label>Join Date</mat-label>
                                     <input matInput [matDatepicker]="picker" [(ngModel)]="Supplier.JoinDate"
-                                        name="JoinDate" required />
+                                        name="JoinDate"  />
                                     <mat-datepicker-toggle matSuffix [for]="picker"
                                         class="small-datepicker-icon"></mat-datepicker-toggle>
                                     <mat-datepicker #picker></mat-datepicker>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
-                                    <mat-label>TinNo</mat-label>
-                                    <input matInput #TinNo="ngModel" name="TinNo" [(ngModel)]="Supplier.TinNo" required
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>TIN No</mat-label>
+                                    <input matInput #TinNo="ngModel" name="TinNo" [(ngModel)]="Supplier.TinNo" 
                                         autofocus>
                                     <mat-error
                                         *ngIf="(TinNo.dirty  || TinNo.touched) || (TinNo.invalid && isSubmitted)">
-                                        TinNo name is <strong>required</strong>
+                                        TIN No is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
-                                    <mat-label>DLNo</mat-label>
-                                    <input matInput #DLNo="ngModel" name="DLNo" [(ngModel)]="Supplier.DLNo" required
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>DL No</mat-label>
+                                    <input matInput #DLNo="ngModel" name="DLNo" [(ngModel)]="Supplier.DLNo" 
                                         autofocus>
                                     <mat-error *ngIf="(DLNo.dirty  || DLNo.touched) || (DLNo.invalid && isSubmitted)">
-                                        DLNo name is <strong>required</strong>
+                                        DL No is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
-                                    <mat-label>PinCode</mat-label>
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>Pin-Code</mat-label>
                                     <input matInput #PinCode="ngModel" name="PinCode" [(ngModel)]="Supplier.PinCode"
-                                        required autofocus>
+                                         autofocus>
                                     <mat-error
                                         *ngIf="(PinCode.dirty  || PinCode.touched) || (PinCode.invalid && isSubmitted)">
-                                        PinCode name is <strong>required</strong>
+                                        Pin-Code is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>GST No</mat-label>
-                                    <input matInput #GSTNo="ngModel" name="GSTNo" [(ngModel)]="Supplier.GSTNo" required
+                                    <input matInput #GSTNo="ngModel" name="GSTNo" [(ngModel)]="Supplier.GSTNo" 
                                         autofocus>
                                     <mat-error
                                         *ngIf="(GSTNo.dirty  || GSTNo.touched) || (GSTNo.invalid && isSubmitted)">
-                                        GSTNo name is <strong>required</strong>
+                                        GST No name is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>PAN No</mat-label>
-                                    <input matInput #PANNo="ngModel" name="PANNo" [(ngModel)]="Supplier.PANNo" required
+                                    <input matInput #PANNo="ngModel" name="PANNo" [(ngModel)]="Supplier.PANNo" 
                                         autofocus>
                                     <mat-error
                                         *ngIf="(PANNo.dirty  || PANNo.touched) || (PANNo.invalid && isSubmitted)">
-                                        PAN No name is <strong>required</strong>
+                                        PAN No name is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="Supplier.Address"
+                                         autofocus></textarea>
+                                    <mat-error
+                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                        Address is <strong></strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
                                     <mat-label>Status</mat-label>
-                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="Supplier.Status" required>
+                                    <mat-select #Status="ngModel" name="Status" required [(ngModel)]="Supplier.Status" >
                                         <mat-option [value]="status.Key"
                                             *ngFor="let status of StatusList">{{status.Value}}</mat-option>
                                     </mat-select>
                                     <mat-error
                                         *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
-                                        Status is <strong>required</strong>
+                                        Status is <strong></strong>
                                     </mat-error>
                                 </mat-form-field>
+
+                                
                             </div>
 
                         </div>

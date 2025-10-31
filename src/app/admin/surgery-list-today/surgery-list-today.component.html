@@ -80,10 +80,15 @@
                 <th class="text-center" style="cursor: pointer" (click)="sort('ContactNo')">Contact</th>
                 <th class="text-right" style="cursor: pointer" (click)="sort('PayableAmount')">Payable Amount</th>
                 <th class="text-right" style="cursor: pointer" (click)="sort('PaidAmount')">Paid Amount</th>
-                <th class="text-right" style="cursor: pointer ;color: red; font-weight: 600;" (click)="sort('DueAmount')">Due Amount</th>
+                <th class="text-right" style="cursor: pointer ;color: red; font-weight: 600;"
+                  (click)="sort('DueAmount')">Due Amount</th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('PaymentStatus')">Status</th>
+                <th class="text-center">Payment Mode</th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('PaymentStatus')">Pay</th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('Bill')">Bill</th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Description')">
+                  View
+                </th>
                 <th class="text-center" *ngIf="action.CanEdit">Edit</th>
                 <th class="text-center" *ngIf="action.CanDelete">Delete</th>
               </tr>
@@ -106,7 +111,7 @@
                 <td class="text-center">{{ item.ContactNo }}</td>
                 <td class="text-right">{{ item.PayableAmount }}</td>
                 <td class="text-right">{{ item.PaidAmount }}</td>
-                <td class="text-right " style="color: red; font-weight: 600;" >{{ item.DueAmount }}</td>
+                <td class="text-right " style="color: red; font-weight: 600;">{{ item.DueAmount }}</td>
                 <!-- <td>{{ item.PaidAmount }}</td> -->
                 <!-- <td>{{ item.CreatedOn | date: 'dd-MM-yyyy' }}</td>
                 <td>{{ item.UpdatedOn | date: 'dd-MM-yyyy' }}</td> -->
@@ -119,7 +124,7 @@
                     {{ AllStatusList[item.PaymentStatus] }}
                   </span>
                 </td>
-
+                <td class="text-center">{{ item.PaymentModeName}}</td>
                 <!-- Show Pay Due button only if PaymentStatus == 0 (due) -->
                 <td class="text-center">
                   <ng-container *ngIf="item.PaymentStatus == 2; else paidTemplate">
@@ -128,7 +133,7 @@
                     </button>
                   </ng-container>
                   <ng-template #paidTemplate>
-                    <button class="btn btn-sm " style="pointer-events: none;" >
+                    <button class="btn btn-sm " style="pointer-events: none;">
                       <i class="bi bi-check-lg"></i>
                     </button>
                   </ng-template>
@@ -138,6 +143,11 @@
                 <td class="text-center">
                   <button class="btn btn-sm btn-success" (click)="getPrint(item)">
                     <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn btn-primary" (click)="openViewModal(item)">
+                    <i class="bi bi-eye-fill"></i>
                   </button>
                 </td>
                 <td class="text-center" *ngIf="action.CanEdit">
@@ -161,10 +171,15 @@
                 <th></th>
                 <th></th>
                 <th></th>
-                <th></th>
+                <th class="text-end" style="font-weight: 600;">Total</th>
                 <th class="text-end">{{ SurgeryTotal.TotalPayableAmount }}</th>
                 <th class="text-end">{{ SurgeryTotal.PaidAmount }}</th>
-                <th class="text-end">{{ SurgeryTotal.DueAmountTotal }}</th>
+                <th class="text-end text-danger">{{ SurgeryTotal.DueAmountTotal }}</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -185,57 +200,179 @@
 
   <div class="modal fade" id="viewDueModal" tabindex="-2" aria-labelledby="viewDueModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content"  >
-        <div class="modal-header" >
+      <div class="modal-content">
+        <div class="modal-header">
           <h5 class="modal-title" id="viewDueModalLabel">Due Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div style="padding: 30px;">
           <mat-form-field appearance="outline" class="col-lg-2 ">
-          <mat-label>Payment date</mat-label>
-          <input matInput [matDatepicker]="pickers" name="PaymentDate " required #PaymentDate="ngModel"
-            [(ngModel)]="DueBill.PaymentDate" />
-          <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
-          <mat-datepicker #pickers></mat-datepicker>
-        </mat-form-field>
+            <mat-label>Payment date</mat-label>
+            <input matInput [matDatepicker]="pickers" name="PaymentDate " required #PaymentDate="ngModel"
+              [(ngModel)]="DueBill.PaymentDate" />
+            <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #pickers></mat-datepicker>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-lg-2">
-          <mat-label>Amount</mat-label>
-          <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
-            readonly="true" />
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-lg-2">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
+              readonly="true" />
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-sm-3">
-                  <mat-label>Payment Mode</mat-label>
-                  <mat-select
-                    #PaymentMode="ngModel"
-                    name="PaymentMode"
-                    [(ngModel)]="DueBill.PaymentMode"
-                    required
-                    class="no-spinner"
-                  >
-                    <mat-option
-                      [value]="PaymentMode.Key"
-                      *ngFor="let PaymentMode of PaymentModeList"
-                      >{{ PaymentMode.Value }}</mat-option
-                    >
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
+          <mat-form-field appearance="outline" class="col-sm-3">
+            <mat-label>Payment Mode</mat-label>
+            <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="DueBill.PaymentMode" required
+              class="no-spinner">
+              <mat-option [value]="PaymentMode.Key" *ngFor="let PaymentMode of PaymentModeList">{{ PaymentMode.Value
+                }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="
                       PaymentMode.dirty ||
                       PaymentMode.touched ||
                       (PaymentMode.invalid && isSubmitted)
-                    "
-                  >
-                    Payment Mode is <strong>required</strong>
-                  </mat-error>
-                </mat-form-field>
-        <button  (click)="ClearDueAmount(DueBill)" mat-raised-button
-          color="primary">
-          Make Payment
-        </button>
-      </div>
+                    ">
+              Payment Mode is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <button (click)="ClearDueAmount(DueBill)" mat-raised-button color="primary">
+            Make Payment
+          </button>
+        </div>
 
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewDetailsModalLabel">
+            Surgery Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="DueBill" class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>SurgeryDate:</strong>
+                {{ selectedBill.SurgeryDate | date : "dd-MM-yyyy" }}
+              </div>
+              <div class="col-6">
+                <strong>Surgery Code:</strong>
+                {{ selectedBill.SurgeryCode }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Patient Name:</strong> {{ selectedBill.PatientName }}
+              </div>
+              <div class="col-6">
+                <strong>Payment Status :</strong>
+                {{ AllStatusList[selectedBill.PaymentStatus] }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>UHID:</strong> {{ selectedBill.UHID }}
+              </div>
+              <div class="col-6">
+                <strong>Payable Amount:</strong>
+                {{ selectedBill.PayableAmount }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Age:</strong> {{ selectedBill.Age }}
+              </div>
+              <div class="col-6">
+                <strong>Paid Amount:</strong> {{ selectedBill.PaidAmount }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Contact:</strong> {{ selectedBill.ContactNo }}
+              </div>
+              <div class="col-6">
+                <strong>Due Amount:</strong> {{ selectedBill.DueAmount }}
+              </div>
+            </div>
+            <!-- <div class="row mb-2">
+              <div class="col-6">
+                <strong>Delivery Status:</strong>
+                {{ getDeliveryStatus(selectedBill?.DeliveryStatus) }}
+              </div>
+            </div> -->
+          </div>
+          <div class="">
+            Package Details
+          </div>
+          <!-- Optical Items Table -->
+          <div *ngIf="SurgerySellListALL?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Package Code</th>
+                  <th>Package Name</th>
+                  <th>Price</th>
+                  <th>Description</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of SurgerySellListALL; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PackageCode }}</td>
+                  <td>{{ item.PackageName }}</td>
+                  <td>{{ item.Price | number : "1.2-2" }}</td>
+                  <td>{{ item.Description }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="SurgerySellListALL?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
+
+
+          <div class="">
+            Payments Details
+          </div>
+
+
+          <div *ngIf="SurgerySellListPayments?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of SurgerySellListPayments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{PaymentModeAll[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="SurgerySellListALL?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
+        </div>
       </div>
     </div>
   </div>

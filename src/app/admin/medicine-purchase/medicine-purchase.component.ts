@@ -15,7 +15,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 
 import { Status } from '../../utils/enum';
-
+import { debounceTime, Subject } from 'rxjs';
 @Component({
   selector: 'app-medicine-purchase',
   templateUrl: './medicine-purchase.component.html',
@@ -35,7 +35,9 @@ export class MedicinePurchaseComponent implements OnInit {
   AllStatusList = Status;
   filteredMedicineList: any = [];
   MedicineDetailList: any = [];
-  SupplierDetailList: any[] = [];
+  SupplierDetailList: any[] = [];  
+  searchInputChanged: Subject<string> = new Subject();
+  
 
   constructor(
     private service: AppService,
@@ -68,6 +70,13 @@ export class MedicinePurchaseComponent implements OnInit {
       else
         this.Purchase.PurchaseId = 0;
     });
+
+    this.searchInputChanged.pipe(debounceTime(300)).subscribe(value => {
+      this.filterMedicineList(value);
+    });
+  }
+  onSearchInput(value: string) {
+    this.searchInputChanged.next(value);
   }
 
  validiateMenu() {
@@ -484,14 +493,25 @@ export class MedicinePurchaseComponent implements OnInit {
     this.Purchase.SearchSupplier = null;
   }
 
+  // filterMedicineList(value: any) {
+  //   if (value) {
+  //     const MedicinefilterValue = value.toLowerCase();
+  //     this.MedicineDetailList = this.MedicineList.filter((option: any) =>
+  //       option.MedicineName.toLowerCase().includes(MedicinefilterValue)
+  //     );
+  //   } else {
+  //     this.MedicineDetailList = this.MedicineList;
+  //   }
+  // }
+
   filterMedicineList(value: any) {
     if (value) {
-      const MedicinefilterValue = value.toLowerCase();
-      this.MedicineDetailList = this.MedicineList.filter((option: any) =>
-        option.MedicineName.toLowerCase().includes(MedicinefilterValue)
-      );
+      const filterValue = value.toLowerCase();
+      this.MedicineDetailList = this.MedicineList
+      .filter(med => med.MedicineName.toLowerCase().includes(filterValue))
+      .slice(0, 50);
     } else {
-      this.MedicineDetailList = this.MedicineList;
+      this.MedicineDetailList = this.MedicineList.slice(0, 50);
     }
   }
 
@@ -527,11 +547,22 @@ export class MedicinePurchaseComponent implements OnInit {
   // }
 
   clearMedicine() {
-    this.MedicineDetailList = this.MedicineList;
+    this.MedicineDetailList = this.MedicineList.slice(0, 50);
     this.PurchaseProduct.MedicineId = null;
     this.PurchaseProduct.MedicineName = '';
     this.PurchaseProduct.HSNCode = '';
   }
+
+  // clearMedicine() {
+  //   this.MedicineDetailList = this.MedicineList.slice(0, 50);
+  //   this.PaymentMedicine.MedicineId = null;
+  //   this.PaymentMedicine.MedicineName = null;
+  //   this.PaymentMedicine.UnitId = null;
+  //   this.PaymentMedicine.HSNCode = null;
+  //   this.PaymentMedicine.SearchMedicine = null;
+  //   this.PaymentMedicine.UnitName = null;
+  //   this.MedicineStockList = [];
+  // }
 
   changeCostAmount(purchaseProductModel: any) {
     purchaseProductModel.BasicAmount = this.loadData.round(

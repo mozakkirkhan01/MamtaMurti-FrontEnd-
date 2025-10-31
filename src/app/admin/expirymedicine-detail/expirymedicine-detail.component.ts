@@ -46,7 +46,7 @@ export class ExpirymedicineDetailComponent implements OnInit {
 
     // Create worksheet data
     const data = [
-      [{ t: 's', s: { bold: true, fontSize: 24 }, v: 'SARVODAYA HOSPITAL EXPIRED MEDICINE REPORT' }],
+      [{ t: 's', s: { bold: true, fontSize: 24 }, v: 'MAMTA MURTI NATRALAYA EXPIRED MEDICINE REPORT' }],
       [],
       ['Expiry Date', 'Medicine', 'Batch No.', 'HSN Code', 'Unit', 'Manufacturer', 'Category', 'Qty.', 'MRP', 'C.P'],
       ...this.ExpiryMedicineList.map(item => [

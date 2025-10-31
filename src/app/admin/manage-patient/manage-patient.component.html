@@ -40,6 +40,7 @@
                                 <th class="text-center" >S.No</th>
                                 <th class="text-center" *ngIf="action.CanCreate">Booking</th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">UHID No.</th>
+                                <th style="cursor:pointer;" (click)="sort('CreatedOn')">Reg Date</th>
                                 <th style="cursor:pointer;" (click)="sort('PatientName')">Patient</th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('Age')">Age</th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('Gender')">Gender</th>
@@ -62,7 +63,7 @@
                                     </button>
                                 </td>
                                 <td  class="text-success text-center">{{item.UHID}}</td>
-
+                                <td>{{item.CreatedOn | date:'dd-MM-yyyy'}}</td>
                                 <td>{{item.PatientName}}</td>
                                 <td class="text-center">{{item.Age}}</td>
                                 <td class="text-center">{{AllGenderList[item.Gender]}}</td>
