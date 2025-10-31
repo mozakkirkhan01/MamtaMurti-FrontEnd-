@@ -217,8 +217,7 @@ export class SurgeryListComponent {
            this.SurgeryTotal.TotalPayableAmount = response.TotalPayableAmount;
            this.SurgeryTotal.DueAmountTotal = response.DueAmountTotal;
  
-           console.log(response.SurgeryList);
-           console.log(this.TotalRecords);
+ 
          } else {
            this.toastr.error(response.Message);
          }
@@ -240,7 +239,7 @@ export class SurgeryListComponent {
      this.PackageDetial.CreatedBy = this.staffLogin.StaffId;
      this.PackageDetial.UpdatedBy = this.staffLogin.StaffId;
  
-     console.log(this.PackageDetial);
+
  
      var obj: RequestModel = {
        request: this.localService
@@ -308,7 +307,6 @@ export class SurgeryListComponent {
  
            // Store in a shared service (better approach)
            this.service.setSelectedSurgeryData(this.alldata);
-           console.log('mera datra', this.alldata);
  
            // Then navigate using only necessary params
            this.router.navigate(['/admin/surgery-bill'], {
@@ -328,14 +326,12 @@ export class SurgeryListComponent {
    }
  
    openViewModalForDue(item: any) {
-     console.log(item);
      this.DueBill = item;
      this.DueBill.PaymentDate = new Date();
      $('#viewDueModal').modal('show');
    }
  
    ClearDueAmount(obj: any) {
-     console.log(obj);
  
      this.DueBill = obj;
      this.DueBill.CreatedBy = this.staffLogin.StaffId;

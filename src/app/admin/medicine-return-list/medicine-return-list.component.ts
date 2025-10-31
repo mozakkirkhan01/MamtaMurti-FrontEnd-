@@ -113,7 +113,6 @@ export class MedicineReturnListComponent implements OnInit {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.MedicineReturnList = response.MedicineReturnList;
-        console.log(this.MedicineReturnList);
         
         this.MedicineReturnList.forEach((e1: any) => {
           this.SaleTotal.TotalTaxableAmount += e1.TotalTaxableAmount;

@@ -112,11 +112,9 @@ export class SupplierComponent {
       this.dataLoading = true;
       this.service.getSupplierList(obj).subscribe({
         next: r1 => {
-          // console.log("API Response:", r1);
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
             this.SupplierList = response.SupplierList.reverse();
-            console.log(this.SupplierList);
             
             
           } else {
@@ -143,7 +141,6 @@ export class SupplierComponent {
       this.Supplier.CreatedBy = this.staffLogin.StaffId;
       this.Supplier.UpdatedBy = this.staffLogin.StaffId;
       this.Supplier.JoinDate = this.loadData.loadDateYMD(this.Supplier.JoinDate);
-      console.log(this.Supplier);
       
       var obj: RequestModel = {
         request: this.localService.encrypt(JSON.stringify(this.Supplier)).toString()
@@ -194,7 +191,6 @@ export class SupplierComponent {
     editSupplier(obj: any) {
       this.resetForm()
       this.Supplier = obj
-      console.log(this.Supplier);
       
     }
   

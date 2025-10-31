@@ -161,7 +161,6 @@ export class MedicineSaleListComponent implements OnInit {
         }
         
       });
-      console.log(obj);
   }
 
   onTableDataChange(p: any) {

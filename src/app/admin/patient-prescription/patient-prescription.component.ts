@@ -117,7 +117,6 @@ dataLoading: boolean = false;
     
     this.route.queryParams.subscribe((params) => {
       const PatientPrescriptionId = params['id'];
-      console.log('PatientPrescriptionId:', PatientPrescriptionId);
       const redUrl = params['redUrl'];
       
       if(PatientPrescriptionId){
@@ -129,7 +128,6 @@ dataLoading: boolean = false;
             (r1) => {
               let response = r1 as any;
               if (response.Message == ConstantData.SuccessMessage) {
-                console.log(response);
                 this.Patient = response.PatientPrescriptionAll.GetPatient;
                 this.lensEntry = response.PatientPrescriptionAll.GetPatient;
                 this.SelectedPrescriptionList = response.PatientPrescriptionAll.GetPatientPrescriptionDetails;
@@ -264,7 +262,6 @@ addPrescriptionDetail() {
 
   this.SelectedPrescriptionList.push(prescriptionItemCopy);
 
-  console.log(this.SelectedPrescriptionList);
 
   this.clearHeadSelection();
   this.clearPrescriptionItemSelection();
@@ -310,7 +307,6 @@ addPrescriptionDetail() {
       GetPatientPrescriptionDetails: this.SelectedPrescriptionList,
       
     };
-    console.log(data);
     
 
     const obj: RequestModel = {
@@ -475,7 +471,6 @@ addPrescriptionDetail() {
         if (response.Message == ConstantData.SuccessMessage) {
           this.HeadList = response.PrescriptionHeadList || [];
           this.filteredHeadList = [...this.HeadList];
-          console.log('Head List:', this.HeadList);
         } else {
           this.toastr.error(response.Message);
         }
@@ -500,7 +495,6 @@ addPrescriptionDetail() {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.PrescriptionItemList = response.PrescriptionItemList || [];
-          console.log('Prescription Item List:', this.PrescriptionItemList);
         } else {
           this.toastr.error(response.Message);
         }
@@ -519,7 +513,6 @@ addPrescriptionDetail() {
       this.toastr.error('Please fill at least one eye prescription');
       return;
     }
-    console.log('Lens Entry Data:', this.lensEntry);
     this.toastr.success('Lens entry saved successfully');
     $('#lensEntryModal').modal('hide');
   }

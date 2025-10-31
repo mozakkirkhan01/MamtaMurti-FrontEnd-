@@ -308,7 +308,6 @@ PaymentModeAll = PaymentMode;
           if (response.Message == ConstantData.SuccessMessage) {
             this.CanteenSellListALL = response.CanteenSellList;
             this.CanteenSellListPayments = response.CanteenSellListPayment;
-  
             this.dataLoading = false;
           } else {
             this.toastr.error('Error occured while Fetching  the recored');

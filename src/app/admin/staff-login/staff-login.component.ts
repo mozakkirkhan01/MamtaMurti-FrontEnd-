@@ -232,11 +232,10 @@ export class StaffLoginComponent {
         StaffLogin: this.StaffLogin,
         StaffLoginRoleList: this.StaffLoginRoleList.filter((x1: any) => x1.IsSelected),
         StaffClassList: staffClassList,
-        StaffLoginId: this.staffLogin.StaffLoginId // Fixed from `this.staffLogin.StaffLoginId`
+        StaffLoginId: this.staffLogin.StaffLoginId 
       })).toString()
     }
 
-    console.log("Sending Data:", JSON.parse(this.localService.decrypt(obj.request))); // Debug log
 
     this.dataLoading = true;
     this.service.saveStaffLogin(obj).subscribe(r1 => {

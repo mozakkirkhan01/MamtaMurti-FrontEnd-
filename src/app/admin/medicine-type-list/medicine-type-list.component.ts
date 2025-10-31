@@ -105,7 +105,6 @@ getMedicineTypeList() {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.MedicineTypeList = response.MedicineTypeList;
-        console.log(response.MedicineTypeList);
         
       } else {
         this.toastr.error(response.Message);
@@ -131,14 +130,12 @@ getMedicineTypeList() {
           this.MedicineType.CreatedBy = this.staffLogin.StaffId;
       this.MedicineType.UpdatedBy = this.staffLogin.StaffId;
     this.dataLoading = true;
-    console.log(this.MedicineType);
     
     var obj: RequestModel = {
         request: this.localService.encrypt(JSON.stringify(this.MedicineType)).toString()
       }
     this.service.saveMedicineType(obj).subscribe(r1 => {
       let response = r1 as any;
-      console.log(response);
       
       if (response.Message == ConstantData.SuccessMessage) {
        if (this.MedicineType.MedicineTypeId > 0) {

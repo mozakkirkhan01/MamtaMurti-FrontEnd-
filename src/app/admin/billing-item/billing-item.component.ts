@@ -458,7 +458,6 @@ getPatientListall(PatientId: number) {
       if (response.Message == ConstantData.SuccessMessage) {
         this.PatientListAll = response.PatientList;
         this.filteredPatientList = [...this.PatientListAll];
-        console.log('Patient List loaded:', this.PatientListAll);
       } else {
         this.toastr.error(response.Message);
       }
@@ -488,7 +487,6 @@ getPatientListall(PatientId: number) {
       option.ContactNo?.toString().toLowerCase().includes(filterValue)
   );
   
-  console.log('Filtered results:', this.filteredPatientList.length); // Debug log
 }
 
 afterPatientSelected(event: any) {
@@ -499,7 +497,6 @@ afterPatientSelected(event: any) {
   );
 
   if (selected) {
-    console.log('Selected patient:', selected); // Debug log
     
     // Assign patient details
     this.Patient = {

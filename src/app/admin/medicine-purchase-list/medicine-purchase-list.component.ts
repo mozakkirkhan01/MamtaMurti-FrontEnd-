@@ -113,7 +113,6 @@ export class MedicinePurchaseListComponent implements OnInit {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.PurchaseList = response.PurchaseList;
-        console.log(this.PurchaseList);
         
         this.PurchaseList.forEach((e1: any) => {
           this.PurchaseTotal.TotalBasicAmount += e1.TotalBasicAmount;

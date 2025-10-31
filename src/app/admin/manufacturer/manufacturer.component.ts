@@ -106,7 +106,6 @@ export class ManufacturerComponent implements OnInit {
        let response = r1 as any;
        if (response.Message == ConstantData.SuccessMessage) {
          this.ManufacturerList = response.ManufacturerList;
-         console.log();
          
        } else {
          this.toastr.error(response.Message);
@@ -139,7 +138,6 @@ export class ManufacturerComponent implements OnInit {
        }
      this.service.saveManufacturer(obj).subscribe(r1 => {
        let response = r1 as any;
-       console.log(response);
        
        if (response.Message == ConstantData.SuccessMessage) {
         if (this.Manufacturer.ManufacturerId > 0) {

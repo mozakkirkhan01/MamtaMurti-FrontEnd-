@@ -115,7 +115,6 @@ throw new Error('Method not implemented.');
     this.dataLoading = true;
     this.service.getConsentList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.ConsentList = response.ConsentList;
@@ -146,7 +145,6 @@ throw new Error('Method not implemented.');
     this.Patient.ConsentDate = this.loadData.loadDateYMD(this.Patient.ConsentDate);
     this.Patient.RelationDate = this.loadData.loadDateYMD(this.Patient.RelationDate);
     this.Patient.CounsellorDate = this.loadData.loadDateYMD(this.Patient.CounsellorDate);
-    console.log(this.Patient);
     
     var obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(this.Patient)).toString()
@@ -197,7 +195,6 @@ throw new Error('Method not implemented.');
   editPatient(obj: any) {
     this.resetForm()
     this.Patient = obj
-    console.log(this.Patient);
     
   }
 
@@ -208,17 +205,14 @@ throw new Error('Method not implemented.');
     const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(data)).toString(),
     };
-    // console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getPatientList(obj).subscribe({
       next: (r1) => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.PatientListAll = response.PatientList;
           this.filteredPatientList = [...this.PatientListAll];
-          // console.log(this.filteredPatientList);
         } else {
           this.toastr.error(response.Message);
         }

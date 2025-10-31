@@ -259,7 +259,6 @@ export class PatientPrescriptionListComponent {
     }
     openViewModal(item: any) {
       this.selectedPrescription = item;
-      console.log(this.selectedPrescription);
       
       $('#viewPrescriptionDetailsModal').modal('show');
       this.getPatientPrescriptionItem(item);

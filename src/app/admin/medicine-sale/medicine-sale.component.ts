@@ -75,12 +75,10 @@ export class MedicineSaleComponent implements OnInit {
     // this.Elements.InputMedicineAutoComplete = inputDivs['MedicineAutoComplete'].childNodes[0].childNodes[0].childNodes[0];
     this.resetFormPaymentMedicine();
     this.PaymentCollection.DiscOnBill = 0;
-    console.log('yes here is data');
     this.route.queryParams.subscribe((params: any) => {
       this.PaymentCollection.PurchaseId = params.id;
       this.PaymentCollection.PaymentCollectionId = params.pid;
       this.PaymentCollection.PaymentMedicineId = params.did;
-      // console.log(this.PaymentCollection.PaymentCollectionId);
 
       this.redUrl = params.redUrl;
       if (this.PaymentCollection.PaymentCollectionId > 0) {
@@ -146,8 +144,6 @@ export class MedicineSaleComponent implements OnInit {
           this.PaymentMedicineList = response.PaymentMedicineList;
           this.SelectedPaymentCollectionList =
             response.SelectedPaymentCollectionList;
-          console.log(this.PaymentMedicineList);
-          console.log(this.PaymentCollection);
 
           // this.PaymentMedicineList[0].UnitId = 23;
           // for (let i = 0; i < this.PaymentMedicineList.length; i++) {
@@ -289,7 +285,6 @@ export class MedicineSaleComponent implements OnInit {
         x.SearchMedicine = this.PaymentMedicine.SearchMedicine;
         x.HSNCode = this.PaymentMedicine.HSNCode;
         this.PaymentMedicineList.push(x);
-        console.log(this.PaymentMedicineList);
       }
     });
     this.MedicineStockList = [];
@@ -362,7 +357,6 @@ export class MedicineSaleComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.UnitList = response.UnitList;
-          console.log(this.UnitList);
         } else {
           this.toastr.error(response.Message);
         }
@@ -389,7 +383,6 @@ export class MedicineSaleComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.MedicineStockList = response.MedicineStockList;
-          console.log(this.MedicineStockList);
 
           this.MedicineStockMessage = response.MedicineStockMessage;
 
@@ -419,26 +412,20 @@ export class MedicineSaleComponent implements OnInit {
   }
 
   changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
-    console.log(PaymentMedicineModel);
-    console.log('unit change ');
 
     PaymentMedicineModel.Unit = {};
-    // console.log(this.UnitList);
 
     for (var i = 0; i < this.UnitList.length; i++) {
       if (this.UnitList[i].UnitId == PaymentMedicineModel.UnitId) {
         PaymentMedicineModel.Unit = this.UnitList[i];
         PaymentMedicineModel.UnitValue = this.UnitList[i].Value;
-        console.log(PaymentMedicineModel.UnitValue);
         PaymentMedicineModel.UnitId = this.UnitList[i].UnitId;
-        console.log(PaymentMedicineModel.Unit);
 
         //PaymentMedicineModel.UnitId = 5;
         break;
       }
     }
 
-    console.log(PaymentMedicineModel.UnitValue);
 
     var newQty = this.loadData.round(
       PaymentMedicineModel.Quantity * PaymentMedicineModel.UnitValue,
@@ -449,7 +436,6 @@ export class MedicineSaleComponent implements OnInit {
       PaymentMedicineModel.Quantity = 0;
       return;
     }
-    console.log('value hai', PaymentMedicineModel.Unit.Value);
 
     if (
       PaymentMedicineModel.Unit.Value != PaymentMedicineModel.PurchaseUnitValue
@@ -499,13 +485,11 @@ export class MedicineSaleComponent implements OnInit {
 
   calculateGST(PaymentMedicine: any) {
     PaymentMedicine.TotalGSTAmount = 0;
-    console.log(PaymentMedicine.GSTId);
 
     if (PaymentMedicine.GSTId > 0) {
       var selectedGST = this.GSTList.filter(
         (x) => x.GSTId == PaymentMedicine.GSTId
       )[0];
-      console.log(selectedGST);
 
       PaymentMedicine.GSTName = selectedGST.GSTName;
       PaymentMedicine.TotalGSTAmount = this.loadData.round(
@@ -513,7 +497,6 @@ export class MedicineSaleComponent implements OnInit {
           (PaymentMedicine.TotalAmount * 100) / (100 + selectedGST.GSTValue),
         2
       );
-      console.log(PaymentMedicine.TotalGSTAmount);
 
       PaymentMedicine.CGSTAmount = this.loadData.round(
         PaymentMedicine.TotalGSTAmount / 2,
@@ -529,7 +512,6 @@ export class MedicineSaleComponent implements OnInit {
       PaymentMedicine.TotalAmount - PaymentMedicine.TotalGSTAmount,
       2
     );
-    console.log(PaymentMedicine.TaxableAmount);
 
     this.calulateTotal();
   }
@@ -1128,16 +1110,13 @@ export class MedicineSaleComponent implements OnInit {
   //     request: this.localService.encrypt(JSON.stringify({})).toString()
   //   };
 
-  //   // console.log("Sending request:", obj);
   //   this.dataLoading = true;
 
   //   this.service.getDoctorList(obj).subscribe({
   //     next: r1 => {
-  //       // console.log("API Response:", r1);
   //       let response = r1 as any;
   //       if (response.Message == ConstantData.SuccessMessage) {
   //         this.DoctorList = response.DoctorList;
-  //         // console.log(this.DoctorList);
 
   //       } else {
   //         this.toastr.error(response.Message);

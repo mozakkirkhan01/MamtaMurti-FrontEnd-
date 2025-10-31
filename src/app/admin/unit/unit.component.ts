@@ -99,16 +99,13 @@ export class UnitComponent  {
         request: this.localService.encrypt(JSON.stringify({})).toString()
       };
   
-      console.log("Sending request:", obj);
       this.dataLoading = true;
   
       this.service.getUnitList(obj).subscribe({
         next: r1 => {
-          // console.log("API Response:", r1);
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
             this.UnitList = response.UnitList;
-            console.log(this.UnitList);
             
           } else {
             this.toastr.error(response.Message);

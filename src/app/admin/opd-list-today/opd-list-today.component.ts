@@ -164,7 +164,6 @@ PaymentModeAll = PaymentMode;
       var request: RequestModel = {
         request: this.localService.encrypt(JSON.stringify(obj)).toString(),
       };
-      console.log(obj);
 
       this.dataLoading = true;
       this.service.DeleteOpticalBilling(request).subscribe(
@@ -216,14 +215,12 @@ PaymentModeAll = PaymentMode;
   }
 
   openViewModalForDue(item: any) {
-    console.log(item);
     this.DueBill = item;
     this.DueBill.PaymentDate = new Date();
     $('#viewDueModal').modal('show');
   }
 
   ClearDueAmount(obj: any) {
-    console.log(obj);
 
     this.DueBill = obj;
     this.DueBill.CreatedBy = this.staffLogin.StaffId;

@@ -97,7 +97,6 @@ export class DischargeSummaryComponent {
 
         this.route.queryParams.subscribe((params) => {
       const DischargeSummaryId = params['id'];
-      console.log(DischargeSummaryId);
       
       const redUrl = params['redUrl'];
 
@@ -105,13 +104,11 @@ export class DischargeSummaryComponent {
 
        if(data && data.length > 0) {
     const item = data[0];
-      console.log(item.DischargeSummaryId);
       
       
       if (item.DischargeSummaryId == DischargeSummaryId) {
         this.Patient = item;
       } else {
-        console.log("your data not match");
       }
     }
     });
@@ -232,8 +229,6 @@ export class DischargeSummaryComponent {
       this.Patient.SurgeryDate = this.loadData.loadDateYMD(this.Patient.SurgeryDate);
       this.Patient.DischargeDate = this.loadData.loadDateYMD(this.Patient.DischargeDate);
     
-      console.log('Submitting data:', this.Patient);
-  
       const obj: RequestModel = {
         request: this.localService.encrypt(JSON.stringify(this.Patient)).toString(),
       };
@@ -326,16 +321,13 @@ export class DischargeSummaryComponent {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
-    // console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getDoctorList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.DoctorList = response.DoctorList;
-          // console.log(this.DoctorList);
           
         } else {
           this.toastr.error(response.Message);

@@ -89,7 +89,6 @@ export class OpticalAddComponent {
       let response = r1 as any
       if (response.Message == ConstantData.SuccessMessage) {
         this.OpticalList = response.OpticalList;
-        console.log(response.OpticalList);
         
       } else {
         this.toastr.error(response.Message)

@@ -189,7 +189,6 @@ export class MedicineSaleReportComponent implements OnInit {
         option.UHID?.toLowerCase().includes(filterValue) ||
         option.ContactNo?.toLowerCase().includes(filterValue)
     );
-    console.log(this.filteredPatientList);
     
   }
 

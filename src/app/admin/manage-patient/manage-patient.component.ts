@@ -76,7 +76,6 @@ export class ManagePatientComponent {
   }
 
   GotoOPDBooking(data: any) {
-    // console.log(data.PatientID);
     this.router.navigate(['/admin/opd-booking'], { queryParams: { id: data.PatientID, redUrl: '/admin/manage-patient' } });
   }
 
@@ -95,12 +94,10 @@ export class ManagePatientComponent {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
-    // console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getPatientList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.PatientList = response.PatientList;
@@ -127,7 +124,6 @@ export class ManagePatientComponent {
     }
     this.Patient.CreatedBy = this.staffLogin.StaffId;
     this.Patient.UpdatedBy = this.staffLogin.StaffId;
-    console.log(this.Patient);
     
     var obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(this.Patient)).toString()

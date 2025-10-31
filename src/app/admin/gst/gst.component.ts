@@ -99,16 +99,13 @@ export class GstComponent {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
-    console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getGSTList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.GSTList = response.GSTList;
-          console.log(this.GSTList);
           
         } else {
           this.toastr.error(response.Message);

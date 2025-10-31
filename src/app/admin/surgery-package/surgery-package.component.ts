@@ -111,7 +111,6 @@ export class SurgeryPackageComponent {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.PackageDetialList = response.PackageDetialList;
-          // console.log(this.PackageDetialList);
         } else {
           this.toastr.error(response.Message);
         }
@@ -133,7 +132,6 @@ export class SurgeryPackageComponent {
     this.PackageDetial.CreatedBy = this.staffLogin.StaffId;
     this.PackageDetial.UpdatedBy = this.staffLogin.StaffId;
 
-    console.log(this.PackageDetial);
     
 
     var obj: RequestModel = {
@@ -231,7 +229,6 @@ afterPackageCollectionSelected(event: any) {
   PackageCollectiontypeList() {
     this.service.PackageCollectiontypeListAll({}).subscribe((res: any) => {
       this.PackageCollectionListall = res.PackageCollectionList || [];
-      console.log(this.PackageCollectionListall);
     });
   }
 }

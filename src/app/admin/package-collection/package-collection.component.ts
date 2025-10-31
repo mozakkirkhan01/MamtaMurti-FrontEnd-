@@ -87,7 +87,6 @@ export class PackageCollectionComponent {
           let response = r1 as any
           if (response.Message == ConstantData.SuccessMessage) {
             this.PackageCollectionList = response.PackageCollectionList;
-            console.log(this.PackageCollectionList);
             
           } else {
             this.toastr.error(response.Message)

@@ -122,7 +122,6 @@ export class PrescriptionItemComponent implements OnInit {
         if (response.Message == ConstantData.SuccessMessage) {
           this.HeadList = response.PrescriptionHeadList || [];
           this.filteredHeadList = [...this.HeadList];
-          console.log('Head List:', this.HeadList);
         } else {
           this.toastr.error(response.Message);
         }
@@ -148,7 +147,6 @@ export class PrescriptionItemComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.PrescriptionItemList = response.PrescriptionItemList || [];
-          console.log('Prescription Item List:', this.PrescriptionItemList);
         } else {
           this.toastr.error(response.Message);
         }

@@ -118,13 +118,11 @@ getMedicineList() {
   var obj: RequestModel = {
     request: this.localService.encrypt(JSON.stringify({ })).toString()
   };
-  console.log(obj);
   this.dataLoading = true;
   this.service.getMedicineList(obj).subscribe(r1 => {
     let response = r1 as any;
     if (response.Message == ConstantData.SuccessMessage) {
       this.MedicineList = response.MedicineList;
-      console.log(response.MedicineList);
       
     } else {
       this.toastr.error(response.Message);
@@ -187,7 +185,6 @@ getMedicineList() {
     }
       this.Medicine.CreatedBy = this.staffLogin.StaffId;
     this.Medicine.UpdatedBy = this.staffLogin.StaffId;
-    console.log(this.Medicine);
      var obj: RequestModel = {
          request: this.localService.encrypt(JSON.stringify(this.Medicine)).toString()
        }
@@ -268,16 +265,13 @@ getMedicineList() {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
-    console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getGSTList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.GSTList = response.GSTList;
-          console.log(this.GSTList);
           
         } else {
           this.toastr.error(response.Message);
@@ -304,7 +298,6 @@ getMedicineList() {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.CategoryList = response.CategoryList;
-        console.log(this.CategoryList);
         
       } else {
         this.toastr.error(response.Message);
@@ -324,16 +317,13 @@ getMedicineList() {
         request: this.localService.encrypt(JSON.stringify({})).toString()
       };
   
-      console.log("Sending request:", obj);
       this.dataLoading = true;
   
       this.service.getUnitList(obj).subscribe({
         next: r1 => {
-          // console.log("API Response:", r1);
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
             this.UnitList = response.UnitList;
-            console.log(this.UnitList);
             
           } else {
             this.toastr.error(response.Message);
@@ -360,7 +350,6 @@ getMedicineList() {
        let response = r1 as any;
        if (response.Message == ConstantData.SuccessMessage) {
          this.ManufacturerList = response.ManufacturerList;
-         console.log();
          
        } else {
          this.toastr.error(response.Message);
@@ -387,7 +376,6 @@ getMedicineList() {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.MedicineTypeList = response.MedicineTypeList;
-        console.log(response.MedicineTypeList);
         
       } else {
         this.toastr.error(response.Message);

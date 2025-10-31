@@ -74,7 +74,6 @@ dataLoading: boolean = false
   }
 
   GotoOPDBooking(data: any) {
-    // console.log(data.DoctorID);
     this.router.navigate(['/admin/opd-booking'], { queryParams: { id: data.DoctorID, redUrl: '/admin/manage-Doctor' } });
   }
 
@@ -95,16 +94,13 @@ dataLoading: boolean = false
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
-    // console.log("Sending request:", obj);
     this.dataLoading = true;
 
     this.service.getDoctorList(obj).subscribe({
       next: r1 => {
-        // console.log("API Response:", r1);
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.DoctorList = response.DoctorList;
-          // console.log(this.DoctorList);
           
         } else {
           this.toastr.error(response.Message);
@@ -129,7 +125,6 @@ dataLoading: boolean = false
     }
     this.Doctor.CreatedBy = this.staffLogin.StaffId;
     this.Doctor.UpdatedBy = this.staffLogin.StaffId;
-    console.log(this.Doctor);
     
     var obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(this.Doctor)).toString()
