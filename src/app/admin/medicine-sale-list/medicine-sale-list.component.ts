@@ -6,7 +6,7 @@ import { AppService } from "../../utils/app.service";
 import { ConstantData } from "../../utils/constant-data";
 import { LocalService } from "../../utils/local.service";
 import { LoadDataService } from '../../utils/load-data.service';
-import { Status } from '../../utils/enum';
+import { BillStatus, PaymentMode, Status } from '../../utils/enum';
 import { ToastrService } from 'ngx-toastr';
 import { ActionModel ,RequestModel ,StaffLoginModel } from '../../utils/interface';
 
@@ -98,7 +98,9 @@ export class MedicineSaleListComponent implements OnInit {
   Sale: any = {};
   employeeDetail: any;
   StatusList = this.loadData.GetEnumList(Status);
-  AllStatusList = Status;
+  AllStatusList = BillStatus;
+  PaymentMode = this.loadData.GetEnumList(PaymentMode);
+  AllPaymentMode = PaymentMode;
   PaymentMedicineCollectionList: any[];
   dataLoading: boolean = false;
   submitted: boolean;
@@ -216,6 +218,7 @@ export class MedicineSaleListComponent implements OnInit {
 
 
   PaymentMedicineList: any[] = [];
+  PaymentMedicineListPaymentList: any[] = [];
   getPaymentMedicineList(Sale: any) {
     this.dataLoading = true;
           var obj: RequestModel = {
@@ -225,6 +228,8 @@ export class MedicineSaleListComponent implements OnInit {
       let response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.PaymentMedicineList = response.PaymentMedicineList;
+        this.PaymentMedicineListPaymentList = response.PaymentMedicineListPaymentList;
+        
         
         $('#modal_popUp').modal('show');
       } else {

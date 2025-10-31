@@ -86,36 +86,34 @@ dataLoading: boolean = false;
   }
 
   ngOnInit(): void {
-    this.staffLogin = this.localService.getEmployeeDetail();
-    this.validiateMenu();
-    this.tempData = this.service.getSelectedSurgeryData();
+  this.staffLogin = this.localService.getEmployeeDetail();
+  this.validiateMenu();
+  this.tempData = this.service.getSelectedSurgeryData();
 
-    this.resetForm();
-    this.initializeCurrentPayment();
-    this.getPackageList(this.Package.PackageDetailId);
-    this.getPatientList(this.Patient.PatientId);
+  this.resetForm();
+  this.initializeCurrentPayment();
+  this.getPatientList(); 
+  this.getPackageList(0); 
+  
+
+  this.route.queryParams.subscribe((params: any) => {
+    const patientId = params.id;
+    this.redUrl = params.redUrl;
     
-    this.route.queryParams.subscribe((params: any) => {
-      this.Patient.PatientId = params.id;
-      this.redUrl = params.redUrl;
-      if (this.Patient.PatientId > 0) {
-        this.getPatientList(this.Patient.PatientId);
-      }
-    });
+    if (patientId > 0) {
+      this.getPatientList(patientId);
+    }
 
-    this.route.queryParams.subscribe((params) => {
-      const surgeryId = params['id'];
-      const redUrl = params['redUrl'];
-
-      const data = this.service.getSelectedSurgeryData();
-      if (data && data.GetSurgery.SurgeryId == surgeryId) {
-        this.Patient = data.GetSurgery;
-        this.Package = data.GetPaymentCollection;
-        this.SelectedPaymentDetailList = data.GetPackageBookingDetail || [];
-        this.SelectedPaymentCollectionList = data.GetPaymentDetails || [];
-      }
-    });
-  }
+    const surgeryId = params['id'];
+    const data = this.service.getSelectedSurgeryData();
+    if (data && data.GetSurgery.SurgeryId == surgeryId) {
+      this.Patient = data.GetSurgery;
+      this.Package = data.GetPaymentCollection;
+      this.SelectedPaymentDetailList = data.GetPackageBookingDetail || [];
+      this.SelectedPaymentCollectionList = data.GetPaymentDetails || [];
+    }
+  });
+}
 
   validiateMenu() {
     var request: RequestModel = {
@@ -177,42 +175,55 @@ dataLoading: boolean = false;
     };
   }
 
-  getPatientList(PatientId: number) {
-    var data = {
-      PatientID: PatientId,
-    };
-    const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify(data)).toString(),
-    };
+  getPatientList(PatientId?: number) {
+  var data = {
+    PatientID: PatientId || 0, // Pass 0 to get all patients
+  };
+  const obj: RequestModel = {
+    request: this.localService.encrypt(JSON.stringify(data)).toString(),
+  };
 
-    this.dataLoading = true;
+  this.dataLoading = true;
 
-    this.service.getPatientList(obj).subscribe({
-      next: (r1) => {
-        let response = r1 as any;
-        if (response.Message == ConstantData.SuccessMessage) {
-          this.PatientListAll = response.PatientList;
-          
-          if (!this.Package.PaymentDate) {
-            this.Package.PaymentDate = new Date();
+  this.service.getPatientList(obj).subscribe({
+    next: (r1) => {
+      let response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        this.PatientListAll = response.PatientList || [];
+        this.filteredPatientList = [...this.PatientListAll];
+        
+        // If a specific patient was requested and found, select it
+        if (PatientId && this.PatientListAll.length > 0) {
+          const foundPatient = this.PatientListAll.find(
+            (p: any) => p.PatientId === PatientId || p.PatientID === PatientId
+          );
+          if (foundPatient) {
+            this.Patient = { ...foundPatient };
+            if (!this.Patient.SurgeryDate) {
+              this.Patient.SurgeryDate = new Date();
+            }
           }
-          if (!this.Patient.SurgeryDate) {
-            this.Patient.SurgeryDate = new Date();
-          }
-          
-          this.filteredPatientList = [...this.PatientListAll];
-        } else {
-          this.toastr.error(response.Message);
         }
-        this.dataLoading = false;
-      },
-      error: (err) => {
-        console.error('API error:', err);
-        this.toastr.error('Error while fetching records');
-        this.dataLoading = false;
-      },
-    });
-  }
+        
+        // Set default dates if not set
+        if (!this.Package.PaymentDate) {
+          this.Package.PaymentDate = new Date();
+        }
+        if (!this.Patient.SurgeryDate) {
+          this.Patient.SurgeryDate = new Date();
+        }
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    },
+    error: (err) => {
+      console.error('API error:', err);
+      this.toastr.error('Error while fetching records');
+      this.dataLoading = false;
+    },
+  });
+}
 
   // Enhanced addPaymentDetail method
   addPaymentDetail() {
@@ -459,32 +470,59 @@ dataLoading: boolean = false;
   }
 
   filterpatientList(value: string) {
-    const filterValue = value?.toLowerCase() || '';
-    this.filteredPatientList =this.PatientListAll.filter(
-      (option: any) =>
-        option.PatientName?.toLowerCase().includes(filterValue) ||
-        option.UHID?.toLowerCase().includes(filterValue) ||
-        option.ContactNo?.toLowerCase().includes(filterValue)
-    );
+  const filterValue = value?.toLowerCase() || '';
+  
+  if (!filterValue) {
+    this.filteredPatientList = [...this.PatientListAll];
+    return;
   }
+  
+  this.filteredPatientList = this.PatientListAll.filter(
+    (option: any) =>
+      option.PatientName?.toLowerCase().includes(filterValue) ||
+      option.UHID?.toLowerCase().includes(filterValue) ||
+      option.ContactNo?.toString().toLowerCase().includes(filterValue)
+  );
+}
 
-    afterPatientSelected(event: any) {
-    const selectedName = event.option.value;
-    const selected = this.PatientListAll.find(
-      (x: any) => x.PatientName === selectedName
-    );
+afterPatientSelected(event: any) {
+  const selectedName = event.option.value;
+  const selected = this.PatientListAll.find(
+    (x: any) => x.PatientName === selectedName
+  );
 
-    if (selected) {
-      this.Patient = { ...selected };
-      this.getPatientList(this.Patient.PatientID);
-    }
+  if (selected) {
+    // Assign all patient properties
+    this.Patient = {
+      PatientId: selected.PatientId || selected.PatientID, // Handle both cases
+      PatientName: selected.PatientName,
+      Age: selected.Age,
+      Gender: selected.Gender,
+      Category: selected.Category,
+      ContactNo: selected.ContactNo,
+      AadharNo: selected.AadharNo,
+      Address: selected.Address,
+      UHID: selected.UHID,
+      SurgeryDate: this.Patient.SurgeryDate || new Date() // Preserve or set default
+    };
+    
+    // Don't call getPatientList again - it will overwrite the selection
+    // Only call it if you need to refresh the entire list
   }
+}
 
-  clearPatient() {
-    this.filteredPatientList = this.PatientListAll;
-    this.Patient = {};
-
+clearPatient() {
+  this.Patient = {
+    SurgeryDate: new Date() // Preserve the surgery date
+  };
+  this.filteredPatientList = [...this.PatientListAll];
+  
+  // Reset form validation
+  if (this.formPatientDetails) {
+    this.formPatientDetails.control.markAsPristine();
+    this.formPatientDetails.control.markAsUntouched();
   }
+}
 
 
 

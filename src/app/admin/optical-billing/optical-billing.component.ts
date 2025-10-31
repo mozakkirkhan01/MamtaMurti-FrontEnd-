@@ -139,6 +139,7 @@ export class OpticalBillingComponent {
     if (this.formPatientDetails) {
       this.formPatientDetails.control.markAsPristine();
       this.formPatientDetails.control.markAsUntouched();
+      this.currentPayment = {};
     }
     this.isSubmitted = false;
   }

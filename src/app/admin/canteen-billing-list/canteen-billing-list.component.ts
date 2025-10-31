@@ -64,6 +64,8 @@ export class CanteenBillingListComponent {
     selectedBill: any = {};
     CanteenSellListALL: any = {};
     DueBill: any={};
+       PaymentMode = this.loadData.GetEnumList(PaymentMode);
+PaymentModeAll = PaymentMode;
     constructor(
       private service: AppService,
       private toastr: ToastrService,
@@ -291,6 +293,9 @@ export class CanteenBillingListComponent {
       $('#viewDetailsModal').modal('show');
       this.CanteenSellList(item);
     }
+
+     CanteenSellListPayments: any = {};
+
   
     CanteenSellList(obj: any) {
       var request: RequestModel = {
@@ -302,6 +307,7 @@ export class CanteenBillingListComponent {
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
             this.CanteenSellListALL = response.CanteenSellList;
+            this.CanteenSellListPayments = response.CanteenSellListPayment;
   
             this.dataLoading = false;
           } else {

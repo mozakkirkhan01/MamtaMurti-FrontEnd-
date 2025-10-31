@@ -105,6 +105,8 @@
                 <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('PaymentStatus')">
                   Payment Status
                 </th>
+                <th class="text-center">Payment Mode</th>
+
                 <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('PaymentStatus')">
                   Pay
                 </th>
@@ -151,6 +153,9 @@
                     {{ AllStatusList[item.PaymentStatus] }}
                   </span>
                 </td>
+
+                <td class="text-center">{{ item.PaymentModeName}}</td>
+
                 <td class="text-center">
                   <ng-container *ngIf="item.PaymentStatus == 2; else paidTemplate">
                     <button class="btn btn-sm btn btn-primary" (click)="openViewModalForDue(item)">
@@ -193,10 +198,15 @@
                 <th></th>
                 <th></th>
                 <th></th>
-                <th></th>
+                <th class="text-right" style="font-weight: 600" >Total</th>
                 <th class="text-end">{{ OpticalTotal.TotalPayableAmount }}</th>
                 <th class="text-end">{{ OpticalTotal.PaidAmount }}</th>
-                <th class="text-end">{{ OpticalTotal.DueAmountTotal }}</th>
+                <th class="text-end text-danger">{{ OpticalTotal.DueAmountTotal }}</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -299,6 +309,38 @@
 
           <!-- Optional fallback -->
           <div *ngIf="BillSellList?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
+
+          <div class="">
+            Payments Details
+          </div>
+
+
+          <div *ngIf="BillingSellListPayments?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of BillingSellListPayments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{PaymentModeAll[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="BillingSellListPayments?.length === 0" class="alert alert-warning mt-3">
             No item details found for this bill.
           </div>
         </div>

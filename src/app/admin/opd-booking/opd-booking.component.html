@@ -262,7 +262,7 @@
                           <th>Particular</th>
                           <th>Description</th>
                           <th>Amount</th>
-                          <th>Action</th>
+                          <th class="text-center" >Action</th>
                         </tr>
                       </thead>
 
@@ -285,7 +285,7 @@
                             {{ model.Amount }}
                           </td>
 
-                          <td>
+                          <td class="text-center" >
                             <button
                               (click)="RemoveHotel(i)"
                               class="btn btn-sm btn-danger"
@@ -477,7 +477,7 @@
                         <th>Description</th>
                         <th>Amount</th>
                         <th>Payment Mode</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -492,7 +492,7 @@
                         <td>{{ item.Remarks }}</td>
                         <td>{{ item.PaidAmount }}</td>
                         <td>{{ AllPaymentModeList[item.PaymentMode] }}</td>
-                        <td>
+                        <td class="text-center">
                           <button
                             class="btn btn-sm btn-danger"
                             (click)="removePaymentItem(i)"

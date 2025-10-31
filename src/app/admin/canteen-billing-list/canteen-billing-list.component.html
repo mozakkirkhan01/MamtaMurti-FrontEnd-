@@ -235,6 +235,39 @@
           <div *ngIf="CanteenSellListALL?.length === 0" class="alert alert-warning mt-3">
             No item details found for this bill.
           </div>
+
+
+           <div class="">
+            Payments Details
+          </div>
+
+
+          <div *ngIf="CanteenSellListPayments?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of CanteenSellListPayments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{PaymentModeAll[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="CanteenSellListPayments?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
         </div>
       </div>
     </div>

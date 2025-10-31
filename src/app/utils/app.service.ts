@@ -229,6 +229,15 @@ getSelectedBillingData() {
     return this.http.post(this.apiUrl + "OpticalBilling/OpticalSellListPayment", obj, { headers: this.headers })
   }
 
+  CanteenSellListPayments(obj: any) {
+    return this.http.post(this.apiUrl + "OpticalBilling/OpticalSellListPayment", obj, { headers: this.headers })
+  }
+
+   billItemSellListPayment(obj: any) {
+    return this.http.post(this.apiUrl + "BillingItem/BillingSellListPayment", obj, { headers: this.headers })
+  }
+
+
     SurgerySellList(obj: any) {
     return this.http.post(this.apiUrl + "Surgery/SurgerySellList", obj, { headers: this.headers })
   }

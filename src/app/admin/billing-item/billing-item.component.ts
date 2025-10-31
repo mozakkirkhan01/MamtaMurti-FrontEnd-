@@ -139,6 +139,7 @@ dataLoading: boolean = false;
     if (this.formPatientDetails) {
       this.formPatientDetails.control.markAsPristine();
       this.formPatientDetails.control.markAsUntouched();
+      this.currentPayment = {};
     }
     this.isSubmitted = false;
   }
@@ -208,6 +209,7 @@ dataLoading: boolean = false;
     this.Payment.Description = Transport.BillingDescription;
     this.Payment.Quantity = 1;
     this.Payment.BillingId = Transport.BillingId;
+    this.onRateChange();
   }
 
   filterBillingList(value: any) {
@@ -402,7 +404,7 @@ addToPaymentList() {
     // Calculate remaining amount
     const remainingAmount = this.Patient.PayableAmount - totalPaid;
 
-    // Validate that PaidAmount does not exceed remaining
+  
     if (this.currentPayment.PaidAmount > remainingAmount) {
       alert('Paid amount cannot exceed remaining payable amount!');
       this.currentPayment.PaidAmount = remainingAmount;
@@ -412,7 +414,6 @@ addToPaymentList() {
     // Push a copy of the current payment into the list
     this.SelectedPaymentCollectionList.push({ ...this.currentPayment });
 
-    // Calculate the new remaining amount after this payment
     const newTotalPaid = totalPaid + this.currentPayment.PaidAmount;
     const newRemainingAmount = this.Patient.PayableAmount - newTotalPaid;
 
@@ -423,12 +424,6 @@ addToPaymentList() {
       PaymentMode: '',
       PaidAmount: newRemainingAmount > 0 ? newRemainingAmount : 0
     };
-
-    // Optional: Notify if payment completed
-    if (newRemainingAmount <= 0) {
-      alert('All payments are completed!');
-    }
-
   } else {
     alert('Please fill all fields!');
   }
@@ -448,93 +443,130 @@ addToPaymentList() {
 }
 
 
-  getPatientListall(PatientId: number) {
-    var data = {
-      PatientID: PatientId,
-    };
-    const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify(data)).toString(),
-    };
-    this.dataLoading = true;
+getPatientListall(PatientId: number) {
+  var data = {
+    PatientID: PatientId,
+  };
+  const obj: RequestModel = {
+    request: this.localService.encrypt(JSON.stringify(data)).toString(),
+  };
+  this.dataLoading = true;
 
-    this.service.getPatientList(obj).subscribe({
-      next: (r1) => {
-        let response = r1 as any;
-        if (response.Message == ConstantData.SuccessMessage) {
-          this.PatientListAll = response.PatientList;
-          this.filteredPatientList = [...this.PatientListAll];
-        } else {
-          this.toastr.error(response.Message);
-        }
-        this.dataLoading = false;
-      },
-      error: (err) => {
-        console.error('API error:', err);
-        this.toastr.error('Error while fetching records');
-        this.dataLoading = false;
-      },
-    });
-  }
+  this.service.getPatientList(obj).subscribe({
+    next: (r1) => {
+      let response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        this.PatientListAll = response.PatientList;
+        this.filteredPatientList = [...this.PatientListAll];
+        console.log('Patient List loaded:', this.PatientListAll);
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    },
+    error: (err) => {
+      console.error('API error:', err);
+      this.toastr.error('Error while fetching records');
+      this.dataLoading = false;
+    },
+  });
+}
+
 
   filterpatientList(value: string) {
-    const filterValue = value?.toLowerCase() || '';
+  const filterValue = value?.toLowerCase() || '';
 
-    this.filteredPatientList = this.PatientListAll.filter(
-      (option: any) =>
-        option.PatientName?.toLowerCase().includes(filterValue) ||
-        option.UHID?.toLowerCase().includes(filterValue) ||
-        option.ContactNo?.toLowerCase().includes(filterValue)
-    );
+  if (!filterValue) {
+    this.filteredPatientList = [...this.PatientListAll];
+    return;
   }
 
-  afterPatientSelected(event: any) {
-    const selectedName = event.option.value;
+  this.filteredPatientList = this.PatientListAll.filter(
+    (option: any) =>
+      option.PatientName?.toLowerCase().includes(filterValue) ||
+      option.UHID?.toLowerCase().includes(filterValue) ||
+      option.ContactNo?.toString().toLowerCase().includes(filterValue)
+  );
+  
+  console.log('Filtered results:', this.filteredPatientList.length); // Debug log
+}
 
-    const selected = this.PatientListAll.find(
-      (x: any) => x.PatientName === selectedName
-    );
+afterPatientSelected(event: any) {
+  const selectedName = event.option.value;
 
-    if (selected) {
-      this.Patient = { ...selected }; // assign full patient object
-      this.getPatientList(this.Patient.PatientID); // optional
+  const selected = this.filteredPatientList.find(
+    (x: any) => x.PatientName === selectedName
+  );
+
+  if (selected) {
+    console.log('Selected patient:', selected); // Debug log
+    
+    // Assign patient details
+    this.Patient = {
+      PatientID: selected.PatientID || selected.PatientID,
+      PatientName: selected.PatientName,
+      Age: selected.Age,
+      Gender: selected.Gender,
+      Category: selected.Category,
+      ContactNo: selected.ContactNo,
+      AadharNo: selected.AadharNo,
+      Address: selected.Address,
+      BillingDate: this.Patient.BillingDate || new Date(),
+      PaymentDate: this.Patient.PaymentDate || new Date()
+    };
+
+    // Initialize payment defaults if needed
+    if (selected.Rate) {
+      this.Payment.BillingRate = selected.Rate || 0;
+      this.Payment.Quantity = 1;
+      this.onRateChange();
     }
-    if (selected) {
-    this.Payment.BillingRate = selected.Rate || 0;  // get the rate from your selected option
-    this.Payment.Quantity = 1;
-    this.onRateChange();  // calculate Amount and LineTotal
+  } else {
+    console.error('Patient not found in filtered list');
   }
-  }
+}
 
-  clearPatient() {
-    this.ChargeList = this.PatientListAll;
-    // this.Patient.PackageCollectionId = null;
-    this.Patient.PatientName = '';
-  }
+clearPatient() {
+  this.filteredPatientList = [...this.PatientListAll];
+  this.Patient = {
+    BillingDate: new Date(),
+    PaymentDate: new Date()
+  };
+  this.Payment = {};
+}
 
 
 
+onRateChange() {
+  const rate = Number(this.Payment.BillingRate) || 0;
+  const qty  = Number(this.Payment.Quantity)    || 0;
+  this.Payment.Amount = rate * qty;
+  this.updateLineTotal();
+}
 
-  // my code 
-  onRateChange() {
-    if (this.Payment.Quantity && this.Payment.BillingRate) {
-      this.Payment.Amount = this.Payment.BillingRate * this.Payment.Quantity;
-      this.updateLineTotal();
-    }
-  }
+onQuantityChange() {
+  const rate = Number(this.Payment.BillingRate) || 0;
+  const qty  = Number(this.Payment.Quantity)    || 0;
+  this.Payment.Amount = rate * qty;
+  this.updateLineTotal();
+}
 
-  onQuantityChange() {
-    if (this.Payment.BillingRate && this.Payment.Quantity) {
-      this.Payment.Amount = this.Payment.BillingRate * this.Payment.Quantity;
-      this.updateLineTotal();
-    }
-  }
 
-  onDiscountChange() {
-    this.updateLineTotal();
-  }
+onDiscountChange() {
 
-  updateLineTotal() {
-    this.Payment.LineAmount =
-      (this.Payment.Amount || 0) - (this.Payment.Discount || 0);
-  }
+  this.Payment.Discount = Number(this.Payment.Discount) || 0;
+  this.updateLineTotal();
+}
+
+updateLineTotal() {
+  const amount = Number(this.Payment.Amount)   || 0;
+  const disc   = Number(this.Payment.Discount) || 0;
+
+  let line = amount - disc;
+  if (line < 0) line = 0;
+
+
+  this.Payment.LineAmount = Number(line.toFixed(2));
+}
+
 }

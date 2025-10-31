@@ -84,9 +84,12 @@
                                                 <th class="text-right">Payable Amount</th>
                                                 <th class="text-right">Paid Amount</th>
                                                 <th class="text-right">Due Amount</th>
+                                                <th class="text-center"> Payment Status</th>
+                                                <th class="text-center">Payment Mode</th>
+
                                                 <th>Remarks</th>
                                                 <th>Created By</th>
-                                                <th class="text-center">Created On</th>
+                                                <!-- <th>Created On</th> -->
                                                 <!-- <th style="cursor: pointer;" (click)="sort('StatusName')">Status</th> -->
                                                 <!-- <th>Delete</th> -->
                                             </tr>
@@ -133,9 +136,19 @@
                                                 <td class="text-right">{{model.PayableAmount }}</td>
                                                 <td class="text-right">{{model.PaidAmount }}</td>
                                                 <td class="text-right">{{model.DueAmount }}</td>
+                                                <td class="text-center">
+                                                    <span class="p-1" [ngClass]="
+                      model.PaymentStatus == 1
+                        ? 'badge text-bg-success'
+                        : 'badge text-bg-danger'
+                    ">
+                                                        {{ AllStatusList[model.PaymentStatus] }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">{{ AllPaymentMode[model.PaymentMode]}}</td>
                                                 <td>{{model.Remarks }}</td>
                                                 <td>{{model.CreatedByName}}</td>
-                                                <td class="text-center">{{model.CreatedOn | date:'dd-MM-yyyy'}}</td>
+                                                <!-- <td class="text-center">{{model.CreatedOn | date:'dd-MM-yyyy'}}</td> -->
                                                 <!-- <td><span
                                                     [ngClass]="model.Status == 2 ?'badge bg-warning':'badge bg-success'">
                                                     {{AllStatusList[model.Status]}}</span></td> -->
@@ -252,6 +265,38 @@
                                 </tr>
                             </tbody>
                         </table>
+
+                         <div class="">
+            Payments Details
+          </div>
+
+
+          <div *ngIf="PaymentMedicineListPaymentList.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of PaymentMedicineListPaymentList; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{AllPaymentMode[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Optional fallback -->
+          <div *ngIf="PaymentMedicineListPaymentList?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
                     </div>
                 </div>
             </div>

@@ -24,17 +24,17 @@
             <div class="d-flex flex-wrap gap-1">
               <form #formPatientDetails="ngForm">
                 <div class="row">
+                  <!-- Update the patient autocomplete section -->
                   <mat-form-field appearance="outline" class="col-lg-3">
                     <mat-label>Patient Name / Mobile / UHID</mat-label>
-                    <input matInput name="PackageCollectionName" [(ngModel)]="Patient.PatientName"
+                    <input matInput name="PatientName" [(ngModel)]="Patient.PatientName"
                       (ngModelChange)="filterpatientList($event)" [matAutocomplete]="autoTransportPackageCollection"
-                      placeholder="Search By Package Collection" required />
+                      placeholder="Search By Patient Name / UHID / Mobile" required />
 
                     <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
                       (optionSelected)="afterPatientSelected($event)">
                       <mat-option *ngFor="let option of filteredPatientList" [value]="option.PatientName">
-                        {{ option.PatientName }} / {{ option.UHID }} /
-                        {{ option.ContactNo }}
+                        {{ option.PatientName }} | UHID: {{ option.UHID }} | Mobile: {{ option.ContactNo }}
                       </mat-option>
                     </mat-autocomplete>
 
@@ -115,9 +115,8 @@
                 <mat-form-field appearance="outline" class="col-lg-3">
                   <mat-label>Select Billing Name </mat-label>
                   <input matInput #RegistrationChargeId="ngModel" name="RegistrationChargeId"
-                    (ngModelChange)="filterBillingList($event)"
-                    placeholder="Search By Particular/Amount/Description" [(ngModel)]="Payment.BillingName"
-                    [matAutocomplete]="autoTransportSupplier" required />
+                    (ngModelChange)="filterBillingList($event)" placeholder="Search By Particular/Amount/Description"
+                    [(ngModel)]="Payment.BillingName" [matAutocomplete]="autoTransportSupplier" required />
                   <mat-autocomplete #autoTransportSupplier="matAutocomplete"
                     (optionSelected)="afterBillingSelected($event)">
                     <mat-option *ngFor="let option of ChargeList" [id]="option.BillingId"
@@ -147,7 +146,7 @@
                 <mat-form-field appearance="outline" class="col-lg-1">
                   <mat-label>Disc.</mat-label>
                   <input matInput type="number" name="Discount" [(ngModel)]="Payment.Discount"
-                    (ngModelChange)="onDiscountChange()" required class="no-spinner" />
+                    (ngModelChange)="onDiscountChange()"  class="no-spinner" />
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="col-lg-2">
                   <mat-label>Line Total</mat-label>
@@ -173,7 +172,7 @@
                           <th class="text-center">Quantity</th>
                           <th class="text-right">Discount Amount</th>
                           <th class="text-right">Line Amount</th>
-                          <th>Action</th>
+                          <th class="text-center">Action</th>
                         </tr>
                       </thead>
 
@@ -203,7 +202,7 @@
                             {{ model.LineTotal }}
                           </td>
 
-                          <td>
+                          <td class="text-center">
                             <button (click)="Removepayment(i)" class="btn btn-sm btn-danger">
                               <i class="bi bi-trash-fill"></i>
                             </button>
@@ -319,7 +318,7 @@
                         <th>Remarks</th>
                         <th>Amount</th>
                         <th>Payment Mode</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -331,7 +330,7 @@
                         <td>{{ item.Remarks }}</td>
                         <td>{{ item.PaidAmount }}</td>
                         <td>{{ AllPaymentModeList[item.PaymentMode] }}</td>
-                        <td>
+                        <td class="text-center">
                           <button class="btn btn-sm btn-danger" (click)="removePaymentItem(i)">
                             <i class="bi bi-trash-fill"></i>
                           </button>
