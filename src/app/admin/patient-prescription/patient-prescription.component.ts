@@ -108,8 +108,8 @@ dataLoading: boolean = false;
   redUrl: string = '';
 
   ngOnInit(): void {
-    this.getPatientListall(this.Patient.PatientId);
     this.staffLogin = this.localService.getEmployeeDetail();
+    this.getPatientListall(this.Patient.PatientId);
     this.validiateMenu();
     this.resetForm();
     this.getHeadList();
@@ -390,7 +390,7 @@ addPrescriptionDetail() {
 
     if (selected) {
       this.Patient = { ...selected }; // assign full patient object
-      this.getPatientList(this.Patient.PatientID); // optional
+      // this.getPatientList(this.Patient.PatientID); // optional
     }
     if (selected) {
     this.Payment.OpticalItemRate = selected.Rate || 0;  // get the rate from your selected option
@@ -400,9 +400,8 @@ addPrescriptionDetail() {
   }
 
   clearPatient() {
-    this.ChargeList = this.PatientListAll;
-    // this.Patient.PackageCollectionId = null;
-    this.Patient.PatientName = '';
+    this.filteredPatientList = this.PatientListAll;
+    this.Patient={};
   }
 
 
@@ -438,6 +437,8 @@ addPrescriptionDetail() {
       this.PrescriptionItem.PrescriptionHeadId = selectedHead.PrescriptionHeadId;
       this.PrescriptionItem.PrescriptionHeadName = selectedHead.PrescriptionHeadName;
     }
+
+    this.getPrescriptionItemList(this.PrescriptionItem.PrescriptionHeadId);
   }
 
   // Filter heads for autocomplete
@@ -484,9 +485,9 @@ addPrescriptionDetail() {
     });
   }
 
-  getPrescriptionItemList() {
+  getPrescriptionItemList(PrescriptionHeadId?: number) {
     const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({})).toString()
+      request: this.localService.encrypt(JSON.stringify({PrescriptionHeadId:PrescriptionHeadId})).toString()
     };
 
     this.dataLoading = true;

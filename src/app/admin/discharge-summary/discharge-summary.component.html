@@ -48,13 +48,13 @@
                                         <mat-error *ngIf="!Patient.PatientName">Required field !!</mat-error>
                                     </mat-form-field>
 
-                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                    <mat-form-field appearance="outline" class="col-lg-2">
                                         <mat-label>Age</mat-label>
-                                        <input matInput readonly type="number" name="Age" [(ngModel)]="Patient.Age"
+                                        <input matInput readonly type="text" name="Age" [(ngModel)]="Patient.Age"
                                             required />
                                     </mat-form-field>
 
-                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                    <mat-form-field appearance="outline" class="col-lg-2">
                                         <mat-label>Gender</mat-label>
                                         <input matInput readonly name="Gender" [value]="
                         Patient.Gender !== undefined &&
@@ -64,7 +64,7 @@
                       " required />
                                     </mat-form-field>
 
-                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                    <mat-form-field appearance="outline" class="col-lg-2">
                                         <mat-label>Category</mat-label>
                                         <input matInput name="Category" [value]="
                         Patient.Category != null

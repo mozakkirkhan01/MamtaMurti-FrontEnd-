@@ -1100,9 +1100,8 @@ export class MedicineSaleComponent implements OnInit {
   }
 
   clearPatient() {
-    this.PatientDetailList = this.PatientList;
-    // this.Patient.PackageCollectionId = null;
     this.PaymentMedicine.PatientName = '';
+    this.filteredPatientList = this.PatientList;
   }
 
   // getDoctorList() {

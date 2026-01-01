@@ -503,11 +503,11 @@ afterPatientSelected(event: any) {
       AadharNo: selected.AadharNo,
       Address: selected.Address,
       UHID: selected.UHID,
+      PatientGardianName: selected.PatientGardianName,
+
       SurgeryDate: this.Patient.SurgeryDate || new Date() // Preserve or set default
     };
-    
-    // Don't call getPatientList again - it will overwrite the selection
-    // Only call it if you need to refresh the entire list
+
   }
 }
 

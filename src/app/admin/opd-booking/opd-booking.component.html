@@ -68,7 +68,7 @@
                     <mat-label>Age</mat-label>
                     <input
                       matInput
-                      type="number"
+                      type="text"
                       name="Age"
                       [(ngModel)]="Patient.Age"
                       required
@@ -105,6 +105,17 @@
                       type="tel"
                       name="ContactNo"
                       [(ngModel)]="Patient.ContactNo"
+                      required
+                      readonly="true"
+                    />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="col-lg-3">
+                    <mat-label>Gurdian Name</mat-label>
+                    <input
+                      matInput
+                      name="PatientGardianName"
+                      [(ngModel)]="Patient.PatientGardianName"
                       required
                       readonly="true"
                     />

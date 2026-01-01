@@ -91,7 +91,7 @@ export class DischargeSummaryComponent {
       this.staffLogin = this.localService.getEmployeeDetail();
       this.validiateMenu();
       this.resetForm();
-      this.getPatientList(this.Patient.PatientId);
+      this.getPatientList();
       this.getDepartmentList();
       this.getDoctorList();
 
@@ -175,12 +175,10 @@ export class DischargeSummaryComponent {
       };
     }
   
-    getPatientList(PatientId: number) {
-      var data = {
-        PatientID: PatientId,
-      };
+    getPatientList() {
+      
       const obj: RequestModel = {
-        request: this.localService.encrypt(JSON.stringify(data)).toString(),
+        request: this.localService.encrypt(JSON.stringify({})).toString(),
       };
   
       this.dataLoading = true;
@@ -190,6 +188,7 @@ export class DischargeSummaryComponent {
           let response = r1 as any;
           if (response.Message == ConstantData.SuccessMessage) {
             this.PatientListAll = response.PatientList;
+            this.filteredPatientList = this.PatientListAll;
             
             if (!this.Package.PaymentDate) {
               this.Package.PaymentDate = new Date();
@@ -201,7 +200,6 @@ export class DischargeSummaryComponent {
               this.Patient.DischargeDate = new Date();
             }
             
-            this.filteredPatientList = [...this.PatientListAll];
           } else {
             this.toastr.error(response.Message);
           }
@@ -273,8 +271,8 @@ export class DischargeSummaryComponent {
     }
   
     clearPatient() {
+      this.filteredPatientList = this.PatientListAll;
       this.Patient = {};
-      this.filteredPatientList = [...this.PatientListAll];
     }
   
     afterPatientSelected(event: any) {
@@ -285,7 +283,6 @@ export class DischargeSummaryComponent {
   
       if (selected) {
         this.Patient = { ...selected };
-        this.getPatientList(this.Patient.PatientID);
       }
     }
   

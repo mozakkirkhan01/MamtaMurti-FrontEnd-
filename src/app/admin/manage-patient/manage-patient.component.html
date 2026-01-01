@@ -37,7 +37,7 @@
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th class="text-center" >S.No</th>
+                                <th class="text-center">S.No</th>
                                 <th class="text-center" *ngIf="action.CanCreate">Booking</th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('UHID')">UHID No.</th>
                                 <th style="cursor:pointer;" (click)="sort('CreatedOn')">Reg Date</th>
@@ -46,15 +46,17 @@
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('Gender')">Gender</th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('Category')">Category</th>
                                 <th style="cursor:pointer;" (click)="sort('Address')">Address</th>
-                                <th class="text-center" style="cursor:pointer;" (click)="sort('AadharNo')">Aadhar No</th>
-                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Contact No.</th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('AadharNo')">Aadhar No
+                                </th>
+                                <th class="text-center" style="cursor:pointer;" (click)="sort('ContactNo')">Contact No.
+                                </th>
                                 <th class="text-center" style="cursor:pointer;" (click)="sort('Status')">Status</th>
                                 <th class="text-center" *ngIf="action.CanEdit">Edit</th>
                                 <th class="text-center" *ngIf="action.CanDelete">Delete</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr 
+                            <tr
                                 *ngFor="let item of PatientList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
                                 <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
                                 <td class="text-center" *ngIf="action.CanCreate">
@@ -62,7 +64,7 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                 </td>
-                                <td  class="text-success text-center">{{item.UHID}}</td>
+                                <td class="text-success text-center">{{item.UHID}}</td>
                                 <td>{{item.CreatedOn | date:'dd-MM-yyyy'}}</td>
                                 <td>{{item.PatientName}}</td>
                                 <td class="text-center">{{item.Age}}</td>
@@ -82,7 +84,7 @@
                                         data-bs-target="#staticBackdrop" (click)="editPatient(item)">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                </td >
+                                </td>
                                 <td class="text-center" *ngIf="action.CanDelete">
                                     <button class="btn btn-sm btn-danger" (click)="deletePatient(item)">
                                         <i class="bi bi-trash-fill"></i>
@@ -130,17 +132,20 @@
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Patient Guardian Name</mat-label>
                                     <input matInput #PatientGuardianName="ngModel" name="PatientGuardianName"
-                                        [(ngModel)]="Patient.PatientGuardianName"  autofocus>
+                                        [(ngModel)]="Patient.PatientGuardianName" autofocus>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Age</mat-label>
-                                    <input matInput #Age="ngModel" name="Age" [(ngModel)]="Patient.Age" required
-                                        autofocus maxlength="2" min="0" max="99">
-                                    <mat-error *ngIf="(Age.dirty  || Age.touched) || (Age.invalid && isSubmitted)">
-                                        Age is <strong>required</strong>
+
+                                    <input matInput type="text" #Age="ngModel" name="Age" [(ngModel)]="Patient.Age"
+                                        required autofocus />
+
+                                    <mat-error *ngIf="(Age.dirty || Age.touched || isSubmitted) && Age.invalid">
+                                        Age is <strong>required</strong> and must be between 0–99
                                     </mat-error>
                                 </mat-form-field>
+
 
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Address</mat-label>
@@ -155,7 +160,8 @@
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Contact No</mat-label>
                                     <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
-                                        [(ngModel)]="Patient.ContactNo" required autofocus maxlength="10" min="0000000000" max="9999999999" >
+                                        [(ngModel)]="Patient.ContactNo" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999">
                                     <mat-error
                                         *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
                                         ContactNo is <strong>required</strong>
@@ -165,8 +171,9 @@
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Aadhar No</mat-label>
                                     <input type="tel" matInput #AadharNo="ngModel" name="AadharNo"
-                                        [(ngModel)]="Patient.AadharNo" autofocus maxlength="12" min="000000000000" max="999999999999" >
-                                    
+                                        [(ngModel)]="Patient.AadharNo" autofocus maxlength="12" min="000000000000"
+                                        max="999999999999">
+
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="col-sm-6">
@@ -183,7 +190,8 @@
 
                                 <mat-form-field appearance="outline" class="col-sm-6">
                                     <mat-label>Category</mat-label>
-                                    <mat-select #Category="ngModel" name="Category" [(ngModel)]="Patient.Category" required>
+                                    <mat-select #Category="ngModel" name="Category" [(ngModel)]="Patient.Category"
+                                        required>
                                         <mat-option [value]="Category.Key"
                                             *ngFor="let Category of CategoryList">{{Category.Value}}</mat-option>
                                     </mat-select>

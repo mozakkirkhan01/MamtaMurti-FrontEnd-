@@ -46,9 +46,9 @@
                     <mat-error *ngIf="!Patient.PatientName">Required field !!</mat-error>
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="col-lg-1">
+                  <mat-form-field appearance="outline" class="col-lg-2">
                     <mat-label>Age</mat-label>
-                    <input matInput type="number" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" required
+                    <input matInput type="text" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" required
                       readonly="true" />
                   </mat-form-field>
 
@@ -89,6 +89,12 @@
                     <mat-datepicker-toggle matSuffix [for]="picker"
                       class="small-datepicker-icon"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
+
+                  <!-- Gurdian name  -->
+                  <mat-form-field appearance="outline" class="col-lg-3">
+                    <mat-label>Gurdian Name</mat-label>
+                    <input matInput name="PatientGardianName" [(ngModel)]="Patient.PatientGardianName" required readonly="true" />
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="col-lg-3">

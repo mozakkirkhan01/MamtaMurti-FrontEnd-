@@ -46,9 +46,9 @@
                     <mat-error *ngIf="!Patient.PatientName">Required field !!</mat-error>
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="col-lg-1">
+                  <mat-form-field appearance="outline" class="col-lg-2">
                     <mat-label>Age</mat-label>
-                    <input matInput type="number" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" required
+                    <input matInput type="text" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" required
                       readonly="true" />
                   </mat-form-field>
 
@@ -80,6 +80,12 @@
                     <mat-label>Aadhar No</mat-label>
                     <input matInput type="tel" name="AadharNo" [(ngModel)]="Patient.AadharNo" required
                       readonly="true" />
+                  </mat-form-field>
+
+                  <!-- Gurdian Name  -->
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Gurdian Name</mat-label>
+                    <input matInput name="GurdianName" [(ngModel)]="Patient.PatientGardianName" required readonly="true" />
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="col-lg-2">

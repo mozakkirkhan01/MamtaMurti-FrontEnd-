@@ -49,14 +49,14 @@
                   </mat-form-field>
 
                   <!-- Age -->
-                  <mat-form-field appearance="outline" class="col-lg-1">
+                  <mat-form-field appearance="outline" class="col-lg-2">
                     <mat-label>Age</mat-label>
-                    <input matInput type="number" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" 
+                    <input matInput type="text" name="Age" [(ngModel)]="Patient.Age" class="no-spinner" 
                       readonly="true" />
                   </mat-form-field>
 
                   <!-- Gender -->
-                  <mat-form-field appearance="outline" class="col-lg-1">
+                  <mat-form-field appearance="outline" class="col-lg-2">
                     <mat-label>Gender</mat-label>
                     <input matInput name="Gender" [value]="
                         Patient.Gender != null
@@ -87,6 +87,11 @@
                     <mat-label>Aadhar No</mat-label>
                     <input matInput type="tel" name="AadharNo" [(ngModel)]="Patient.AadharNo" 
                       readonly="true" />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="col-lg-2">
+                    <mat-label>Gurdian Name</mat-label>
+                    <input matInput name="GurdianName" [(ngModel)]="Patient.PatientGardianName" required readonly="true" />
                   </mat-form-field>
 
                   <!-- Address -->
@@ -198,7 +203,7 @@
                   </mat-form-field>
 
                 <mat-form-field appearance="outline" class="col-lg-4">
-                  <mat-label>Select Optical Name </mat-label>
+                  <mat-label>Prescription Item Name </mat-label>
                   <input matInput #RegistrationChargeId="ngModel" name="RegistrationChargeId"
                     (ngModelChange)="filterPrescriptionItemList($event)"
                     placeholder="Search By Item Name" [(ngModel)]="PrescriptionItem.PrescriptionItemName"

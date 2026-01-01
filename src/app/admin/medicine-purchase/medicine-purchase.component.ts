@@ -13,9 +13,9 @@ import {
   StaffLoginModel,
 } from '../../utils/interface';
 import { ToastrService } from 'ngx-toastr';
-
 import { Status } from '../../utils/enum';
 import { debounceTime, Subject } from 'rxjs';
+
 @Component({
   selector: 'app-medicine-purchase',
   templateUrl: './medicine-purchase.component.html',
@@ -35,9 +35,10 @@ export class MedicinePurchaseComponent implements OnInit {
   AllStatusList = Status;
   filteredMedicineList: any = [];
   MedicineDetailList: any = [];
-  SupplierDetailList: any[] = [];  
+  SupplierDetailList: any[] = [];
   searchInputChanged: Subject<string> = new Subject();
-  
+  isEditMode: boolean = false;
+  allowMedicineEdit: boolean = false; // Flag to allow medicine edits during purchase edit
 
   constructor(
     private service: AppService,
@@ -57,48 +58,66 @@ export class MedicinePurchaseComponent implements OnInit {
     this.getMedicineList(0);
     this.getSupplierList(0);
     this.getUnitList();
-    // this.getCategoryList();
-    // this.getManufacturerList();
+    this.getCategoryList();
+    this.getManufacturerList();
+    this.getMedicinTypeList()
     this.employeeDetail = this.localService.getEmployeeDetail();
     this.resetForm();
     this.resetFormPurchaseProduct();
+    
     this.route.queryParams.subscribe((params: any) => {
       this.Purchase.PurchaseId = params.id;
       this.redUrl = params.redUrl;
-      if (this.Purchase.PurchaseId > 0)
+      if (this.Purchase.PurchaseId > 0) {
+        this.isEditMode = true;
         this.getPurchaseDetail(this.Purchase.PurchaseId);
-      else
+      } else {
         this.Purchase.PurchaseId = 0;
+        this.isEditMode = false;
+      }
     });
 
-    this.searchInputChanged.pipe(debounceTime(300)).subscribe(value => {
+    this.searchInputChanged.pipe(debounceTime(300)).subscribe((value) => {
       this.filterMedicineList(value);
     });
   }
+
   onSearchInput(value: string) {
     this.searchInputChanged.next(value);
   }
 
- validiateMenu() {
+  validiateMenu() {
     var obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({ Url: "/admin/medicine-purchase",StaffLoginId:this.staffLogin.StaffLoginId })).toString()
-    }
-    this.dataLoading = true
-    this.service.validiateMenu(obj).subscribe((response: any) => {
-      this.action = this.loadData.validiateMenu(response, this.toastr, this.router)
-      this.dataLoading = false;
-    }, (err => {
-      this.toastr.error("Error while fetching records")
-      this.dataLoading = false;
-    }))
+      request: this.localService
+        .encrypt(
+          JSON.stringify({
+            Url: '/admin/medicine-purchase',
+            StaffLoginId: this.staffLogin.StaffLoginId,
+          })
+        )
+        .toString(),
+    };
+    this.dataLoading = true;
+    this.service.validiateMenu(obj).subscribe(
+      (response: any) => {
+        this.action = this.loadData.validiateMenu(
+          response,
+          this.toastr,
+          this.router
+        );
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error while fetching records');
+        this.dataLoading = false;
+      }
+    );
   }
 
-  // Supplier
   @ViewChild('formSupplier') formSupplier: NgForm;
-
   Supplier: any = {};
-
   StateList: any[] = [];
+
   getStateList() {
     var obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify({})).toString(),
@@ -144,7 +163,7 @@ export class MedicinePurchaseComponent implements OnInit {
   saveSupplier() {
     this.submitted = true;
     if (this.formSupplier.invalid) {
-      this.toastr.warning('Fill all the Required Fields.', 'Invailid Form');
+      this.toastr.warning('Fill all the Required Fields.', 'Invalid Form');
       this.dataLoading = false;
       return;
     }
@@ -168,7 +187,7 @@ export class MedicinePurchaseComponent implements OnInit {
         }
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
@@ -183,7 +202,6 @@ export class MedicinePurchaseComponent implements OnInit {
     this.Medicine.GSTId = '';
     this.Medicine.SizeId = '';
     this.Medicine.CategoryId = '';
-    // this.Medicine.MinimumQuantity = 0;
     this.Medicine.ManufacturerId = '';
     if (this.formMedicine) {
       this.formMedicine.control.markAsPristine();
@@ -198,29 +216,63 @@ export class MedicinePurchaseComponent implements OnInit {
   }
 
   CategoryList: any[] = [];
-  getCategoryList() {
+  ManufacturerList: any[] = [];
+  MedicineTypeList : any[]=[];
+  UnitList: any[] = [];
+  GSTList: any[] = [];
+  MedicineList: any[] = [];
+  SupplierList: any[] = [];
+
+  getUnitList() {
     this.dataLoading = true;
-    this.service.getCategoryList({}).subscribe(
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString(),
+    };
+    this.service.getUnitList(obj).subscribe(
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
-          this.CategoryList = response.CategoryList;
+          this.UnitList = response.UnitList;
         } else {
           this.toastr.error(response.Message);
         }
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
   }
 
-  ManufacturerList: any[] = [];
-  getManufacturerList() {
+   getMedicinTypeList() {
     this.dataLoading = true;
-    this.service.getManufacturerList({}).subscribe(
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString(),
+    };
+    this.service.getMedicineTypeList(obj).subscribe(
+      (r1) => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.MedicineTypeList = response.MedicineTypeList;
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error Occurred while fetching data.');
+        this.dataLoading = false;
+      }
+    );
+  }
+
+    getManufacturerList() {
+    this.dataLoading = true;
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString(),
+    };
+    this.service.getManufacturerList(obj).subscribe(
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
@@ -231,7 +283,50 @@ export class MedicinePurchaseComponent implements OnInit {
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
+        this.dataLoading = false;
+      }
+    );
+  }
+      getCategoryList() {
+    this.dataLoading = true;
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString(),
+    };
+    this.service.getCategoryList(obj).subscribe(
+      (r1) => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.CategoryList = response.CategoryList;
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error Occurred while fetching data.');
+        this.dataLoading = false;
+      }
+    );
+  }
+
+  getGSTList() {
+    this.dataLoading = true;
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString(),
+    };
+    this.service.getGSTList(obj).subscribe(
+      (r1) => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.GSTList = response.GSTList;
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
@@ -240,7 +335,7 @@ export class MedicinePurchaseComponent implements OnInit {
   saveMedicine() {
     this.submitted = true;
     if (this.formMedicine.invalid) {
-      this.toastr.warning('Fill all the Required Fields.', 'Invailid Form');
+      this.toastr.warning('Fill all the Required Fields.', 'Invalid Form');
       this.dataLoading = false;
       return;
     }
@@ -274,7 +369,7 @@ export class MedicinePurchaseComponent implements OnInit {
         }
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
@@ -282,8 +377,10 @@ export class MedicinePurchaseComponent implements OnInit {
 
   getPurchaseDetail(PurchaseId: number) {
     this.dataLoading = true;
-       var obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({ PurchaseId: PurchaseId })).toString(),
+    var obj: RequestModel = {
+      request: this.localService
+        .encrypt(JSON.stringify({ PurchaseId: PurchaseId }))
+        .toString(),
     };
     this.service.getPurchaseDetail(obj).subscribe(
       (r1) => {
@@ -294,32 +391,39 @@ export class MedicinePurchaseComponent implements OnInit {
             this.Purchase.InvoiceDate
           );
           this.PurchaseProductList = response.PurchaseProductList;
-          this.PurchaseProductList.map(
-            (x) => (x.SearchProduct = `${x.ProductName} - ${x.HSNCode}`)
-          );
+          
+          // Add editable fields flag
+          this.PurchaseProductList.forEach(item => {
+            item.AllowEdit = false;
+            item.OriginalData = JSON.parse(JSON.stringify(item)); // Store original data
+          });
+          
           this.Purchase.SupplierId = this.Purchase.SupplierId;
-          this.Purchase.SupplierAutoComplete = this.Purchase.SupplierName;
-          // this.setSupplier();
+          this.Purchase.SupplierName = this.Purchase.SupplierName;
           this.calculateTotal();
+          this.allowMedicineEdit = true; // Allow editing medicines
         } else {
           this.toastr.error(response.Message);
         }
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
   }
 
   @ViewChild('formPurchase') formPurchase: NgForm;
+  
   resetForm() {
     this.PurchaseProductList = [];
     this.Purchase = {};
     this.Purchase.Status = 1;
     this.Purchase.InvoiceDate = this.loadData.loadDateYMD(new Date());
     this.Purchase.SupplierId = '';
+    this.isEditMode = false;
+    this.allowMedicineEdit = false;
     if (this.formPurchase) {
       this.formPurchase.control.markAsPristine();
       this.formPurchase.control.markAsUntouched();
@@ -327,7 +431,6 @@ export class MedicinePurchaseComponent implements OnInit {
     this.submitted = false;
   }
 
-  SupplierList: any[] = [];
   getSupplierList(SupplierId: number) {
     this.dataLoading = true;
     var obj: RequestModel = {
@@ -338,15 +441,16 @@ export class MedicinePurchaseComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.SupplierList = response.SupplierList;
+          this.SupplierDetailList = this.SupplierList;
 
-          for (let i = 0; i < this.SupplierList.length; i++) {
-            const e = this.SupplierList[i];
-            if (e.SupplierId == SupplierId) {
-              this.Purchase.SupplierAutoComplete = e;
-              this.Purchase.SupplierId = e.SupplierId;
-              this.SupplierList.map((x1) => x1.SupplierName);
-              this.afterSupplierSelected(e);
-              break;
+          if (SupplierId > 0) {
+            for (let i = 0; i < this.SupplierList.length; i++) {
+              const e = this.SupplierList[i];
+              if (e.SupplierId == SupplierId) {
+                this.Purchase.SupplierName = e.SupplierName;
+                this.Purchase.SupplierId = e.SupplierId;
+                break;
+              }
             }
           }
         } else {
@@ -355,60 +459,12 @@ export class MedicinePurchaseComponent implements OnInit {
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
-        this.dataLoading = false;
-      }
-    );
-  }
-  UnitList: any[] = [];
-  getUnitList() {
-    this.dataLoading = true;
-    var obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({})).toString(),
-    };
-    this.service.getUnitList(obj).subscribe(
-      (r1) => {
-        let response = r1 as any;
-        if (response.Message == ConstantData.SuccessMessage) {
-          this.UnitList = response.UnitList;
-        } else {
-          this.toastr.error(response.Message);
-        }
-        this.dataLoading = false;
-      },
-      (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
   }
 
-  GSTList: any[] = [];
-  getGSTList() {
-    this.dataLoading = true;
-    var obj: RequestModel = {
-      request: this.localService
-        .encrypt(JSON.stringify({}))
-        .toString(),
-    };
-    this.service.getGSTList(obj).subscribe(
-      (r1) => {
-        let response = r1 as any;
-        if (response.Message == ConstantData.SuccessMessage) {
-          this.GSTList = response.GSTList;
-        } else {
-          this.toastr.error(response.Message);
-        }
-        this.dataLoading = false;
-      },
-      (err) => {
-        this.toastr.error('Error Occured while fetching data.');
-        this.dataLoading = false;
-      }
-    );
-  }
-
-  MedicineList: any[] = [];
   getMedicineList(MedicineId: number) {
     this.dataLoading = true;
     var obj: RequestModel = {
@@ -421,32 +477,26 @@ export class MedicinePurchaseComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.MedicineList = response.MedicineList;
-          this.filterMedicineList(this.Medicine.MedicineName);
+          this.MedicineDetailList = this.MedicineList.slice(0, 50);
 
-          for (let i = 0; i < this.MedicineList.length; i++) {
-            const e = this.MedicineList[i];
-            if (e.MedicineId == MedicineId) {
-              this.PurchaseProduct.MedicineAutoComplete = e;
-              this.PurchaseProduct.MedicineId = e.MedicineId;
-              this.MedicineList.map(
-                (x1) => (x1.SearchMedicine = `${x1.Name} - ${x1.HSNCode}`)
-              );
-              //this.Purchase.SearchPatient = e.SearchPatient;
-              //const eventObj = { MedicineId: e.MedicineId, /* other properties */ };
-              this.afterMedicineSelected(e);
-              break;
+          if (MedicineId > 0) {
+            for (let i = 0; i < this.MedicineList.length; i++) {
+              const e = this.MedicineList[i];
+              if (e.MedicineId == MedicineId) {
+                this.PurchaseProduct.MedicineName = e.MedicineName;
+                this.PurchaseProduct.MedicineId = e.MedicineId;
+                this.afterMedicineSelected({ option: { id: e.MedicineId, value: e.MedicineName } });
+                break;
+              }
             }
           }
-          this.MedicineList.map(
-            (x1) => (x1.SearchMedicine = `${x1.Name} - ${x1.HSNCode}`)
-          );
         } else {
           this.toastr.error(response.Message);
         }
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );
@@ -454,10 +504,15 @@ export class MedicinePurchaseComponent implements OnInit {
 
   isSubmittedPurchaseProduct: boolean = false;
   @ViewChild('formPurchaseProduct') formPurchaseProduct: NgForm;
+  
   resetFormPurchaseProduct() {
     this.PurchaseProduct = {};
     this.PurchaseProduct.UnitId = '';
     this.PurchaseProduct.GSTId = '';
+    this.PurchaseProduct.Quantity = 1;
+    this.PurchaseProduct.FreeQunatity = 0;
+    this.PurchaseProduct.DiscountPercent = 0;
+    this.PurchaseProduct.DiscountAmount = 0;
     if (this.formPurchaseProduct) {
       this.formPurchaseProduct.control.markAsPristine();
       this.formPurchaseProduct.control.markAsUntouched();
@@ -472,97 +527,94 @@ export class MedicinePurchaseComponent implements OnInit {
         option.SupplierName.toLowerCase().includes(SupplierfilterValue)
       );
     } else {
+      this.SupplierDetailList = this.SupplierList;
     }
   }
 
   afterSupplierSelected(event: any) {
     this.Purchase.SupplierId = event.option.id;
     this.Purchase.SupplierName = event.option.value;
-    var Transport = this.SupplierDetailList.find(
-      (x: any) => x.PurchaseId == this.Purchase.PurchaseId
-    );
-    this.Purchase.SupplierName = Transport.SupplierName;
-    this.Purchase.SupplierId = Transport.SupplierId;
   }
 
   clearSupplier() {
     this.SupplierDetailList = this.SupplierList;
     this.Purchase.SupplierId = null;
     this.Purchase.SupplierName = null;
-    this.PurchaseProduct.HSNCode = null;
-    this.Purchase.SearchSupplier = null;
   }
-
-  // filterMedicineList(value: any) {
-  //   if (value) {
-  //     const MedicinefilterValue = value.toLowerCase();
-  //     this.MedicineDetailList = this.MedicineList.filter((option: any) =>
-  //       option.MedicineName.toLowerCase().includes(MedicinefilterValue)
-  //     );
-  //   } else {
-  //     this.MedicineDetailList = this.MedicineList;
-  //   }
-  // }
 
   filterMedicineList(value: any) {
     if (value) {
       const filterValue = value.toLowerCase();
       this.MedicineDetailList = this.MedicineList
-      .filter(med => med.MedicineName.toLowerCase().includes(filterValue))
-      .slice(0, 50);
+        .filter((med) => med.MedicineName.toLowerCase().includes(filterValue))
+        .slice(0, 50);
     } else {
       this.MedicineDetailList = this.MedicineList.slice(0, 50);
     }
   }
 
   afterMedicineSelected(event: any) {
+
+    console.log(event.option.id);
+    console.log(event.option.value);
     
-    this.Medicine.MedicineId = event.option.id;
-    this.Medicine.MedicineName = event.option.value;
-    var SelectedMedicine = this.MedicineDetailList.find(
-      (x: any) => x.MedicineId == this.Medicine.MedicineId
-    );
-   
-    this.Purchase.MedicineName = SelectedMedicine.MedicineName;
-    // this.Purchase.SupplierId = SelectedMedicine.SupplierId;
-    // this.Purchase.SupplierName = SelectedMedicine.SupplierName;
-    // this.Purchase.SearchSupplier = SelectedMedicine.SearchSupplier;
-    this.PurchaseProduct.HSNCode = SelectedMedicine.HSNCode;
-    this.PurchaseProduct.UnitId = SelectedMedicine.UnitId;
-    this.PurchaseProduct.UnitName = SelectedMedicine.UnitName;
-    this.PurchaseProduct.GSTId = SelectedMedicine.GSTId;
-    this.PurchaseProduct.MedicineId = SelectedMedicine.MedicineId;
-
+      if (typeof event.option.id === 'string') {
+    this.PurchaseProduct.MedicineId = 0;
+  } else {
+    this.PurchaseProduct.MedicineId = event.option.id;
   }
+    this.PurchaseProduct.MedicineName = event.option.value;
+    
 
-  // afterMedicineSelected(selected: any) {
-  //   this.PurchaseProduct.MedicineId = selected.MedicineId;
-  //   this.PurchaseProduct.Name = selected.Name;
-  //   this.PurchaseProduct.UnitId = selected.UnitId;
-  //   if (selected.GSTId)
-  //     this.PurchaseProduct.GSTId = selected.GSTId;
-  //   this.PurchaseProduct.UnitName = selected.UnitName;
-  //   this.PurchaseProduct.HSNCode = selected.HSNCode;
-  //   this.PurchaseProduct.SearchMedicine = selected.SearchMedicine;
-  // }
+    console.log(this.PurchaseProduct.MedicineId);
+    
+    var SelectedMedicine = this.MedicineDetailList.find(
+      (x: any) => x.MedicineId == this.PurchaseProduct.MedicineId
+    );
+
+    if (SelectedMedicine) {
+      this.PurchaseProduct.HSNCode = SelectedMedicine.HSNCode;
+      this.PurchaseProduct.UnitId = SelectedMedicine.UnitId;
+      this.PurchaseProduct.UnitName = SelectedMedicine.UnitName;
+      this.PurchaseProduct.GSTId = SelectedMedicine.GSTId;
+      this.PurchaseProduct.IsNewMedicine = false;
+      this.PurchaseProduct.ManufacturerId = SelectedMedicine.ManufacturerId;
+      this.PurchaseProduct.CategoryId = SelectedMedicine.CategoryId;
+      this.PurchaseProduct.MedicineTypeId = SelectedMedicine.MedicineTypeId;
+    } else {
+      // New medicine being created
+      this.PurchaseProduct.IsNewMedicine = true;
+      this.PurchaseProduct.UnitId = this.UnitList.length > 0 ? this.UnitList[0].UnitId : '';
+      this.PurchaseProduct.GSTId = this.GSTList.length > 0 ? this.GSTList[0].GSTId : '';
+      // this.toastr.info('New medicine will be created: ' + this.PurchaseProduct.MedicineName);
+    }
+  }
 
   clearMedicine() {
     this.MedicineDetailList = this.MedicineList.slice(0, 50);
     this.PurchaseProduct.MedicineId = null;
     this.PurchaseProduct.MedicineName = '';
     this.PurchaseProduct.HSNCode = '';
+    this.PurchaseProduct.IsNewMedicine = false;
   }
 
-  // clearMedicine() {
-  //   this.MedicineDetailList = this.MedicineList.slice(0, 50);
-  //   this.PaymentMedicine.MedicineId = null;
-  //   this.PaymentMedicine.MedicineName = null;
-  //   this.PaymentMedicine.UnitId = null;
-  //   this.PaymentMedicine.HSNCode = null;
-  //   this.PaymentMedicine.SearchMedicine = null;
-  //   this.PaymentMedicine.UnitName = null;
-  //   this.MedicineStockList = [];
-  // }
+  // Enable editing for a specific product in the list
+  enableProductEdit(index: number) {
+    this.PurchaseProductList[index].AllowEdit = true;
+  }
+
+  // Cancel editing and restore original data
+  cancelProductEdit(index: number) {
+    const original = this.PurchaseProductList[index].OriginalData;
+    Object.assign(this.PurchaseProductList[index], original);
+    this.PurchaseProductList[index].AllowEdit = false;
+    this.calculateTotal();
+  }
+
+  // Mark that medicine data has been updated
+  markMedicineUpdated(product: any) {
+    product.UpdateMedicine = true;
+  }
 
   changeCostAmount(purchaseProductModel: any) {
     purchaseProductModel.BasicAmount = this.loadData.round(
@@ -596,12 +648,14 @@ export class MedicinePurchaseComponent implements OnInit {
     if (PurchaseProduct.GSTId > 0) {
       if (this.Purchase.SupplierId > 0) {
         this.calculateGST(PurchaseProduct);
+        this.markMedicineUpdated(PurchaseProduct);
       } else {
         this.toastr.error('Supplier is required!!');
       }
     } else {
       this.toastr.error('Selected supplier has no GST No.');
     }
+    this.changeCostAmount(PurchaseProduct);
   }
 
   calculateGST(PurchaseProduct: any) {
@@ -670,37 +724,33 @@ export class MedicinePurchaseComponent implements OnInit {
         purchaseProductModel.BasicAmount,
       2
     );
+    this.changeCostAmount(purchaseProductModel);
   }
 
   addPurchaseProduct() {
     this.isSubmittedPurchaseProduct = true;
     this.formPurchaseProduct.control.markAllAsTouched();
+    
     if (this.formPurchaseProduct.invalid) {
       this.toastr.error('Fill Required Fields.');
       return;
     }
+    
     if (
-      this.PurchaseProduct.MedicineId == 0 ||
-      this.PurchaseProduct.MedicineName == null
+      this.PurchaseProduct.MedicineId == null 
     ) {
-      this.toastr.error('Please Select Medicine Name');
+      this.toastr.error('Please Select Medicine ');
       return;
     }
 
-    // if (this.Purchase.SupplierId == 0 || this.Purchase.SupplierId == null) {
-    //   this.toastr.error("Please Select Suppier First !!")
-    //   return;
-    // }
-
-    //Check Label Code
-    //for (var i = 0; i < this.PurchaseProductItemList.length; i++) {
-    //    if (this.PurchaseProductItemList[i].BatchNo == this.PurchaseProduct.BatchNo) {
-    //        this.toastr.error("Batch No. is already exist.")
-    //        return;
-    //    }
-    //}
-
-    this.PurchaseProductList.push(this.PurchaseProduct);
+    // Create a copy of the product
+    const productCopy = JSON.parse(JSON.stringify(this.PurchaseProduct));
+    productCopy.AllowEdit = false;
+    productCopy.OriginalData = JSON.parse(JSON.stringify(productCopy));
+    
+    console.log(productCopy);
+    
+    this.PurchaseProductList.push(productCopy);
     this.resetFormPurchaseProduct();
     this.calculateTotal();
   }
@@ -715,17 +765,23 @@ export class MedicinePurchaseComponent implements OnInit {
     this.Purchase.TotalIGSTAmount = 0;
     this.Purchase.TotalGrandTotal = 0;
     this.Purchase.DuesAmount = 0;
+    
     this.PurchaseProductList.forEach((purchase) => {
-      this.Purchase.TotalCostAmount += parseFloat(purchase.CostAmount);
-      this.Purchase.TotalBasicAmount += parseFloat(purchase.BasicAmount);
-      this.Purchase.TotalDiscountAmount += parseFloat(purchase.DiscountAmount);
-      this.Purchase.TotalTaxableAmount += parseFloat(purchase.TaxableAmount);
-      this.Purchase.TotalCGSTAmount += parseFloat(purchase.CGSTAmount);
-      this.Purchase.TotalSGSTAmount += parseFloat(purchase.SGSTAmount);
+      this.Purchase.TotalCostAmount += parseFloat(purchase.CostAmount || 0);
+      this.Purchase.TotalBasicAmount += parseFloat(purchase.BasicAmount || 0);
+      this.Purchase.TotalDiscountAmount += parseFloat(
+        purchase.DiscountAmount || 0
+      );
+      this.Purchase.TotalTaxableAmount += parseFloat(
+        purchase.TaxableAmount || 0
+      );
+      this.Purchase.TotalCGSTAmount += parseFloat(purchase.CGSTAmount || 0);
+      this.Purchase.TotalSGSTAmount += parseFloat(purchase.SGSTAmount || 0);
       this.Purchase.TotalIGSTAmount += parseFloat(
         purchase.IGSTAmount > 0 ? purchase.IGSTAmount : 0
       );
     });
+    
     this.Purchase.TotalGrandTotal = this.loadData.round(
       this.Purchase.TotalTaxableAmount +
         this.Purchase.TotalCGSTAmount +
@@ -733,9 +789,11 @@ export class MedicinePurchaseComponent implements OnInit {
         this.Purchase.TotalIGSTAmount,
       0
     );
-    if (!isPaidAmount) this.Purchase.PaidAmount = this.Purchase.TotalGrandTotal;
+    
+    if (!isPaidAmount)
+      this.Purchase.PaidAmount = this.Purchase.TotalGrandTotal;
     this.Purchase.DuesAmount =
-      this.Purchase.TotalGrandTotal - this.Purchase.PaidAmount;
+      this.Purchase.TotalGrandTotal - (this.Purchase.PaidAmount || 0);
   }
 
   RemovePurchaseProduct(index: number) {
@@ -746,11 +804,11 @@ export class MedicinePurchaseComponent implements OnInit {
   savePurchase() {
     this.submitted = true;
     if (this.formPurchase.invalid) {
-      this.toastr.warning('Fill all the Required Fields.', 'Invailid Form');
+      this.toastr.warning('Fill all the Required Fields.', 'Invalid Form');
       return;
     }
     if (this.Purchase.PaidAmount == null) {
-      this.toastr.warning('Paid  Amount is required!!');
+      this.toastr.warning('Paid Amount is required!!');
       return;
     }
     if (this.PurchaseProductList.length == 0) {
@@ -761,33 +819,42 @@ export class MedicinePurchaseComponent implements OnInit {
     var data = {
       Purchase: this.Purchase,
       PurchaseProductList: this.PurchaseProductList,
-      CreatedBy : this.staffLogin.StaffId,
-       UpdatedBy : this.staffLogin.StaffId
+      CreatedBy: this.staffLogin.StaffId,
+      UpdatedBy: this.staffLogin.StaffId,
     };
-      const obj: RequestModel = {
+    console.log( 'Saving Purchase:', data ); // Debug log
+
+    const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(data)).toString(),
     };
+    
     this.dataLoading = true;
     this.service.savePurchase(obj).subscribe(
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
-          this.toastr.success(
-            'One record created successfully.',
-            'Operation Success'
-          );
-          
-          this.service.PrintMedicinePurchase(response.PurchaseId);
-
+          if (this.isEditMode) {
+            this.toastr.success(
+              'Purchase updated successfully.',
+              'Operation Success'
+            );
+          } else {
+            this.toastr.success(
+              'Purchase created successfully.',
+              'Operation Success'
+            );
+            this.service.PrintMedicinePurchase(response.PurchaseId);
+          }
           this.resetForm();
           this.resetFormPurchaseProduct();
+          this.router.navigate(['/admin/medicine-purchase-list']);
         } else {
           this.toastr.error(response.Message);
         }
         this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occured while fetching data.');
+        this.toastr.error('Error Occurred while fetching data.');
         this.dataLoading = false;
       }
     );

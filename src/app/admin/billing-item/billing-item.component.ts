@@ -508,6 +508,8 @@ afterPatientSelected(event: any) {
       ContactNo: selected.ContactNo,
       AadharNo: selected.AadharNo,
       Address: selected.Address,
+      UHID: selected.UHID,
+      PatientGardianName: selected.PatientGardianName,
       BillingDate: this.Patient.BillingDate || new Date(),
       PaymentDate: this.Patient.PaymentDate || new Date()
     };
