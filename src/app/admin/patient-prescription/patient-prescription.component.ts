@@ -3,7 +3,7 @@ import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AppService } from '../../utils/app.service';
 import { ConstantData } from '../../utils/constant-data';
-import { Gender, PaymentMode, Status,Category } from '../../utils/enum';
+import { Gender, PaymentMode, Status, Category } from '../../utils/enum';
 import { LoadDataService } from '../../utils/load-data.service';
 import {
   ActionModel,
@@ -20,13 +20,15 @@ declare var $: any;
   styleUrls: ['./patient-prescription.component.css']
 })
 export class PatientPrescriptionComponent {
-clearForm() {
-  this.Patient= [];
-  this.lensEntry ={};
-  this.SelectedPrescriptionList =[];
-}
 
-dataLoading: boolean = false;
+  clearForm() {
+    this.Patient = [];
+    this.lensEntry = {};
+    this.SelectedPrescriptionList = [];
+    this.SelectedMedicineList = [];
+  }
+
+  dataLoading: boolean = false;
   PatientList: any = [];
   ChargeList: any = [];
   Patient: any = {};
@@ -58,8 +60,22 @@ dataLoading: boolean = false;
   SelectedPrescriptionList: any[] = [];
   filteredHeadList: any[] = [];
   HeadList: any[] = [];
-  PrescriptionItemList: any=[];
+  PrescriptionItemList: any = [];
 
+  // **NEW: Medicine Related Properties**
+  MedicineItem: any = {
+    PrescriptionMedicineDetailId: 0,
+    MedicineId: null,
+    MedicineName: '',
+    DosageId: null,
+    DosageName: '',
+    TimingFreqDuration: ''
+  };
+  SelectedMedicineList: any[] = [];
+  MedicineList: any[] = [];
+  filteredMedicineList: any[] = [];
+  DosageList: any[] = [];
+  filteredDosageList: any[] = [];
 
   lensEntry: any = {
     RE_DV_SPH: '',
@@ -83,9 +99,6 @@ dataLoading: boolean = false;
     PD: '',
     Lens: ''
   };
-  
-  
-  
 
   sort(key: any) {
     this.sortKey = key;
@@ -103,7 +116,7 @@ dataLoading: boolean = false;
     private localService: LocalService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   redUrl: string = '';
 
@@ -114,37 +127,42 @@ dataLoading: boolean = false;
     this.resetForm();
     this.getHeadList();
     this.getPrescriptionItemList();
-    
+    this.getMedicineList();
+    this.getDosageList();
+
     this.route.queryParams.subscribe((params) => {
       const PatientPrescriptionId = params['id'];
       const redUrl = params['redUrl'];
-      
-      if(PatientPrescriptionId){
-          var request: RequestModel = {
-            request: this.localService.encrypt(JSON.stringify({PatientPrescriptionId:PatientPrescriptionId})).toString(),
-          };
-          this.dataLoading = true;
-          this.service.GetPatientPrescriptionDetails(request).subscribe(
-            (r1) => {
-              let response = r1 as any;
-              if (response.Message == ConstantData.SuccessMessage) {
-                this.Patient = response.PatientPrescriptionAll.GetPatient;
-                this.lensEntry = response.PatientPrescriptionAll.GetPatient;
-                this.SelectedPrescriptionList = response.PatientPrescriptionAll.GetPatientPrescriptionDetails;
-      
-                this.dataLoading = false;
-              } else {
-                this.toastr.error('Error occured while Fetching  the recored');
-              }
-            },
-            (err) => {
-              this.toastr.error('Error occured while Fetching  the recored');
+
+      if (PatientPrescriptionId) {
+        var request: RequestModel = {
+          request: this.localService.encrypt(JSON.stringify({ PatientPrescriptionId: PatientPrescriptionId })).toString(),
+        };
+        this.dataLoading = true;
+        this.service.GetPatientPrescriptionDetails(request).subscribe(
+          (r1) => {
+            let response = r1 as any;
+            if (response.Message == ConstantData.SuccessMessage) {
+              this.Patient = response.PatientPrescriptionAll.GetPatient;
+              this.lensEntry = response.PatientPrescriptionAll.GetPatient;
+              this.SelectedPrescriptionList = response.PatientPrescriptionAll.GetPatientPrescriptionDetails;
+              this.SelectedMedicineList = response.PatientPrescriptionAll.GetMedicineDetails || [];
+              console.log(this.SelectedMedicineList);
+              
               this.dataLoading = false;
+            } else {
+              this.toastr.error('Error occured while Fetching  the recored');
             }
-          );
+          },
+          (err) => {
+            this.toastr.error('Error occured while Fetching  the recored');
+            this.dataLoading = false;
+          }
+        );
       }
     });
   }
+
   validiateMenu() {
     var request: RequestModel = {
       request: this.localService
@@ -185,9 +203,6 @@ dataLoading: boolean = false;
     this.isSubmitted = false;
   }
 
-  
-
-
   getPatientList(PatientId: number) {
     var data = {
       PatientID: PatientId,
@@ -216,7 +231,6 @@ dataLoading: boolean = false;
     });
   }
 
-
   afterPrescriptionItemSelected(event: any) {
     this.PrescriptionItem.PrescriptionItemId = event.option.id;
     this.PrescriptionItem.PrescriptionItemName = event.option.value;
@@ -224,7 +238,7 @@ dataLoading: boolean = false;
       (x: any) => x.PrescriptionItemId == this.PrescriptionItem.PrescriptionItemId
     );
     this.PrescriptionItem.PrescriptionItemName = Transport.PrescriptionItemName;
-    if(this.PrescriptionItem.PrescriptionHeadId == null || this.PrescriptionItem.PrescriptionHeadId == '') {
+    if (this.PrescriptionItem.PrescriptionHeadId == null || this.PrescriptionItem.PrescriptionHeadId == '') {
       this.PrescriptionItem.PrescriptionHeadId = Transport.PrescriptionHeadId;
       this.PrescriptionItem.PrescriptionHeadName = Transport.PrescriptionHeadName;
     }
@@ -240,33 +254,29 @@ dataLoading: boolean = false;
       this.ChargeList = this.PrescriptionItemList;
     }
   }
+
   clearPrescriptionItemSelection() {
     this.ChargeList = this.PrescriptionItemList;
     this.PrescriptionItem.PrescriptionItemName = '';
     this.PrescriptionItem.PrescriptionItemId = null;
-    
   }
 
+  addPrescriptionDetail() {
+    if (this.PrescriptionItem.PrescriptionHeadName == null || this.PrescriptionItem.PrescriptionHeadName == '') {
+      this.toastr.error('Please Select Prescription Head!!!');
+      return;
+    }
+    if (this.PrescriptionItem.PrescriptionItemName == null || this.PrescriptionItem.PrescriptionItemName == '') {
+      this.toastr.error('Please Select Prescription Item Name!!!');
+      return;
+    }
 
-addPrescriptionDetail() {
-  if (this.PrescriptionItem.PrescriptionHeadName == null || this.PrescriptionItem.PrescriptionHeadName == '') {
-    this.toastr.error('Please Select Prescription Head!!!');
-    return;
+    const prescriptionItemCopy = { ...this.PrescriptionItem };
+    this.SelectedPrescriptionList.push(prescriptionItemCopy);
+
+    this.clearHeadSelection();
+    this.clearPrescriptionItemSelection();
   }
-  if (this.PrescriptionItem.PrescriptionItemName == null || this.PrescriptionItem.PrescriptionItemName == '') {
-    this.toastr.error('Please Select Prescription Item Name!!!');
-    return;
-  }
-
-  const prescriptionItemCopy = { ...this.PrescriptionItem };
-
-  this.SelectedPrescriptionList.push(prescriptionItemCopy);
-
-
-  this.clearHeadSelection();
-  this.clearPrescriptionItemSelection();
-}
-
 
   RemoveHotel(index: number) {
     this.SelectedPrescriptionList.splice(index, 1);
@@ -280,11 +290,11 @@ addPrescriptionDetail() {
   savePatientPrescription() {
     this.isSubmitted = true;
 
-    if(this.Patient.PatientID == null || this.Patient.PatientID == '') {
+    if (this.Patient.PatientID == null || this.Patient.PatientID == '') {
       this.toastr.error('Please Select Patient!!!');
       return;
     }
-    if(this.lensEntry == null || this.lensEntry == '') {
+    if (this.lensEntry == null || this.lensEntry == '') {
       this.toastr.error('Please fill at least one eye prescription!!!');
       return;
     }
@@ -300,14 +310,13 @@ addPrescriptionDetail() {
 
     this.Patient.CreatedBy = this.staffLogin.StaffId;
     this.Patient.UpdatedBy = this.staffLogin.StaffId;
-    this.Patient.PrescriptionDate = this.loadData.loadDateYMD(this.Patient.PrescriptionDate)
+    this.Patient.PrescriptionDate = this.loadData.loadDateYMD(this.Patient.PrescriptionDate);
 
     const data = {
       GetPatient: { ...this.Patient, ...this.lensEntry },
       GetPatientPrescriptionDetails: this.SelectedPrescriptionList,
-      
+      GetMedicineDetails: this.SelectedMedicineList
     };
-    
 
     const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(data)).toString(),
@@ -327,6 +336,7 @@ addPrescriptionDetail() {
           }
           this.service.PrintPrescription(response.PatientPrescriptionId);
           this.SelectedPrescriptionList = [];
+          this.SelectedMedicineList = [];
           this.resetForm();
         } else {
           this.toastr.error(response.Message);
@@ -340,7 +350,6 @@ addPrescriptionDetail() {
       }
     );
   }
-
 
   getPatientListall(PatientId: number) {
     var data = {
@@ -389,25 +398,20 @@ addPrescriptionDetail() {
     );
 
     if (selected) {
-      this.Patient = { ...selected }; // assign full patient object
-      // this.getPatientList(this.Patient.PatientID); // optional
+      this.Patient = { ...selected };
     }
     if (selected) {
-    this.Payment.OpticalItemRate = selected.Rate || 0;  // get the rate from your selected option
-    this.Payment.Quantity = 1;
-    this.onRateChange();  // calculate Amount and LineTotal
-  }
+      this.Payment.OpticalItemRate = selected.Rate || 0;
+      this.Payment.Quantity = 1;
+      this.onRateChange();
+    }
   }
 
   clearPatient() {
     this.filteredPatientList = this.PatientListAll;
-    this.Patient={};
+    this.Patient = {};
   }
 
-
-
-
-  // my code 
   onRateChange() {
     if (this.Payment.Quantity && this.Payment.OpticalItemRate) {
       this.Payment.Amount = this.Payment.OpticalItemRate * this.Payment.Quantity;
@@ -441,7 +445,6 @@ addPrescriptionDetail() {
     this.getPrescriptionItemList(this.PrescriptionItem.PrescriptionHeadId);
   }
 
-  // Filter heads for autocomplete
   filterHeadList(value: any) {
     if (value) {
       const filterValue = value.toLowerCase();
@@ -453,11 +456,11 @@ addPrescriptionDetail() {
     }
   }
 
-  // Clear head selection
   clearHeadSelection() {
     this.filteredHeadList = [...this.HeadList];
     this.PrescriptionItem.PrescriptionHeadId = null;
     this.PrescriptionItem.PrescriptionHeadName = '';
+    this.ChargeList = [];
   }
 
   getHeadList() {
@@ -487,7 +490,7 @@ addPrescriptionDetail() {
 
   getPrescriptionItemList(PrescriptionHeadId?: number) {
     const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({PrescriptionHeadId:PrescriptionHeadId})).toString()
+      request: this.localService.encrypt(JSON.stringify({ PrescriptionHeadId: PrescriptionHeadId })).toString()
     };
 
     this.dataLoading = true;
@@ -509,6 +512,157 @@ addPrescriptionDetail() {
     });
   }
 
+  // **NEW: Medicine Related Methods**
+  getMedicineList() {
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+
+    this.dataLoading = true;
+    this.service.getMedicineList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.MedicineList = response.MedicineList || [];
+          this.filteredMedicineList = this.MedicineList;
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching medicine records");
+        this.dataLoading = false;
+      }
+    });
+  }
+
+  getDosageList() {
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+
+    this.dataLoading = true;
+    this.service.getDosageList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.DosageList = response.DosageList || [];
+          this.filteredDosageList = [...this.DosageList];
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching dosage records");
+        this.dataLoading = false;
+      }
+    });
+  }
+
+filterMedicineList(value: any) {
+
+  if (!this.MedicineList || this.MedicineList.length === 0) {
+    this.filteredMedicineList = this.MedicineList;
+    
+    return;
+  }
+
+  if (value) {
+    const filterValue = value.toLowerCase();
+    this.filteredMedicineList = this.MedicineList.filter((option: any) =>
+      option.MedicineName?.toLowerCase().includes(filterValue)
+    );
+  } else {
+    this.filteredMedicineList =this.MedicineList;
+  }
+}
+
+
+afterMedicineSelected(event: any) {
+
+  const selectedMedicine = this.MedicineList.find(
+    (x: any) => x.MedicineId === event.option.id
+  );
+
+  if (selectedMedicine) {
+    this.MedicineItem.MedicineId = selectedMedicine.MedicineId;
+    this.MedicineItem.MedicineName = selectedMedicine.MedicineName;
+
+    // ⭐ STORE CATEGORY
+    this.MedicineItem.CategoryId = selectedMedicine.CategoryId;
+    this.MedicineItem.CategoryName = selectedMedicine.CategoryName;
+  }
+}
+
+  clearMedicineSelection() {
+    this.filteredMedicineList =this.MedicineList;
+    this.MedicineItem.MedicineId = null;
+    this.MedicineItem.MedicineName = '';
+  }
+
+  filterDosageList(value: any) {
+    if (value) {
+      const filterValue = value.toLowerCase();
+      this.filteredDosageList = this.DosageList.filter((option: any) =>
+        option.DosageName.toLowerCase().includes(filterValue)
+      );
+    } else {
+      this.filteredDosageList =this.DosageList;
+    }
+  }
+
+  afterDosageSelected(event: any) {
+    this.MedicineItem.DosageId = event.option.id;
+    this.MedicineItem.DosageName = event.option.value;
+  }
+
+  clearDosageSelection() {
+    this.filteredDosageList =this.DosageList;
+    this.MedicineItem.DosageId = null;
+    this.MedicineItem.DosageName = '';
+  }
+
+  addMedicineDetail() {
+    if (!this.MedicineItem.MedicineName) {
+      this.toastr.error('Please Select Medicine!!!');
+      return;
+    }
+    if (!this.MedicineItem.DosageName) {
+      this.toastr.error('Please Select Dosage!!!');
+      return;
+    }
+    if (!this.MedicineItem.TimingFreqDuration) {
+      this.toastr.error('Please Enter Timing/Frequency/Duration!!!');
+      return;
+    }
+
+    const medicineItemCopy = { ...this.MedicineItem };
+    this.SelectedMedicineList.push(medicineItemCopy);
+
+    this.clearMedicineForm();
+  }
+
+  clearMedicineForm() {
+    this.MedicineItem = {
+      PrescriptionMedicineDetailId: 0,
+      MedicineId: null,
+      MedicineName: '',
+      DosageId: null,
+      DosageName: '',
+      TimingFreqDuration: ''
+    };
+    this.clearMedicineSelection();
+    this.clearDosageSelection();
+  }
+
+  RemoveMedicine(index: number) {
+    this.SelectedMedicineList.splice(index, 1);
+  }
+
   saveLensEntry() {
     if (!this.lensEntry.RE_DV_SPH && !this.lensEntry.LE_DV_SPH) {
       this.toastr.error('Please fill at least one eye prescription');
@@ -519,30 +673,30 @@ addPrescriptionDetail() {
   }
 
   clearLensEntry() {
-      this.lensEntry = {
-        RE_DV_SPH: '',
-        RE_DV_CYL: '',
-        RE_DV_AXIS: '',
-        RE_DV_V: '',
-        RE_NV_SPH: '',
-        RE_NV_CYL: '',
-        RE_NV_AXIS: '',
-        RE_NV_V: '',
-    
-        LE_DV_SPH: '',
-        LE_DV_CYL: '',
-        LE_DV_AXIS: '',
-        LE_DV_V: '',
-        LE_NV_SPH: '',
-        LE_NV_CYL: '',
-        LE_NV_AXIS: '',
-        LE_NV_V: '',
-    
-        PD: '',
-        Lens: ''
-      };
-}
-    
+    this.lensEntry = {
+      RE_DV_SPH: '',
+      RE_DV_CYL: '',
+      RE_DV_AXIS: '',
+      RE_DV_V: '',
+      RE_NV_SPH: '',
+      RE_NV_CYL: '',
+      RE_NV_AXIS: '',
+      RE_NV_V: '',
+
+      LE_DV_SPH: '',
+      LE_DV_CYL: '',
+      LE_DV_AXIS: '',
+      LE_DV_V: '',
+      LE_NV_SPH: '',
+      LE_NV_CYL: '',
+      LE_NV_AXIS: '',
+      LE_NV_V: '',
+
+      PD: '',
+      Lens: ''
+    };
+  }
+
   closeLensEntryModal() {
     $('#lensEntryModal').modal('hide');
   }
@@ -550,5 +704,4 @@ addPrescriptionDetail() {
   addLensEntry() {
     $('#lensEntryModal').modal('show');
   }
-  
 }

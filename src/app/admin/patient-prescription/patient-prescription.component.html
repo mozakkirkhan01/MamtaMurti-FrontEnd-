@@ -272,6 +272,116 @@
     </div>
   </div>
 
+  <!-- medicine list here  -->
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Add Medicine</h5>
+            <form #formMedicineDetails="ngForm">
+              <div class="row">
+                <!-- Medicine Name -->
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Select Medicine</mat-label>
+                  <input matInput name="MedicineName"
+                         (ngModelChange)="filterMedicineList($event)"
+                         placeholder="Search medicine"
+                         [(ngModel)]="MedicineItem.MedicineName"
+                         [matAutocomplete]="autoMedicineSelector" />
+                  <mat-autocomplete #autoMedicineSelector="matAutocomplete"
+                                    (optionSelected)="afterMedicineSelected($event)">
+                    <mat-option *ngFor="let option of filteredMedicineList" 
+                                [id]="option.MedicineId"
+                                [value]="option.MedicineName">
+                      {{ option.MedicineName }} - {{ option.CategoryName }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix 
+                          *ngIf="MedicineItem.MedicineName" 
+                          color="primary"
+                          (click)="clearMedicineSelection()">
+                    <mat-icon><i class="ri-close-circle-line"></i></mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <!-- Dosage -->
+                <mat-form-field appearance="outline" class="col-lg-2">
+                  <mat-label>Dosage</mat-label>
+                  <input matInput name="DosageName"
+                         (ngModelChange)="filterDosageList($event)"
+                         placeholder="Search dosage"
+                         [(ngModel)]="MedicineItem.DosageName"
+                         [matAutocomplete]="autoDosageSelector" />
+                  <mat-autocomplete #autoDosageSelector="matAutocomplete"
+                                    (optionSelected)="afterDosageSelected($event)">
+                    <mat-option *ngFor="let option of filteredDosageList" 
+                                [id]="option.DosageId"
+                                [value]="option.DosageName">
+                      {{ option.DosageName }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix 
+                          *ngIf="MedicineItem.DosageName" 
+                          color="primary"
+                          (click)="clearDosageSelection()">
+                    <mat-icon><i class="ri-close-circle-line"></i></mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <!-- Timing/Frequency/Duration -->
+                <mat-form-field appearance="outline" class="col-lg-5">
+                  <mat-label>Timing/Frequency/Duration</mat-label>
+                  <input matInput name="TimingFreqDuration"
+                         [(ngModel)]="MedicineItem.TimingFreqDuration"
+                         placeholder="e.g., 1-0-1, After meal, 7 days" />
+                </mat-form-field>
+                
+                <div appearance="outline" class="col-sm-2">
+                  <button mat-flat-button color="primary" (click)="addMedicineDetail()">
+                    ADD MEDICINE
+                  </button>
+                </div>
+              </div>
+
+              <a class="list-group-item list-group-item-action" *ngIf="SelectedMedicineList.length > 0">
+                <div class="row">
+                  <div class="col-sm-12 table-responsive">
+                    <table class="table table-bordered table-hover table-lg">
+                      <thead class="thead-light">
+                        <tr>
+                          <th class="text-center">#</th>
+                          <th>Medicine Name</th>
+                          <th>Dosage</th>
+                          <th>Timing/Frequency/Duration</th>
+                          <th class="text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let medicine of SelectedMedicineList; let i = index">
+                          <td class="text-center">{{ i + 1 }}</td>
+                          <td>{{ medicine.MedicineName }} - {{ medicine.CategoryName }}</td>
+                          <td>{{ medicine.DosageName }}</td>
+                          <td>{{ medicine.TimingFreqDuration }}</td>
+                          <td class="text-center">
+                            <button (click)="RemoveMedicine(i)" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash-fill"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="section">
     <div class="row">
       <div class="col-lg-12">

@@ -85,6 +85,7 @@ import { PrescriptionHeadComponent } from './admin/prescription-head/prescriptio
 import { PrescriptionItemComponent } from './admin/prescription-item/prescription-item.component';
 import { PatientPrescriptionComponent } from './admin/patient-prescription/patient-prescription.component';
 import { PatientPrescriptionListComponent } from './admin/patient-prescription-list/patient-prescription-list.component';
+import { DosageComponent } from './admin/dosage/dosage.component';
 @NgModule({
   declarations: [
     SurgeryPackageComponent,
@@ -157,6 +158,7 @@ import { PatientPrescriptionListComponent } from './admin/patient-prescription-l
     PrescriptionItemComponent,
     PatientPrescriptionComponent,
     PatientPrescriptionListComponent,
+    DosageComponent,
   ],
   imports: [
     

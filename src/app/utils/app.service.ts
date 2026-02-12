@@ -1095,4 +1095,23 @@ deletePurchase(obj: any) {
     return this.http.post(this.apiUrl + 'generalPatient/SaveGeneralPatient', obj, { headers: this.headers })
   }
 
+
+
+
+
+
+
+  getDosageList(obj: any) {
+    return this.http.post(this.apiUrl + 'Dosage/DosageList', obj, { headers: this.headers })
+  }
+
+  deleteDosage(obj: any) {
+    return this.http.post(this.apiUrl + 'Dosage/DeleteDosage', obj, { headers: this.headers })
+  }
+
+  saveDosage(obj: any) {
+    return this.http.post(this.apiUrl + 'Dosage/SaveDosage', obj, { headers: this.headers })
+  }
+
+
 }

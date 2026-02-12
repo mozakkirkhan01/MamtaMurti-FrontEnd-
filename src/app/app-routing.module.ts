@@ -63,6 +63,7 @@ import { PrescriptionHeadComponent } from './admin/prescription-head/prescriptio
 import { PrescriptionItemComponent } from './admin/prescription-item/prescription-item.component';
 import { PatientPrescriptionComponent } from './admin/patient-prescription/patient-prescription.component';
 import { PatientPrescriptionListComponent } from './admin/patient-prescription-list/patient-prescription-list.component';
+import { DosageComponent } from './admin/dosage/dosage.component';
 
 const routes: Routes = [
   { path: '', redirectTo: "/admin-login", pathMatch: 'full' },
@@ -131,6 +132,7 @@ const routes: Routes = [
       {path:'prescription-item',component:PrescriptionItemComponent},
       {path:'patient-prescription',component:PatientPrescriptionComponent},
       {path:'patient-prescription-list',component:PatientPrescriptionListComponent},
+      {path:'manage-dosage',component:DosageComponent},
     ]
   },
   { path: 'page-not-found', component: PageNotFoundComponent },

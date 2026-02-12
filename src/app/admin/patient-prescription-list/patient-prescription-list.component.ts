@@ -257,12 +257,57 @@ export class PatientPrescriptionListComponent {
         },
       });
     }
-    openViewModal(item: any) {
-      this.selectedPrescription = item;
+    // openViewModal(item: any) {
+    //   this.selectedPrescription = item;
       
-      $('#viewPrescriptionDetailsModal').modal('show');
-      this.getPatientPrescriptionItem(item);
+    //   $('#viewPrescriptionDetailsModal').modal('show');
+    //   this.getPatientPrescriptionItem(item);
+    // }
+
+    // Add these properties to your component class
+
+// selectedPrescription: any = null;
+// PatientPrescriptionItems: any[] = [];
+PatientMedicineDetails: any[] = []; // **NEW: Add this property**
+
+// Update your method that opens the view modal
+openViewModal(prescription: any) {
+  const request: RequestModel = {
+    request: this.localService.encrypt(
+      JSON.stringify({ PatientPrescriptionId: prescription.PatientPrescriptionId })
+    ).toString(),
+  };
+
+  this.dataLoading = true;
+  this.service.GetPatientPrescriptionDetails(request).subscribe(
+    (r1) => {
+      let response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        this.selectedPrescription = response.PatientPrescriptionAll.GetPatient;
+        this.PatientPrescriptionItems = response.PatientPrescriptionAll.GetPatientPrescriptionDetails || [];
+        this.PatientMedicineDetails = response.PatientPrescriptionAll.GetMedicineDetails || []; // **NEW: Load medicine details**
+        
+        // Open the modal
+        $('#viewPrescriptionDetailsModal').modal('show');
+      } else {
+        this.toastr.error('Error occurred while fetching prescription details');
+      }
+      this.dataLoading = false;
+    },
+    (err) => {
+      this.toastr.error('Error occurred while fetching prescription details');
+      this.dataLoading = false;
     }
+  );
+}
+
+// Optional: Clear data when modal closes
+closeViewModal() {
+  this.selectedPrescription = null;
+  this.PatientPrescriptionItems = [];
+  this.PatientMedicineDetails = []; // **NEW: Clear medicine details**
+  $('#viewPrescriptionDetailsModal').modal('hide');
+}
 
     getPatientPrescriptionItem(obj: any) {
       var request: RequestModel = {
