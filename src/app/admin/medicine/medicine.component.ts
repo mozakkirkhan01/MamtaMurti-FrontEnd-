@@ -8,7 +8,7 @@ import { ConstantData } from "../../utils/constant-data";
 import { LocalService } from "../../utils/local.service";
 import { LoadDataService } from '../../utils/load-data.service';
 import { Status } from '../../utils/enum';
-import { ActionModel ,RequestModel ,StaffLoginModel } from '../../utils/interface';
+import { ActionModel, RequestModel, StaffLoginModel } from '../../utils/interface';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
@@ -23,7 +23,7 @@ export class MedicineComponent implements OnInit {
   employeeDetail: any;
   StatusList = this.loadData.GetEnumList(Status);
   AllStatusList = Status;
-  MedicineList: any={};
+  MedicineList: any = {};
   dataLoading: boolean = false;
   submitted: boolean;
   Search: string;
@@ -33,24 +33,24 @@ export class MedicineComponent implements OnInit {
   pageSize = ConstantData.PageSizes;
   itemPerPage: number = this.pageSize[0];
   action: ActionModel = {} as ActionModel;
-   staffLogin: StaffLoginModel = {} as StaffLoginModel;
-  GstChargeList: any =[];
-  CategoryChargeList: any =[];
-  UnitChargeList: any =[];
-  ManufacturerChargeList: any =[];
-  MedicineTypeChargeList: any =[];
-  CategoryList: any=[];
-  UnitList: any=[];
-  GSTList: any= [];
-  ManufacturerList: any= [];
-  MedicineTypeList: any=[];
+  staffLogin: StaffLoginModel = {} as StaffLoginModel;
+  GstChargeList: any = [];
+  CategoryChargeList: any = [];
+  UnitChargeList: any = [];
+  ManufacturerChargeList: any = [];
+  MedicineTypeChargeList: any = [];
+  CategoryList: any = [];
+  UnitList: any = [];
+  GSTList: any = [];
+  ManufacturerList: any = [];
+  MedicineTypeList: any = [];
 
   constructor(
     private service: AppService,
     private localService: LocalService,
     private loadData: LoadDataService,
     private router: Router,
-     private toastr: ToastrService,
+    private toastr: ToastrService,
   ) { }
 
   ngOnInit(): void {
@@ -67,7 +67,7 @@ export class MedicineComponent implements OnInit {
 
   validiateMenu() {
     var obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify({ Url: this.router.url,StaffLoginId:this.staffLogin.StaffLoginId })).toString()
+      request: this.localService.encrypt(JSON.stringify({ Url: this.router.url, StaffLoginId: this.staffLogin.StaffLoginId })).toString()
     }
     this.dataLoading = true
     this.service.validiateMenu(obj).subscribe((response: any) => {
@@ -83,10 +83,11 @@ export class MedicineComponent implements OnInit {
   resetForm() {
     this.Medicine = {};
     this.Medicine.Status = 1;
-    this.Medicine.UnitId = "";
-    this.Medicine.GSTId = "";
-    this.Medicine.CategoryId = "";
-    this.Medicine.ManufacturerId = "";
+    this.Medicine.UnitId = null;  // or 0
+    this.Medicine.GSTId = null;   // or 0
+    this.Medicine.CategoryId = null;  // or 0
+    this.Medicine.ManufacturerId = null;  // or 0
+    this.Medicine.MedicineTypeId = null;  // or 0
     if (this.formMedicine) {
       this.formMedicine.control.markAsPristine();
       this.formMedicine.control.markAsUntouched();
@@ -113,26 +114,26 @@ export class MedicineComponent implements OnInit {
     this.reverse = !this.reverse;
   }
 
-getMedicineList() {
-  
-  var obj: RequestModel = {
-    request: this.localService.encrypt(JSON.stringify({ })).toString()
-  };
-  this.dataLoading = true;
-  this.service.getMedicineList(obj).subscribe(r1 => {
-    let response = r1 as any;
-    if (response.Message == ConstantData.SuccessMessage) {
-      this.MedicineList = response.MedicineList;
-      
-    } else {
-      this.toastr.error(response.Message);
-    }
-    this.dataLoading = false;
-  }, (err => {
-    this.toastr.error("Error Occurred while fetching data.");
-    this.dataLoading = false;
-  }));
-}
+  getMedicineList() {
+
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+    this.dataLoading = true;
+    this.service.getMedicineList(obj).subscribe(r1 => {
+      let response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        this.MedicineList = response.MedicineList;
+
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    }, (err => {
+      this.toastr.error("Error Occurred while fetching data.");
+      this.dataLoading = false;
+    }));
+  }
 
 
 
@@ -153,7 +154,7 @@ getMedicineList() {
   //   }));
   // }
 
-  
+
 
 
 
@@ -174,50 +175,51 @@ getMedicineList() {
   //   }));
   // }
 
- 
 
-  saveMedicine() {
-    this.submitted = true;
-    if (this.formMedicine.invalid) {
-      this.toastr.warning("Fill all the Required Fields.", "Invailid Form")
-      this.dataLoading = false;
-      return;
-    }
-      this.Medicine.CreatedBy = this.staffLogin.StaffId;
-    this.Medicine.UpdatedBy = this.staffLogin.StaffId;
-     var obj: RequestModel = {
-         request: this.localService.encrypt(JSON.stringify(this.Medicine)).toString()
-       }
-    this.dataLoading = true;
-    this.service.saveMedicine(obj).subscribe(r1 => {
-      let response = r1 as any;
-      if (response.Message == ConstantData.SuccessMessage) {
-        if (this.Medicine.MedicineId > 0) {
-          this.toastr.success("Medicine Updated detail successfully.");
-          $('#modal_popUp').modal('hide');
-        } else {
-          this.toastr.success("Medicine created successfully.");
-         this.dataLoading = false;
-          $('#modal_popUp').modal('hide');
-          this.Medicine.MedicineId = null;
-          this.Medicine.Name = "";
-          this.Medicine.HSNCode = "";
-          if (this.formMedicine) {
-            this.formMedicine.control.markAsPristine();
-            this.formMedicine.control.markAsUntouched();
-          }
-          this.submitted = false
-        }
-        this.getMedicineList();
-      } else {
-        toastr.error(response.Message);
-        this.dataLoading = false;
-      }
-    }, (err => {
-      toastr.error("Error Occured while fetching data.");
-      this.dataLoading = false;
-    }));
+
+saveMedicine() {
+  this.submitted = true;
+  
+  if (this.formMedicine.invalid) {
+    this.toastr.warning("Fill all the Required Fields.", "Invalid Form");
+    return;
   }
+  
+  // Validate GSTId specifically
+  if (!this.Medicine.GSTId || this.Medicine.GSTId <= 0) {
+    this.toastr.warning("Please select a GST", "Invalid Form");
+    return;
+  }
+  
+  this.Medicine.CreatedBy = this.staffLogin.StaffId;
+  this.Medicine.UpdatedBy = this.staffLogin.StaffId;
+  
+  var obj: RequestModel = {
+    request: this.localService.encrypt(JSON.stringify(this.Medicine)).toString()
+  }
+  
+  this.dataLoading = true;
+  
+  this.service.saveMedicine(obj).subscribe(r1 => {
+    let response = r1 as any;
+    if (response.Message == ConstantData.SuccessMessage) {
+      if (this.Medicine.MedicineId > 0) {
+        this.toastr.success("Medicine Updated successfully.");
+      } else {
+        this.toastr.success("Medicine created successfully.");
+      }
+      $('#modal_popUp').modal('hide');
+      this.getMedicineList();
+      this.resetForm();
+    } else {
+      this.toastr.error(response.Message);
+    }
+    this.dataLoading = false;
+  }, (err => {
+    this.toastr.error("Error Occurred while saving data.");
+    this.dataLoading = false;
+  }));
+}
 
   // deleteMedicine(obj: any) {
   //   if (confirm("Are you sure want to delete this record") == true) {
@@ -238,29 +240,29 @@ getMedicineList() {
   //   }
   // }
 
-   deleteMedicine(obj: any) {
-     if (confirm("Are your sure you want to delete this recored")) {
-       var request: RequestModel = {
-         request: this.localService.encrypt(JSON.stringify(obj)).toString()
-       }
-       this.dataLoading = true;
-       this.service.deleteMedicine(request).subscribe(r1 => {
-         let response = r1 as any
-         if (response.Message == ConstantData.SuccessMessage) {
-           this.toastr.success("Record Deleted successfully")
-           this.getMedicineList()
-         } else {
-           this.toastr.error(response.Message)
-           this.dataLoading = false;
-         }
-       }, (err => {
-         this.toastr.error("Error occured while deleteing the recored")
-         this.dataLoading = false;
-       }))
-     }
-   }
+  deleteMedicine(obj: any) {
+    if (confirm("Are your sure you want to delete this recored")) {
+      var request: RequestModel = {
+        request: this.localService.encrypt(JSON.stringify(obj)).toString()
+      }
+      this.dataLoading = true;
+      this.service.deleteMedicine(request).subscribe(r1 => {
+        let response = r1 as any
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.toastr.success("Record Deleted successfully")
+          this.getMedicineList()
+        } else {
+          this.toastr.error(response.Message)
+          this.dataLoading = false;
+        }
+      }, (err => {
+        this.toastr.error("Error occured while deleteing the recored")
+        this.dataLoading = false;
+      }))
+    }
+  }
 
-    getGSTList() {
+  getGSTList() {
     const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
@@ -272,7 +274,7 @@ getMedicineList() {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.GSTList = response.GSTList;
-          
+
         } else {
           this.toastr.error(response.Message);
         }
@@ -287,110 +289,110 @@ getMedicineList() {
   }
 
   getCategoryList() {
-  const obj: RequestModel = {
-    request: this.localService.encrypt(JSON.stringify({})).toString()
-  };
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
 
-  this.dataLoading = true;
+    this.dataLoading = true;
 
-  this.service.getCategoryList(obj).subscribe({
-    next: r1 => {
-      let response = r1 as any;
-      if (response.Message == ConstantData.SuccessMessage) {
-        this.CategoryList = response.CategoryList;
-        
-      } else {
-        this.toastr.error(response.Message);
-      }
-      this.dataLoading = false;
-    },
-    error: err => {
-      console.error("API error:", err);
-      this.toastr.error("Error while fetching records");
-      this.dataLoading = false;
-    }
-  });
-}
+    this.service.getCategoryList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.CategoryList = response.CategoryList;
 
-    getUnitList() {
-      const obj: RequestModel = {
-        request: this.localService.encrypt(JSON.stringify({})).toString()
-      };
-  
-      this.dataLoading = true;
-  
-      this.service.getUnitList(obj).subscribe({
-        next: r1 => {
-          let response = r1 as any;
-          if (response.Message == ConstantData.SuccessMessage) {
-            this.UnitList = response.UnitList;
-            
-          } else {
-            this.toastr.error(response.Message);
-          }
-          this.dataLoading = false;
-        },
-        error: err => {
-          console.error("API error:", err);
-          this.toastr.error("Error while fetching records");
-          this.dataLoading = false;
+        } else {
+          this.toastr.error(response.Message);
         }
-      });
-    }
-
-    getManufacturerList() {
-   const obj: RequestModel = {
-     request: this.localService.encrypt(JSON.stringify({})).toString()
-   };
- 
-   this.dataLoading = true;
- 
-   this.service.getManufacturerList(obj).subscribe({
-     next: r1 => {
-       let response = r1 as any;
-       if (response.Message == ConstantData.SuccessMessage) {
-         this.ManufacturerList = response.ManufacturerList;
-         
-       } else {
-         this.toastr.error(response.Message);
-       }
-       this.dataLoading = false;
-     },
-     error: err => {
-       console.error("API error:", err);
-       this.toastr.error("Error while fetching records");
-       this.dataLoading = false;
-     }
-   });
- }
-
- getMedicineTypeList() {
-  const obj: RequestModel = {
-    request: this.localService.encrypt(JSON.stringify({})).toString()
-  };
-
-  this.dataLoading = true;
-
-  this.service.getMedicineTypeList(obj).subscribe({
-    next: r1 => {
-      let response = r1 as any;
-      if (response.Message == ConstantData.SuccessMessage) {
-        this.MedicineTypeList = response.MedicineTypeList;
-        
-      } else {
-        this.toastr.error(response.Message);
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
       }
-      this.dataLoading = false;
-    },
-    error: err => {
-      console.error("API error:", err);
-      this.toastr.error("Error while fetching records");
-      this.dataLoading = false;
-    }
-  });
-}
+    });
+  }
 
-    filterGstList(value: any) {
+  getUnitList() {
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+
+    this.dataLoading = true;
+
+    this.service.getUnitList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.UnitList = response.UnitList;
+
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
+      }
+    });
+  }
+
+  getManufacturerList() {
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+
+    this.dataLoading = true;
+
+    this.service.getManufacturerList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.ManufacturerList = response.ManufacturerList;
+
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
+      }
+    });
+  }
+
+  getMedicineTypeList() {
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+
+    this.dataLoading = true;
+
+    this.service.getMedicineTypeList(obj).subscribe({
+      next: r1 => {
+        let response = r1 as any;
+        if (response.Message == ConstantData.SuccessMessage) {
+          this.MedicineTypeList = response.MedicineTypeList;
+
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: err => {
+        console.error("API error:", err);
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
+      }
+    });
+  }
+
+  filterGstList(value: any) {
     if (value) {
       const GSTfilterValue = value.toLowerCase();
       this.GstChargeList = this.GSTList.filter((option: any) =>
@@ -401,7 +403,7 @@ getMedicineList() {
     }
   }
 
-    afterGSTSelected(event: any) {
+  afterGSTSelected(event: any) {
     this.Medicine.GSTId = event.option.id;
     this.Medicine.GSTName = event.option.value;
     var Transport = this.GstChargeList.find(
@@ -411,13 +413,13 @@ getMedicineList() {
     this.Medicine.GSTId = Transport.GSTId;
   }
 
-   clearGST() {
+  clearGST() {
     this.GstChargeList = this.GSTList;
-    this.Medicine.GSTId = null;
+    this.Medicine.GSTId = 0;  // Use 0 instead of null
     this.Medicine.GSTName = "";
   }
 
-      filterCategoryList(value: any) {
+  filterCategoryList(value: any) {
     if (value) {
       const CatfilterValue = value.toLowerCase();
       this.CategoryChargeList = this.CategoryList.filter((option: any) =>
@@ -428,7 +430,7 @@ getMedicineList() {
     }
   }
 
-    afterCategorySelected(event: any) {
+  afterCategorySelected(event: any) {
     this.Medicine.CategoryId = event.option.id;
     this.Medicine.CategoryName = event.option.value;
     var Transport = this.CategoryChargeList.find(
@@ -438,13 +440,13 @@ getMedicineList() {
     this.Medicine.CategoryId = Transport.CategoryId;
   }
 
-   clearCategory() {
+  clearCategory() {
     this.CategoryChargeList = this.CategoryList;
     this.Medicine.CategoryId = null;
     this.Medicine.CategoryName = "";
   }
 
-      filterUnitList(value: any) {
+  filterUnitList(value: any) {
     if (value) {
       const UnitfilterValue = value.toLowerCase();
       this.UnitChargeList = this.UnitList.filter((option: any) =>
@@ -455,7 +457,7 @@ getMedicineList() {
     }
   }
 
-    afterUnitSelected(event: any) {
+  afterUnitSelected(event: any) {
     this.Medicine.UnitId = event.option.id;
     this.Medicine.UnitName = event.option.value;
     var Transport = this.UnitChargeList.find(
@@ -465,17 +467,17 @@ getMedicineList() {
     this.Medicine.UnitId = Transport.UnitId;
   }
 
-   clearUnit() {
+  clearUnit() {
     this.UnitChargeList = this.UnitList;
     this.Medicine.UnitId = null;
     this.Medicine.UnitName = "";
   }
 
 
-  
 
 
-   filterManufacturerList(value: any) {
+
+  filterManufacturerList(value: any) {
     if (value) {
       const ManfilterValue = value.toLowerCase();
       this.ManufacturerChargeList = this.ManufacturerList.filter((option: any) =>
@@ -486,7 +488,7 @@ getMedicineList() {
     }
   }
 
-    afterManufacturerSelected(event: any) {
+  afterManufacturerSelected(event: any) {
     this.Medicine.ManufacturerId = event.option.id;
     this.Medicine.ManufacturerName = event.option.value;
     var Transport = this.ManufacturerChargeList.find(
@@ -496,13 +498,13 @@ getMedicineList() {
     this.Medicine.ManufacturerId = Transport.ManufacturerId;
   }
 
-   clearManufacturer() {
+  clearManufacturer() {
     this.ManufacturerChargeList = this.ManufacturerList;
     this.Medicine.ManufacturerId = null;
     this.Medicine.ManufacturerName = "";
   }
 
-   filterMedicineTypeList(value: any) {
+  filterMedicineTypeList(value: any) {
     if (value) {
       const ManfilterValue = value.toLowerCase();
       this.MedicineTypeChargeList = this.MedicineTypeList.filter((option: any) =>
@@ -513,7 +515,7 @@ getMedicineList() {
     }
   }
 
-    afterMedicineTypeSelected(event: any) {
+  afterMedicineTypeSelected(event: any) {
     this.Medicine.MedicineTypeId = event.option.id;
     this.Medicine.MedicineTypeName = event.option.value;
     var Transport = this.MedicineTypeChargeList.find(
@@ -523,7 +525,7 @@ getMedicineList() {
     this.Medicine.MedicineTypeId = Transport.MedicineTypeId;
   }
 
-   clearMedicineType() {
+  clearMedicineType() {
     this.MedicineTypeChargeList = this.MedicineTypeList;
     this.Medicine.MedicineTypeId = null;
     this.Medicine.MedicineTypeName = "";
