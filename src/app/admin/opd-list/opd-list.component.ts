@@ -182,25 +182,30 @@ DeleteOpdBilling(obj: any) {
     this.getOpdList();
   }
 
-  editPackageCollection(data: any) {
-      
+editPackageCollection(data: any) {
+  // ✅ Send only OpdId, not the entire row object
   const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify(data)).toString(),
-    };
+    request: this.localService.encrypt(
+      JSON.stringify({ OpdId: data.OpdId })  // explicit OpdId only
+    ).toString(),
+  };
+
   this.service.getOpdAllList(obj).subscribe(
     (response: any) => {
       try {
         this.alldata = response.opd;
         this.service.setSelectedOpdData(this.alldata);
-        this.router.navigate(['/admin/opd-booking'], {
-          queryParams: { id: this.alldata.GetOpdBooking.OpdId, redUrl: '/admin/opd-List' }
-        });
-
+       this.router.navigate(['/admin/opd-booking'], {
+  queryParams: { 
+    id: data.OpdId,           // opdId for editing
+    patientId: data.PatientId, // explicit patientId
+    redUrl: '/admin/opd-List' 
+  }
+});
       } catch (error) {
         this.toastr.error(response.Message || "Error processing data.");
       }
-    },
-    
+    }
   );
 }
 

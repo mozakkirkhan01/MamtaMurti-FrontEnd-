@@ -64,36 +64,31 @@ export class OpdBookingComponent implements OnInit {
     private route: ActivatedRoute
   ) {}
 
-  ngOnInit(): void {
-    this.getPatientListall(this.Patient.PatientId);
-    this.staffLogin = this.localService.getEmployeeDetail();
-    this.validiateMenu();
-    this.resetForm();
-    this.getChargeList();
-    
-    this.route.queryParams.subscribe((params: any) => {
-      this.Patient.PatientId = params.id;
-      this.redUrl = params.redUrl;
-      if (this.Patient.PatientId > 0) {
-        this.getPatientList(this.Patient.PatientId);
-      }
-    });
+ngOnInit(): void {
+  this.getPatientListall(this.Patient.PatientId);
+  this.staffLogin = this.localService.getEmployeeDetail();
+  this.validiateMenu();
+  this.resetForm();
+  this.getChargeList();
 
-    this.route.queryParams.subscribe((params) => {
-      const opdId = params['id'];
-      const redUrl = params['redUrl'];
-      const data = this.service.getSelectedOpdData();
-      if (data && data.GetOpdBooking.OpdId == opdId) {
-        this.Patient = {
-          ...data.GetOpdBooking,
-          ...data.GetPaymentCollection,
-        };
-        
-        this.SelectedPaymentDetailList = data.GetPaymentBookingDetails;
-        this.SelectedPaymentCollectionList = data.GetPaymentDetails;
-      }
-    });
-  }
+  this.route.queryParams.subscribe((params: any) => {
+    const opdId = params['id'];
+    const patientId = params['patientId'];
+    this.redUrl = params['redUrl'];
+
+    const data = this.service.getSelectedOpdData();
+    if (data && data.GetOpdBooking.OpdId == opdId) {
+      this.Patient = {
+        ...data.GetOpdBooking,
+        ...data.GetPaymentCollection,
+      };
+      this.SelectedPaymentDetailList = data.GetPaymentBookingDetails;
+      this.SelectedPaymentCollectionList = data.GetPaymentDetails;
+    } else if (patientId > 0) {
+      this.getPatientList(patientId);
+    }
+  });
+}
 
   // Utility methods
   sort(key: any) {
@@ -230,13 +225,14 @@ export class OpdBookingComponent implements OnInit {
   }
 
   afterPatientSelected(event: any) {
-    const selectedName = event.option.value;
+    const selectedUHID = event.option.value;
     const selected = this.PatientListAll.find(
-      (x: any) => x.PatientName === selectedName
+      (x: any) => x.UHID === selectedUHID
     );
 
     if (selected) {
       this.Patient = { ...selected };
+      this.Patient.PatientName = selected.PatientName; //keep name diplayed
       this.getPatientList(this.Patient.PatientID);
       this.Patient.OpdDate = new Date();
       this.Patient.PaymentDate = new Date();
