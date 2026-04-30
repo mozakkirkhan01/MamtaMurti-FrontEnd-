@@ -235,86 +235,44 @@
                                             <form #formPaymentCollection="ngForm">
                                                 <div class="row">
 
-                                                    <!-- <div class="col-sm-2 form-group">
-                                            <label class="form-label">Billing Of <span
-                                                    class="text-danger">*</span></label>
-                                            <select #BillingOf="ngModel" [(ngModel)]="PaymentCollection.BillingOf"
-                                                name="BillingOf" class="form-select" (change)="calulateTotal()"
-                                                [ngClass]="{'is-invalid': submitted && BillingOf.invalid}" required
-                                                autofocus>
-                                                <option value="">--Select--</option>
-                                                <option value="1">OPD</option>
-                                                <option value="2">IPD</option>
-                                                <option value="3">General</option>
 
-                                            </select>
 
-                                            <div *ngIf="BillingOf.invalid && (BillingOf.dirty || BillingOf.touched )"
-                                                class="text-danger">
-                                                <div *ngIf="BillingOf.errors?.['required']">
-                                                    Billing Of is required.
-                                                </div>
-                                            </div>
-                                        </div> -->
-                                                    <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 1)">
-                                            <label class="form-label">Select OPD Patient <span
-                                                    class="text-danger">*</span></label>
-                                            <ng-autocomplete [data]="AllPatientList" [searchKeyword]="'SearchPatient'"
-                                                placeholder="Enter Patient Name/Code"
-                                                (selected)='afterPatientSelected($event)' name="PatientAutoComplete"
-                                                [itemTemplate]="PatientItemTemplate"
-                                                [notFoundTemplate]="PatientNotFoundTemplate"
-                                                #PatientAutoComplete="ngModel"
-                                                [(ngModel)]="PaymentMedicine.PatientAutoComplete"
-                                                [isLoading]="dataLoading" (inputCleared)="clearPatient()"
-                                                [minQueryLength]="1" required [autofocus]="true">
-                                            </ng-autocomplete>
+<mat-form-field appearance="outline" class="col-lg-3">
+    <mat-label>Patient Name / Mobile / UHID</mat-label>
+    <input matInput name="PackageCollectionName"
+        [(ngModel)]="PaymentCollection.PatientName"
+        (ngModelChange)="filterpatientList($event)"
+        [matAutocomplete]="autoTransportPackageCollection"
+        placeholder="Search By Package Collection" required />
 
-                                            <ng-template #PatientItemTemplate let-item>
-                                                <a [innerHTML]="item.SearchPatient"></a>
-                                            </ng-template>
+    <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
+        (optionSelected)="afterPatientSelected($event)">
+        
+        <!-- Existing patients -->
+        <mat-option *ngFor="let option of filteredPatientList"
+            [value]="option.PatientName">
+            {{ option.PatientName }} / {{ option.UHID }} / {{ option.ContactNo }}
+        </mat-option>
 
-                                            <ng-template #PatientNotFoundTemplate let-notFound>
-                                                <div>
-                                                    <a>Not found..</a>
-                                                </div>
-                                            </ng-template>
-                                            <div *ngIf="PatientAutoComplete.invalid && (PatientAutoComplete.dirty || PatientAutoComplete.touched)"
-                                                class="text-danger">
-                                                <div *ngIf="PatientAutoComplete.errors?.['required']">
-                                                    Patient is required.
-                                                </div>
-                                            </div>
-                                        </div> -->
+        <!-- ✅ Add New Patient option shown when no match found -->
+        <mat-option *ngIf="filteredPatientList.length === 0 && PaymentCollection.PatientName"
+            [value]="PaymentCollection.PatientName"
+            (click)="openNewPatientModal()"
+            class="add-new-patient-option">
+            <span class="text-primary">
+                <i class="bi bi-plus-circle-fill me-1"></i>
+                Add New Patient: "{{ PaymentCollection.PatientName }}"
+            </span>
+        </mat-option>
+    </mat-autocomplete>
 
-                                                    <mat-form-field appearance="outline" class="col-lg-3">
-                                                        <mat-label>Patient Name / Mobile / UHID</mat-label>
-                                                        <input matInput name="PackageCollectionName"
-                                                            [(ngModel)]="PaymentCollection.PatientName"
-                                                            (ngModelChange)="filterpatientList($event)"
-                                                            [matAutocomplete]="autoTransportPackageCollection"
-                                                            placeholder="Search By Package Collection" required />
+    <button mat-icon-button matSuffix *ngIf="PaymentMedicine.PatientName" 
+        color="primary" (click)="clearPatient()">
+        <mat-icon>close</mat-icon>
+    </button>
 
-                                                        <mat-autocomplete
-                                                            #autoTransportPackageCollection="matAutocomplete"
-                                                            (optionSelected)="afterPatientSelected($event)">
-                                                            <mat-option *ngFor="let option of filteredPatientList"
-                                                                [value]="option.PatientName">
-                                                                {{ option.PatientName }} / {{ option.UHID }} /
-                                                                {{ option.ContactNo }}
-                                                            </mat-option>
-                                                        </mat-autocomplete>
-
-                                                        <button mat-icon-button matSuffix
-                                                            *ngIf="PaymentMedicine.PatientName" color="primary"
-                                                            (click)="clearPatient()">
-                                                            <mat-icon>close</mat-icon>
-                                                        </button>
-
-                                                        <mat-error *ngIf="!PaymentMedicine.PatientName">Required
-                                                            field
-                                                            !!</mat-error>
-                                                    </mat-form-field>
+    <mat-error *ngIf="!PaymentMedicine.PatientName">Required field !!</mat-error>
+</mat-form-field>
 
                                                     <!-- <div class="col-sm-4 form-group" *ngIf="(PaymentCollection.BillingOf == 2)">
                                             <label class="form-label">Select IPD Patient <span
@@ -794,91 +752,128 @@
     </section>
 </main>
 <div id="modal_popUp" class="modal fade">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{patient.patientId > 0 ? 'Update' : 'New'}} Patient</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+    <h1 class="modal-title fs-5">
+        {{ patient.PatientID > 0 ? 'Update' : 'New' }} Patient
+    </h1>
+    <!-- ✅ Use closePatientModal instead of resetForm -->
+    <button type="button" class="btn-close" data-bs-dismiss="modal" 
+        aria-label="Close" (click)="closePatientModal()">
+    </button>
+                </div>
+                <div class="modal-body">
+                    <form #formPatient="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Patient Name</mat-label>
+                                    <input matInput #PatientName="ngModel" name="PatientName"
+                                        [(ngModel)]="patient.PatientName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(PatientName.dirty  || PatientName.touched) || (PatientName.invalid && isSubmitted)">
+                                        Patient name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Patient Guardian Name</mat-label>
+                                    <input matInput #PatientGuardianName="ngModel" name="PatientGuardianName"
+                                        [(ngModel)]="patient.PatientGuardianName" autofocus>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Age</mat-label>
+
+                                    <input matInput type="text" #Age="ngModel" name="Age" [(ngModel)]="patient.Age"
+                                        required autofocus />
+
+                                    <mat-error *ngIf="(Age.dirty || Age.touched || isSubmitted) && Age.invalid">
+                                        Age is <strong>required</strong> and must be between 0–99
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput #Address="ngModel" name="Address" [(ngModel)]="patient.Address"
+                                        required autofocus></textarea>
+                                    <mat-error
+                                        *ngIf="(Address.dirty  || Address.touched) || (Address.invalid && isSubmitted)">
+                                        Address is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Contact No</mat-label>
+                                    <input type="tel" matInput #ContactNo="ngModel" name="ContactNo"
+                                        [(ngModel)]="patient.ContactNo" required autofocus maxlength="10"
+                                        min="0000000000" max="9999999999">
+                                    <mat-error
+                                        *ngIf="(ContactNo.dirty  || ContactNo.touched) || (ContactNo.invalid && isSubmitted)">
+                                        ContactNo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Aadhar No</mat-label>
+                                    <input type="tel" matInput #AadharNo="ngModel" name="AadharNo"
+                                        [(ngModel)]="patient.AadharNo" autofocus maxlength="12" min="000000000000"
+                                        max="999999999999">
+
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Gender</mat-label>
+                                    <mat-select #Gender="ngModel" name="Gender" [(ngModel)]="patient.Gender" required>
+                                        <mat-option [value]="Gender.Key"
+                                            *ngFor="let Gender of GenderList">{{Gender.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Gender.dirty  || Gender.touched) || (Gender.invalid && isSubmitted)">
+                                        Gender is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Category</mat-label>
+                                    <mat-select #Category="ngModel" name="Category" [(ngModel)]="patient.Category"
+                                        required>
+                                        <mat-option [value]="Category.Key"
+                                            *ngFor="let Category of CategoryList">{{Category.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Category.dirty  || Category.touched) || (Category.invalid && isSubmitted)">
+                                        Gender is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="patient.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+    <button type="button" mat-raised-button color="warn" class="me-2" 
+        data-bs-dismiss="modal" (click)="closePatientModal()">
+        Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="savePatient()">
+        {{ patient.PatientID > 0 ? 'Update' : 'Submit' }}
+    </button>
+                </div>
             </div>
-            <div class="modal-body">
-                <form #myForm="ngForm">
-                    <div class="row">
-                        <div class="col-sm-2 form-group">
-                            <label class="form-label">Patient Name</label>
-                            <input type="text" placeholder="Enter patient Name" #PatientName="ngModel"
-                                [(ngModel)]="patient.PatientName" name="PatientName" class="form-control"
-                                [ngClass]="{'is-invalid':submitted && PatientName.invalid}" required autofocus>
-
-                            <div *ngIf="PatientName.invalid && (PatientName.dirty || PatientName.touched || submitted)"
-                                class="text-danger">
-                                <div *ngIf="PatientName.errors?.['required']">
-                                    Patient Name is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-2 form-group">
-                            <label class="form-label">AGE</label>
-                            <input type="text" placeholder="Enter AGE" #AGE="ngModel" [(ngModel)]="patient.AGE"
-                                name="AGE" class="form-control" [ngClass]="{'is-invalid':submitted && AGE.invalid}"
-                                required autofocus>
-
-                            <div *ngIf="AGE.invalid && (AGE.dirty || AGE.touched || submitted)" class="text-danger">
-                                <div *ngIf="AGE.errors?.['required']">
-                                    AGE is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-2 form-group">
-                            <label class="form-label">GENDER</label>
-                            <select type="text" placeholder="Enter Mobile No" #Gender="ngModel"
-                                [(ngModel)]="patient.Gender" name="Gender" class="form-control"
-                                [ngClass]="{'is-invalid':submitted && Gender.invalid}" required autofocus>
-                                <option value="">--Select Gender--</option>
-                                <option [value]="model.Key" *ngFor="let model of GenderList">
-                                    {{model.Value}}</option>
-                            </select>
-
-                            <div *ngIf="Gender.invalid && (Gender.dirty || Gender.touched || submitted)"
-                                class="text-danger">
-                                <div *ngIf="Gender.errors?.['required']">
-                                    Gender is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3 form-group">
-                            <label class="form-label">ADDRESS</label>
-                            <textarea placeholder="Enter Address" #Address="ngModel" [(ngModel)]="patient.Address"
-                                name="Address" class="form-control"
-                                [ngClass]="{'is-invalid':submitted && Address.invalid}" required autofocus>
-                            </textarea>
-                            <div *ngIf="Address.invalid && (Address.dirty || Address.touched || submitted)"
-                                class="text-danger">
-                                <div *ngIf="Address.errors?.['required']">
-                                    Address is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3 form-group">
-                            <label class="form-label">Mobile No.</label>
-                            <input type="text" placeholder="Enter Mobile" #MobileNo="ngModel"
-                                [(ngModel)]="patient.MobileNo" name="MobileNo" class="form-control"
-                                [ngClass]="{'is-invalid':submitted && MobileNo.invalid}" required autofocus>
-
-                            <div *ngIf="MobileNo.invalid && (MobileNo.dirty || MobileNo.touched || submitted)"
-                                class="text-danger">
-                                <div *ngIf="MobileNo.errors?.['required']">
-                                    Mobile No. is required.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" (click)="savePatient()" class="btn btn-primary">Save</button>
-            </div>
-
-        </div>
     </div>
 </div>

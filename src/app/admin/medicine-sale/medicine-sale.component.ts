@@ -13,7 +13,7 @@ import {
   RequestModel,
   StaffLoginModel,
 } from '../../utils/interface';
-import { Status, Gender } from '../../utils/enum';
+import { Status, Gender, Category } from '../../utils/enum';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime, Subject } from 'rxjs';
 
@@ -29,13 +29,16 @@ export class MedicineSaleComponent implements OnInit {
   employeeDetail: any;
   dataLoading: boolean = false;
   submitted: boolean;
+  isSubmitted = false
   Elements: any = {};
   action: ActionModel = {} as ActionModel;
   staffLogin: StaffLoginModel = {} as StaffLoginModel;
   GenderList = this.loadData.GetEnumList(Gender);
+    CategoryList = this.loadData.GetEnumList(Category);
   MedicineDetailList: any[];
   PatientListAll: any = [];
   PatientList: any;
+    StatusList = this.loadData.GetEnumList(Status);
   PatientDetailList: any = [];
   filteredPatientList: any = [];
   DoctorDetailList: any[];
@@ -859,44 +862,44 @@ export class MedicineSaleComponent implements OnInit {
   }
   redUrl: string;
 
-  savePatient() {
-    this.submitted = true;
-    this.dataLoading = true;
-    var obj: RequestModel = {
-      request: this.localService
-        .encrypt(JSON.stringify(this.patient))
-        .toString(),
-    };
-    this.service.saveGeneralPatient(obj).subscribe(
-      (r1) => {
-        let response = r1 as any;
-        if (response.Message == ConstantData.SuccessMessage) {
-          this.toastr.success(
-            'Patient record created successfully.',
-            'Operation Success'
-          );
-          //this.service.printDayCareBill(response.OPDPatientId);
-          //this.service.printDichargeSummary(response.OPDPatientId);
-          if (this.redUrl) this.router.navigate([this.redUrl]);
-          var empId = this.employeeDetail.EmployeeId;
-          this.resetPatient();
-          //this.resetForm();
-          this.employeeDetail.EmployeeId = empId;
+  // savePatient() {
+  //   this.submitted = true;
+  //   this.dataLoading = true;
+  //   var obj: RequestModel = {
+  //     request: this.localService
+  //       .encrypt(JSON.stringify(this.patient))
+  //       .toString(),
+  //   };
+  //   this.service.saveGeneralPatient(obj).subscribe(
+  //     (r1) => {
+  //       let response = r1 as any;
+  //       if (response.Message == ConstantData.SuccessMessage) {
+  //         this.toastr.success(
+  //           'Patient record created successfully.',
+  //           'Operation Success'
+  //         );
+  //         //this.service.printDayCareBill(response.OPDPatientId);
+  //         //this.service.printDichargeSummary(response.OPDPatientId);
+  //         if (this.redUrl) this.router.navigate([this.redUrl]);
+  //         var empId = this.employeeDetail.EmployeeId;
+  //         this.resetPatient();
+  //         //this.resetForm();
+  //         this.employeeDetail.EmployeeId = empId;
 
-          this.getSearchGeneralPatientList(response.GeneralPatientId);
+  //         this.getSearchGeneralPatientList(response.GeneralPatientId);
 
-          $('#modal_popUp').modal('hide');
-        } else {
-          this.toastr.error(response.Message);
-        }
-        this.dataLoading = false;
-      },
-      (err) => {
-        this.toastr.error('Error Occured while fetching data.');
-        this.dataLoading = false;
-      }
-    );
-  }
+  //         $('#modal_popUp').modal('hide');
+  //       } else {
+  //         this.toastr.error(response.Message);
+  //       }
+  //       this.dataLoading = false;
+  //     },
+  //     (err) => {
+  //       this.toastr.error('Error Occured while fetching data.');
+  //       this.dataLoading = false;
+  //     }
+  //   );
+  // }
 
   saveMedicalPayment() {
     this.submitted = true;
@@ -1160,4 +1163,102 @@ export class MedicineSaleComponent implements OnInit {
     this.PaymentCollection.RefferedBy = null;
     this.PaymentCollection.RefferedByName = null;
   }
+
+  openNewPatientModal(): void {
+  // ✅ Pre-fill patient name from what user typed
+  this.patient = {
+    PatientName: this.PaymentCollection.PatientName || '',
+    Status: 1
+  };
+  
+  // ✅ Clear the input so it doesn't show stale value
+  this.PaymentCollection.PatientName = '';
+  
+  // ✅ Open the modal
+  $('#modal_popUp').modal('show');
+}
+  // savePatient() {
+  //   this.isSubmitted = true;
+  //   this.formPatient.control.markAllAsTouched();
+  //   if (this.formPatient.invalid) {
+  //     this.toastr.error("Fill all the required fields !!")
+  //     return
+  //   }
+  //   this.patient.CreatedBy = this.staffLogin.StaffId;
+  //   this.patient.UpdatedBy = this.staffLogin.StaffId;
+    
+  //   var obj: RequestModel = {
+  //     request: this.localService.encrypt(JSON.stringify(this.patient)).toString()
+  //   }
+  //   this.dataLoading = true;
+  //   this.service.savePatient(obj).subscribe(r1 => {
+  //     let response = r1 as any
+  //     if (response.Message == ConstantData.SuccessMessage) {
+  //       if (this.Patient.PatientID > 0) {
+  //         this.toastr.success("Patient Updated successfully")
+  //         $('#staticBackdrop').modal('hide')
+  //       } else {
+  //         this.toastr.success("Patient added successfully")
+  //       }
+  //       this.resetForm()
+  //       this.getPatientList()
+  //     } else {
+  //       this.toastr.error(response.Message)
+  //       this.dataLoading = false;
+  //     }
+  //   }, (err => {
+  //     this.toastr.error("Error occured while submitting data")
+  //     this.dataLoading = false;
+  //   }))
+  // }
+savePatient() {
+  this.isSubmitted = true;
+  
+  // Basic validation
+  if (!this.patient.PatientName || !this.patient.Age || 
+      !this.patient.ContactNo || !this.patient.Gender) {
+    this.toastr.error('Please fill all required fields');
+    return;
+  }
+
+  this.dataLoading = true;
+      this.patient.CreatedBy = this.staffLogin.StaffId;
+    this.patient.UpdatedBy = this.staffLogin.StaffId;
+  
+  const obj: RequestModel = {
+    request: this.localService.encrypt(JSON.stringify(this.patient)).toString(),
+  };
+
+  // ✅ Use savePatient instead of saveGeneralPatient
+  this.service.savePatient(obj).subscribe(
+    (r1) => {
+      let response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        this.toastr.success('Patient created successfully.', 'Success');
+        
+        // ✅ Refresh patient list
+        this.getPatientList();
+        
+        // ✅ Auto-select the new patient
+        this.PaymentCollection.PatientName = this.patient.PatientName;
+        this.PaymentCollection.PatientId = response.PatientId || response.PatientID;
+        
+        this.closePatientModal();  // ✅ use new method
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    },
+    (err) => {
+      this.toastr.error('Error occurred while saving patient.');
+      this.dataLoading = false;
+    }
+  );
+}
+// Add this new method - only closes modal, doesn't reset the sale form
+closePatientModal(): void {
+  this.resetPatient();  // only reset the patient object
+  this.isSubmitted = false;
+  $('#modal_popUp').modal('hide');
+}
 }
