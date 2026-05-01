@@ -174,46 +174,55 @@ export class MedicineSaleListComponent implements OnInit {
 
   SaleTotal: any = {};
   //PatientType: number = 0;
-  getPaymentCollectionList() {
-    var data = {
-      FromDate: this.loadData.loadDateYMD(this.opd.FromDate),
-      ToDate: this.loadData.loadDateYMD(this.opd.ToDate),
-    }
-      var obj: RequestModel = {
+getPaymentCollectionList() {
+  const data = {
+    FromDate: this.loadData.loadDateYMD(this.opd.FromDate),
+    ToDate: this.loadData.loadDateYMD(this.opd.ToDate),
+  };
+
+  const obj: RequestModel = {
     request: this.localService.encrypt(JSON.stringify(data)).toString()
   };
-    this.dataLoading = true;
-    this.service.getPaymentMedicineCollectionList(obj).subscribe(r1 => {
-      let response = r1 as any;
+
+  this.dataLoading = true;
+
+  this.service.getPaymentMedicineCollectionList(obj).subscribe({
+    next: (r1) => {
+      const response = r1 as any;
       if (response.Message == ConstantData.SuccessMessage) {
         this.PaymentMedicineCollectionList = response.PaymentMedicineCollectionList;
-        this.SaleTotal.DiscountAmount = 0;
-        this.SaleTotal.TotalAmount = 0;
-        this.SaleTotal.CGSTAmount = 0;
-        this.SaleTotal.SGSTAmount = 0;
-        this.SaleTotal.IGSTAmount = 0;
-        this.SaleTotal.PayableAmount = 0;
-        this.SaleTotal.PaidAmount = 0;
-        this.SaleTotal.DueAmount = 0;
+
+        this.SaleTotal = {
+          DiscountAmount: 0,
+          TotalAmount: 0,
+          CGSTAmount: 0,          SGSTAmount: 0,
+          IGSTAmount: 0,
+          PayableAmount: 0,
+          PaidAmount: 0,
+          DueAmount: 0
+        };
+
         this.PaymentMedicineCollectionList.forEach((e1: any) => {
-          this.SaleTotal.DiscountAmount += e1.DiscountAmount;
-          this.SaleTotal.TotalAmount += e1.TotalAmount;
-          this.SaleTotal.CGSTAmount += e1.CGSTAmount;
-          this.SaleTotal.SGSTAmount += e1.SGSTAmount;
-          this.SaleTotal.IGSTAmount += e1.IGSTAmount;
-          this.SaleTotal.PayableAmount += e1.PayableAmount;
-          this.SaleTotal.PaidAmount += e1.PaidAmount;
-          this.SaleTotal.DueAmount += e1.DueAmount;
+          this.SaleTotal.DiscountAmount += e1.DiscountAmount || 0;
+          this.SaleTotal.TotalAmount += e1.TotalAmount || 0;
+          this.SaleTotal.CGSTAmount += e1.CGST || 0;
+          this.SaleTotal.SGSTAmount += e1.SGST || 0;
+          this.SaleTotal.IGSTAmount += e1.IGST || 0;
+          this.SaleTotal.PayableAmount += e1.PayableAmount || 0;
+          this.SaleTotal.PaidAmount += e1.PaidAmount || 0;
+          this.SaleTotal.DueAmount += e1.DueAmount || 0;
         });
       } else {
-        toastr.error(response.Message);
+        this.toastr.error(response.Message); // ✅ this.toastr
       }
-      this.dataLoading = false;
-    }, (err => {
-      toastr.error("Error Occured while fetching data.");
-      this.dataLoading = false;
-    }));
-  }
+      this.dataLoading = false; // ✅ always runs
+    },
+    error: (err) => {
+      this.toastr.error('Error occurred while fetching data.'); // ✅ this.toastr
+      this.dataLoading = false; // ✅ always runs
+    }
+  });
+}
 
 
   PaymentMedicineList: any[] = [];
@@ -244,6 +253,15 @@ export class MedicineSaleListComponent implements OnInit {
   printReciept(obj: any) {
       this.service.printMedicineReciept(obj.PaymentCollectionId)
   }
+
+  getPaymentModes(modes: any[]): string {
+  if (!modes || modes.length === 0) return '';
+  return modes.map(m => this.AllPaymentMode[m]).join(', ');
+}
+getPaymentDetailRemarks(remarks: string[]): string {
+  if (!remarks || remarks.length === 0) return '';
+  return remarks.join(', ');
+}
   // deleteSale(obj: any) {
   //   if (confirm("Are you sure want to delete this record") == true) {
   //     this.dataLoading = true;

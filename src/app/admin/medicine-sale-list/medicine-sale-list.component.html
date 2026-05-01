@@ -87,7 +87,8 @@
                                                 <th class="text-center"> Payment Status</th>
                                                 <th class="text-center">Payment Mode</th>
 
-                                                <th>Remarks</th>
+                                                <th>Doctor Remarks</th>
+                                                <th>Payment Remarks</th>
                                                 <th>Created By</th>
                                                 <!-- <th>Created On</th> -->
                                                 <!-- <th style="cursor: pointer;" (click)="sort('StatusName')">Status</th> -->
@@ -145,8 +146,13 @@
                                                         {{ AllStatusList[model.PaymentStatus] }}
                                                     </span>
                                                 </td>
-                                                <td class="text-center">{{ AllPaymentMode[model.PaymentMode]}}</td>
+                                                <td class="text-center">
+  <ng-container *ngFor="let mode of model.PaymentModeList; let last = last">
+    {{ AllPaymentMode[mode] }}<span *ngIf="!last">, </span>
+  </ng-container>
+</td>
                                                 <td>{{model.Remarks }}</td>
+                                                <td>{{ getPaymentDetailRemarks(model.PaymentDetailRemarks) }}</td>
                                                 <td>{{model.CreatedByName}}</td>
                                                 <!-- <td class="text-center">{{model.CreatedOn | date:'dd-MM-yyyy'}}</td> -->
                                                 <!-- <td><span
@@ -279,6 +285,7 @@
                   <th>Payment Date</th>
                   <th>Amount</th>
                   <th>Payment Mode</th>
+                  <th>Payment Remarks</th>
 
                 </tr>
               </thead>
@@ -288,13 +295,14 @@
                   <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
                   <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
                   <td>{{AllPaymentMode[item.PaymentMode] }}</td>
+                  <td>{{item.Remarks }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <!-- Optional fallback -->
-          <div *ngIf="PaymentMedicineListPaymentList?.length === 0" class="alert alert-warning mt-3">
+          <div *ngIf="PaymentMedicineListPaymentList.length === 0" class="alert alert-warning mt-3">
             No item details found for this bill.
           </div>
                     </div>
