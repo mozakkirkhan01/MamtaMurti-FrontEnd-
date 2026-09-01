@@ -397,6 +397,12 @@ export class MedicineSaleComponent implements OnInit {
 
             e1.SellingUnitId = e1.UnitId;
 
+            // Guard against missing/zero PurchaseUnitValue from the API,
+            // which was causing Amount to compute as NaN in changeQuantity().
+            if (!e1.PurchaseUnitValue) {
+              e1.PurchaseUnitValue = 1;
+            }
+
             e1.UnitList = this.UnitList.filter(
               (x2) => x2.UnitId == e1.UnitId || x2.Value == 1
             );
@@ -431,7 +437,7 @@ export class MedicineSaleComponent implements OnInit {
 
 
     var newQty = this.loadData.round(
-      PaymentMedicineModel.Quantity * PaymentMedicineModel.UnitValue,
+      PaymentMedicineModel.Quantity * (PaymentMedicineModel.UnitValue || 1),
       2
     );
     if (newQty > PaymentMedicineModel.AvailableQuantity) {
@@ -440,12 +446,14 @@ export class MedicineSaleComponent implements OnInit {
       return;
     }
 
-    if (
-      PaymentMedicineModel.Unit.Value != PaymentMedicineModel.PurchaseUnitValue
-    )
+    // Fall back to 1 when the backend doesn't send these, so Amount never
+    // becomes NaN (which was cascading into BasicAmount/TotalAmount/Line Total).
+    var unitValue = PaymentMedicineModel.Unit.Value || 1;
+    var purchaseUnitValue = PaymentMedicineModel.PurchaseUnitValue || 1;
+
+    if (unitValue != purchaseUnitValue)
       PaymentMedicineModel.Amount = this.loadData.round(
-        (PaymentMedicineModel.MRP * PaymentMedicineModel.Unit.Value) /
-          PaymentMedicineModel.PurchaseUnitValue,
+        (PaymentMedicineModel.MRP * unitValue) / purchaseUnitValue,
         2
       );
     else PaymentMedicineModel.Amount = PaymentMedicineModel.MRP;
