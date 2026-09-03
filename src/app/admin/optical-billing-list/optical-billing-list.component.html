@@ -71,7 +71,7 @@
                 <th style="cursor: pointer; text-align: center" (click)="sort('BillingDate')">
                   Billing Date
                 </th>
-                <th style="cursor: pointer; text-align: center" (click)="sort('OpticalBillingCode')">
+                <th style="cursor: pointer; text-align: center" (click)="sort('ReceiptNo')">
                   Receipt No.
                 </th>
                 <th style="cursor: pointer" (click)="sort('UHID')">
@@ -126,7 +126,7 @@
                   {{ item.BillingDate | date : "dd-MM-yyyy" }}
                 </td>
                 <td style="text-align: center">
-                  {{ item.OpticalBillingCode }}
+                  {{ item.ReceiptNo }}
                 </td>
                 <td>{{ item.UHID }}</td>
                 <td>{{ item.PatientName }}</td>
@@ -241,7 +241,7 @@
               </div>
               <div class="col-6">
                 <strong>Receipt No.:</strong>
-                {{ selectedBill.OpticalBillingCode }}
+                {{ selectedBill.ReceiptNo }}
               </div>
             </div>
             <div class="row mb-2">

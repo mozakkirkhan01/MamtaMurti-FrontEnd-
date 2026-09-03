@@ -164,7 +164,7 @@ export class OpticalBillingListComponent {
     const data = {
       requestPayload,
       Page: this.p,
-      PageSize: this.itemPerPage,
+      PageSize: 999999999,
     };
  
     const obj: RequestModel = {
