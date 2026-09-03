@@ -1,0 +1,561 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Purchase Medicine
+            <!-- <span class="badge bg-warning text-dark ms-2" *ngIf="isEditMode">Edit Mode</span> -->
+        </h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active">Medicine Purchase</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales pt-3">
+                    <div class="card-body">
+                        <form #formPurchase="ngForm">
+                            <div class="row">
+                                <a aria-current="true">
+                                    Supplier
+                                </a>
+                                <mat-form-field appearance="outline" class="col-lg-4">
+                                    <mat-label>Supplier </mat-label>
+                                    <input matInput #SupplierId="ngModel" name="SupplierName"
+                                        (ngModelChange)="filterSupplierList($event)" placeholder="Search By Supplier"
+                                        [(ngModel)]="Purchase.SupplierName" [matAutocomplete]="autoSupplier" required />
+                                    <mat-autocomplete #autoSupplier="matAutocomplete"
+                                        (optionSelected)="afterSupplierSelected($event)">
+                                        <mat-option *ngFor="let options of SupplierDetailList" [id]="options.SupplierId"
+                                            [value]="options.SupplierName">{{ options.SupplierName }}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Purchase.SupplierName" color="primary"
+                                        (click)="clearSupplier()">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>Invoice No</mat-label>
+                                    <input matInput #InvoiceNo="ngModel" name="InvoiceNo"
+                                        [(ngModel)]="Purchase.InvoiceNo" required autofocus>
+                                    <mat-error
+                                        *ngIf="(InvoiceNo.dirty || InvoiceNo.touched) || (InvoiceNo.invalid && submitted)">
+                                        Invoice No is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-lg-4">
+                                    <mat-label>Invoice Date</mat-label>
+                                    <input matInput [matDatepicker]="pickers" [(ngModel)]="Purchase.InvoiceDate"
+                                        name="InvoiceDate" required />
+                                    <mat-datepicker-toggle matSuffix [for]="pickers"
+                                        class="small-datepicker-icon"></mat-datepicker-toggle>
+                                    <mat-datepicker #pickers></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                        </form>
+
+                        <div class="list-group">
+                            <!-- <div class="d-flex justify-content-between align-items-center mb-2">
+                                <a aria-current="true">Medicines</a>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Existing Medicine</span>
+                                    <span class="badge bg-info"><i class="bi bi-plus-circle"></i> New Medicine</span>
+                                    <span class="badge bg-warning"><i class="bi bi-pencil"></i> Modified Medicine</span>
+                                </div>
+                            </div> -->
+
+                            <form #formPurchaseProduct="ngForm">
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                        <mat-label> Select Medicine </mat-label>
+                                        <input matInput #MedicineId="ngModel" name="MedicineName"
+                                            (ngModelChange)="onSearchInput($event)" placeholder="Search or Create Medicine"
+                                            [(ngModel)]="PurchaseProduct.MedicineName" [matAutocomplete]="autoMedicine"
+                                            required />
+                                        <mat-autocomplete #autoMedicine="matAutocomplete"
+                                            (optionSelected)="afterMedicineSelected($event)">
+                                            <mat-option *ngFor="let options of MedicineDetailList"
+                                                [id]="options.MedicineId" [value]="options.MedicineName">
+                                                <!-- <span class="badge bg-success me-2">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </span> -->
+                                                {{ options.MedicineName }}
+                                            </mat-option>
+                                            <mat-option *ngIf="PurchaseProduct.MedicineName && MedicineDetailList.length === 0"
+                                                [value]="PurchaseProduct.MedicineName">
+                                                <span class="badge bg-info me-2">
+                                                    <i class="bi bi-plus-circle"></i> New
+                                                </span>
+                                                {{ PurchaseProduct.MedicineName }}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        <button mat-icon-button matSuffix *ngIf="PurchaseProduct.MedicineName"
+                                            color="primary" (click)="clearMedicine()">
+                                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                        </button>
+                                        <mat-hint *ngIf="PurchaseProduct.IsNewMedicine" class="text-info">
+                                            <i class="bi bi-info-circle"></i> This medicine will be created
+                                        </mat-hint>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Batch No</mat-label>
+                                        <input matInput #BatchNo="ngModel" name="BatchNo"
+                                            [(ngModel)]="PurchaseProduct.BatchNo" required autofocus>
+                                        <mat-error
+                                            *ngIf="(BatchNo.dirty || BatchNo.touched) || (BatchNo.invalid && submitted)">
+                                            Batch No is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>HSN </mat-label>
+                                        <input matInput #HSNCode="ngModel" name="HSNCode"
+                                            [(ngModel)]="PurchaseProduct.HSNCode" required autofocus>
+                                        <mat-error
+                                            *ngIf="(HSNCode.dirty || HSNCode.touched) || (HSNCode.invalid && submitted)">
+                                            HSN is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>MRP </mat-label>
+                                        <input type="number" class="no-spinner" matInput #MRP="ngModel" name="MRP"
+                                            [(ngModel)]="PurchaseProduct.MRP" required autofocus>
+                                        <mat-error *ngIf="(MRP.dirty || MRP.touched) || (MRP.invalid && submitted)">
+                                            MRP is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Rate </mat-label>
+                                        <input type="number" class="no-spinner" matInput #Rate="ngModel" name="Rate"
+                                            [(ngModel)]="PurchaseProduct.Rate" (change)="changeCostAmount(PurchaseProduct)"
+                                            required autofocus>
+                                        <mat-error *ngIf="(Rate.dirty || Rate.touched) || (Rate.invalid && submitted)">
+                                            Rate is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Qty. </mat-label>
+                                        <input type="number" class="no-spinner" matInput #Qty="ngModel" name="Quantity"
+                                            [(ngModel)]="PurchaseProduct.Quantity"
+                                            (change)="changeCostAmount(PurchaseProduct)" required autofocus>
+                                        <mat-error *ngIf="(Qty.dirty || Qty.touched) || (Qty.invalid && submitted)">
+                                            Qty is <strong>required</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Free Qty. </mat-label>
+                                        <input type="number" class="no-spinner" matInput #FreeQunatity="ngModel"
+                                            name="FreeQunatity" [(ngModel)]="PurchaseProduct.FreeQunatity"
+                                            (change)="changeCostAmount(PurchaseProduct)" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Disc. (%) </mat-label>
+                                        <input type="number" class="no-spinner" matInput #DiscountPercent="ngModel"
+                                            name="DiscountPercent" [(ngModel)]="PurchaseProduct.DiscountPercent"
+                                            (change)="changeCostAmount(PurchaseProduct)" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>Disc. (₹) </mat-label>
+                                        <input type="number" class="no-spinner" matInput #DiscountAmount="ngModel"
+                                            name="DiscountAmount" [(ngModel)]="PurchaseProduct.DiscountAmount"
+                                            (change)="changeDiscountAmount(PurchaseProduct)" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                        <mat-label>Unit</mat-label>
+                                        <mat-select #UnitId="ngModel" [(ngModel)]="PurchaseProduct.UnitId" name="UnitId"
+                                            (selectionChange)="changeCostAmount(PurchaseProduct)" 
+                                            [disabled]="!PurchaseProduct.IsNewMedicine" required autofocus>
+                                            <mat-option value="">--Unit--</mat-option>
+                                            <mat-option *ngFor="let model of UnitList" [value]="model.UnitId">
+                                                {{ model.UnitName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="UnitId.invalid && (UnitId.dirty || UnitId.touched)">
+                                            Unit is required.
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                        <mat-label>Manufacturer</mat-label>
+                                        <mat-select #ManufacturerId="ngModel" [(ngModel)]="PurchaseProduct.ManufacturerId" name="ManufacturerId"
+                                            [disabled]="!PurchaseProduct.IsNewMedicine" required autofocus>
+                                            <mat-option value="">--Manufacturer--</mat-option>
+                                            <mat-option *ngFor="let model of ManufacturerList" [value]="model.ManufacturerId">
+                                                {{ model.ManufacturerName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="ManufacturerId.invalid && (ManufacturerId.dirty || ManufacturerId.touched)">
+                                            Manufacturer is required.
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                        <mat-label>MedicinType</mat-label>
+                                        <mat-select #MedicineTypeId="ngModel" [(ngModel)]="PurchaseProduct.MedicineTypeId" name="MedicineTypeId"
+                                            [disabled]="!PurchaseProduct.IsNewMedicine" required autofocus>
+                                            <mat-option value="">--MedicineType--</mat-option>
+                                            <mat-option *ngFor="let model of MedicineTypeList" [value]="model.MedicineTypeId">
+                                                {{ model.MedicineTypeName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="MedicineTypeId.invalid && (MedicineTypeId.dirty || MedicineTypeId.touched)">
+                                            Medicine Type is required.
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                        <mat-label>Category</mat-label>
+                                        <mat-select #CategoryId="ngModel" [(ngModel)]="PurchaseProduct.CategoryId" name="CategoryId"
+                                            [disabled]="!PurchaseProduct.IsNewMedicine" required autofocus>
+                                            <mat-option value="">--Category--</mat-option>
+                                            <mat-option *ngFor="let model of CategoryList" [value]="model.CategoryId">
+                                                {{ model.CategoryName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="CategoryId.invalid && (CategoryId.dirty || CategoryId.touched)">
+                                            Category is required.
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Taxable </mat-label>
+                                        <input type="number" class="no-spinner" matInput #Taxable="ngModel"
+                                            name="Taxable" [(ngModel)]="PurchaseProduct.TaxableAmount" readonly autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1 form-group">
+                                        <mat-label>GST %</mat-label>
+                                        <mat-select #GSTId="ngModel" name="GSTId" [(ngModel)]="PurchaseProduct.GSTId"
+                                        [disabled]="!PurchaseProduct.IsNewMedicine" (selectionChange)="gstPercentChange(PurchaseProduct)">
+
+                                            <mat-option value="">--GST--</mat-option>
+                                            <mat-option *ngFor="let model of GSTList" [value]="model.GSTId">
+                                                {{ model.GSTName }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1 form-group">
+                                        <mat-label>Cost<span class="text-danger"></span></mat-label>
+                                        <input matInput type="number" placeholder="Cost Amount" #CostAmount="ngModel"
+                                            name="CostAmount" [(ngModel)]="PurchaseProduct.CostAmount" readonly="readonly"
+                                            autofocus (change)="changeCostAmount(PurchaseProduct)" />
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-1">
+                                        <mat-label>GST ₹ </mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput #Taxable="ngModel"
+                                            name="TotalGSTAmount" [(ngModel)]="PurchaseProduct.TotalGSTAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Grand ₹ </mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput #Taxable="ngModel"
+                                            name="GrandTotal" [(ngModel)]="PurchaseProduct.GrandTotal" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-lg-2">
+                                        <mat-label>Expired Date</mat-label>
+                                        <input matInput [matDatepicker]="picker"
+                                            [(ngModel)]="PurchaseProduct.ExpiredDate" name="ExpiredDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"
+                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+
+                                    <div class="col-sm-1 form-group" style="height: 50px;">
+                                        <button mat-raised-button color="primary" style="margin-top: 5px; margin-left: 10px"
+                                            (click)="addPurchaseProduct()">
+                                             Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <a class="list-group-item list-group-item-action" *ngIf="PurchaseProductList.length > 0">
+                                <div class="row">
+                                    <div class="col-sm-12 table-responsive">
+                                        <table class="table table-bordered  table-sm" id="table_list">
+                                            <thead class="">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Medicine Name</th>
+                                                    <th>Batch No.</th>
+                                                    <th>HSN Code</th>
+                                                    <th>MRP</th>
+                                                    <th>Rate</th>
+                                                    <th>Quantity</th>
+                                                    <th>Free Qty</th>
+                                                    <th>Disc %</th>
+                                                    <th>Disc Amt.</th>
+                                                    <th>Unit</th>
+                                                    <th>Basic Amt.</th>
+                                                    <th>Taxable Amt.</th>
+                                                    <th>GST</th>
+                                                    <th>CGST</th>
+                                                    <th>SGST</th>
+                                                    <th>IGST</th>
+                                                    <th>Cost Amount</th>
+                                                    <th>Grand Total</th>
+                                                    <th>Expired Date</th>
+                                                    <th class="text-right">Action</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr *ngFor="let model of PurchaseProductList; let i = index"
+                                                   >
+                                                    <td>{{ i + 1 }}</td>
+                                                    <!-- <td>
+                                                        <span class="badge bg-success" *ngIf="!model.IsNewMedicine && !model.UpdateMedicine"
+                                                            title="Existing Medicine">
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </span>
+                                                        <span class="badge bg-info" *ngIf="model.IsNewMedicine"
+                                                            title="New Medicine - Will be created">
+                                                            <i class="bi bi-plus-circle"></i> New
+                                                        </span>
+                                                        <span class="badge bg-warning" *ngIf="model.UpdateMedicine && !model.IsNewMedicine"
+                                                            title="Medicine details modified">
+                                                            <i class="bi bi-pencil"></i> Modified
+                                                        </span>
+                                                    </td> -->
+                                                    <td>
+                                                        <strong>{{ model.MedicineName }}</strong>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.BatchNo"
+                                                            [readonly]="!model.AllowEdit && !isEditMode">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.HSNCode"
+                                                            [readonly]="!model.AllowEdit && !isEditMode"
+                                                            (change)="markMedicineUpdated(model)">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.MRP"
+                                                            [readonly]="!model.AllowEdit && !isEditMode">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.Rate"
+                                                            (change)="changeCostAmount(model)"
+                                                            [readonly]="!model.AllowEdit && !isEditMode">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.Quantity"
+                                                            (change)="changeCostAmount(model)"
+                                                            [readonly]="!model.AllowEdit && !isEditMode">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                            [(ngModel)]="model.FreeQunatity"
+                                                            (change)="changeCostAmount(model)"
+                                                            [readonly]="!model.AllowEdit && !isEditMode">
+                                                    </td>
+                                                    <td>{{ model.DiscountPercent }}%</td>
+                                                    <td>₹{{ model.DiscountAmount }}</td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm" 
+                                                            [(ngModel)]="model.UnitId"
+                                                            (change)="changeCostAmount(model); markMedicineUpdated(model)"
+                                                            [disabled]="(!model.AllowEdit && !isEditMode) || !model.IsNewMedicine">
+                                                            <option *ngFor="let unit of UnitList" [value]="unit.UnitId">
+                                                                {{ unit.UnitName }}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>₹{{ model.BasicAmount }}</td>
+                                                    <td>₹{{ model.TaxableAmount }}</td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm" 
+                                                            [(ngModel)]="model.GSTId"
+                                                            (change)="gstPercentChange(model)"
+                                                            [disabled]="!model.AllowEdit && !isEditMode">
+                                                            <option *ngFor="let gst of GSTList" [value]="gst.GSTId">
+                                                                {{ gst.GSTName }}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>₹{{ model.CGSTAmount }}</td>
+                                                    <td>₹{{ model.SGSTAmount }}</td>
+                                                    <td>₹{{ model.IGSTAmount }}</td>
+                                                    <td>₹{{ model.CostAmount }}</td>
+                                                    <td>₹{{ model.GrandTotal }}</td>
+                                                    <td>{{ model.ExpiredDate | date:'dd-MM-yyyy' }}</td>
+                                                    <td class="text-right">
+                                                        <div class="btn-group" role="group">
+                                                            <!-- <button *ngIf="!model.AllowEdit && isEditMode" 
+                                                                (click)="enableProductEdit(i)"
+                                                                class="btn btn-sm btn-primary" 
+                                                                title="Edit this item">
+                                                                <i class="bi bi-pencil-fill"></i>
+                                                            </button>
+                                                            <button *ngIf="model.AllowEdit" 
+                                                                (click)="cancelProductEdit(i)"
+                                                                class="btn btn-sm btn-warning" 
+                                                                title="Cancel editing">
+                                                                <i class="bi bi-x-circle-fill"></i>
+                                                            </button> -->
+                                                            <button (click)="RemovePurchaseProduct(i)"
+                                                                class="btn btn-sm btn-danger"
+                                                                title="Remove this item">
+                                                                <i class="bi bi-trash-fill"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="list-group" style="margin-top: 10px;">
+                            <a aria-current="true">
+                                Payment Details
+                            </a>
+                            <form #formPurchase="ngForm">
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total Cost </mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalCostAmount="ngModel" name="TotalCostAmount"
+                                            [(ngModel)]="Purchase.TotalCostAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total Basic Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalBasicAmount="ngModel" name="TotalBasicAmount"
+                                            [(ngModel)]="Purchase.TotalBasicAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total Discount Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalDiscountAmount="ngModel" name="TotalDiscountAmount"
+                                            [(ngModel)]="Purchase.TotalDiscountAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total Taxable Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalTaxableAmount="ngModel" name="TotalTaxableAmount"
+                                            [(ngModel)]="Purchase.TotalTaxableAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total CGST Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalCGSTAmount="ngModel" name="TotalCGSTAmount"
+                                            [(ngModel)]="Purchase.TotalCGSTAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total SGST Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalSGSTAmount="ngModel" name="TotalSGSTAmount"
+                                            [(ngModel)]="Purchase.TotalSGSTAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total IGST Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalIGSTAmount="ngModel" name="TotalIGSTAmount"
+                                            [(ngModel)]="Purchase.TotalIGSTAmount" autofocus>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Total Grand Amount</mat-label>
+                                        <input type="number" class="no-spinner" readonly matInput
+                                            #TotalGrandTotal="ngModel" name="TotalGrandTotal"
+                                            [(ngModel)]="Purchase.TotalGrandTotal" autofocus>
+                                    </mat-form-field>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <button type="submit" mat-raised-button class="mdc-button-final" color="primary"
+                            (click)="savePurchase()">
+                            {{ isEditMode ? 'Update Purchase' : 'Submit Purchase' }}
+                        </button>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- <style>
+    .table-warning {
+        background-color: #fff3cd !important;
+    }
+
+    .table-info {
+        background-color: #cff4fc !important;
+    }
+
+    .form-control-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-select-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+
+    table td {
+        vertical-align: middle;
+    }
+
+    .table th {
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .no-spinner::-webkit-inner-spin-button,
+    .no-spinner::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .no-spinner {
+        -moz-appearance: textfield;
+    }
+</style> -->

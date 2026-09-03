@@ -1,0 +1,123 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{action.MenuTitle}}</h1>
+    </div>
+
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate"
+        class="float-right" data-bs-toggle="modal"
+        data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Dosage
+      </button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body table-responsive">
+
+        <input class="form-control mb-2" [(ngModel)]="Search" placeholder="Search..." />
+
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th (click)="sort('DosageName')" style="cursor:pointer">Dosage</th>
+              <th (click)="sort('Status')" style="cursor:pointer">Status</th>
+              <th *ngIf="action.CanEdit">Edit</th>
+              <th *ngIf="action.CanDelete">Delete</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of DosageList 
+                | filter:Search 
+                | orderBy:sortKey:reverse 
+                | paginate:{ itemsPerPage:itemPerPage, currentPage:p }; let i=index">
+
+              <td>{{(itemPerPage * (p -1)) + i + 1}}</td>
+              <td>{{item.DosageName}}</td>
+              <td>
+                <span class="badge"
+                  [ngClass]="item.Status == 1 ? 'text-bg-success':'text-bg-danger'">
+                  {{AllStatusList[item.Status]}}
+                </span>
+              </td>
+
+              <td *ngIf="action.CanEdit">
+                <button class="btn btn-warning btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#staticBackdrop"
+                  (click)="editDosage(item)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </td>
+
+              <td *ngIf="action.CanDelete">
+                <button class="btn btn-danger btn-sm"
+                  (click)="deleteDosage(item)">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <pagination-controls (pageChange)="onTableDataChange($event)"
+          class="float-end"></pagination-controls>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{Dosage.DosageId > 0 ? 'Update' : 'New'}} Dosage
+          </h5>
+          <button class="btn-close" data-bs-dismiss="modal" (click)="resetForm()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form #formDosage="ngForm">
+
+            <mat-form-field appearance="outline" class="w-100 mb-2">
+              <mat-label>Dosage Name</mat-label>
+              <input matInput name="DosageName"
+                [(ngModel)]="Dosage.DosageName" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Status</mat-label>
+              <mat-select name="Status" [(ngModel)]="Dosage.Status" required>
+                <mat-option *ngFor="let s of StatusList" [value]="s.Key">
+                  {{s.Value}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button mat-raised-button color="warn"
+            data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary"
+            (click)="saveDosage()">
+            {{Dosage.DosageId > 0 ? 'Update' : 'Submit'}}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>

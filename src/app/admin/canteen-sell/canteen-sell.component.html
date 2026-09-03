@@ -1,0 +1,249 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Customer Details</h5>
+            <div class="d-flex flex-wrap gap-1">
+              <form #formCanteenDetails="ngForm">
+                <div class="row">
+                  
+
+                  <mat-form-field appearance="outline" class="col-lg-7">
+                    <mat-label>Customer Name</mat-label>
+                    <input matInput type="text" name="Age" [(ngModel)]="Canteen.CustomerName" class="no-spinner" required
+                       />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="col-lg-5">
+                    <mat-label>Invoice Date</mat-label>
+                    <input matInput [matDatepicker]="picker" [(ngModel)]="Canteen.InvoiceDate" name="SurgeryDate"
+                      required />
+                    <mat-datepicker-toggle matSuffix [for]="picker"
+                      class="small-datepicker-icon"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Add Item</h5>
+            <form #formPaymentDetails="ngForm">
+              <div class="row">
+                <!-- <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Select Item Name </mat-label>
+                  <input matInput #RegistrationChargeId="ngModel" name="RegistrationChargeId"
+                    (ngModelChange)="filterCanteenList($event)"
+                    placeholder="Search By Particular/Amount/Description" [(ngModel)]="Payment.ItemName"
+                    [matAutocomplete]="autoTransportSupplier" required />
+                  <mat-autocomplete #autoTransportSupplier="matAutocomplete"
+                    (optionSelected)="afterTransportSupplierSelected($event)">
+                    <mat-option *ngFor="let option of ChargeList" [id]="option.ItemId"
+                      [value]="option.ItemName">{{ option.ItemName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Payment.ItemName" color="primary"
+                    (click)="clearTransportSupplier()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field> -->
+
+                <mat-form-field appearance="outline" class="col-lg-4">
+                  <mat-label>Item </mat-label>
+                  <input matInput #ItemId="ngModel" name="ItemName"
+                    (ngModelChange)="filterItemList($event)"
+                    placeholder="Search By Item" [(ngModel)]="Payment.ItemName"
+                    [matAutocomplete]="autoItem" required />
+                  <mat-autocomplete #autoItem="matAutocomplete"
+                    (optionSelected)="afterItemSelected($event)">
+                    <mat-option *ngFor="let options of ItemChargeList" [id]="options.ItemId"
+                      [value]="options.ItemName">{{ options.ItemName }}</mat-option>
+                  </mat-autocomplete>
+                  <button mat-icon-button matSuffix *ngIf="Payment.ItemName" color="primary"
+                    (click)="clearItem()">
+                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                  </button>
+                  <mat-error>Required field !!</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="col-lg-2">
+                  <mat-label>Rate</mat-label>
+                  <input matInput type="number" name="Rate" [(ngModel)]="Payment.Rate"
+                    (ngModelChange)="onRateChange()" required class="no-spinner" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="col-lg-1">
+                  <mat-label>Qty.</mat-label>
+                  <input matInput type="number" name="Quentity" [(ngModel)]="Payment.Quantity"
+                    (ngModelChange)="onQuantityChange()" required class="no-spinner" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="col-lg-2">
+                  <mat-label>Amount</mat-label>
+                  <input matInput type="number" name="Amount" [(ngModel)]="Payment.TotalAmount" required class="no-spinner"
+                    readonly="true" />
+                </mat-form-field>
+                <div appearance="outline" class="col-sm-1">
+                  <button mat-flat-button color="primary" (click)="addPaymentDetail()">
+                    ADD
+                  </button>
+                </div>
+              </div>
+              <a class="list-group-item list-group-item-action" *ngIf="SelectedPaymentDetailList.length > 0">
+                <div class="row">
+                  <div class="col-sm-19 table-responsive">
+                    <table class="table table-bordered table-hover table-lg" id="table_list">
+                      <thead class="thead-light">
+                        <tr>
+                          <th class="text-center">#</th>
+                          <th>Item Name</th>
+                          <th class="text-right">Rate</th>
+                          <th class="text-center">Quantity</th>
+                          <th class="text-right">Total Amount</th>
+                          <th class="text-center">Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr *ngFor="
+                            let model of SelectedPaymentDetailList;
+                            let i = index
+                          ">
+                          <td class="text-center">{{ i + 1 }}</td>
+
+                          <td>
+                            {{ model.ItemName }}
+                          </td>
+                          <td class="text-right">
+                            {{ model.Rate }}
+                          </td>
+                          
+                          <td class="text-center">
+                            {{ model.Quantity }}
+                          </td>
+                          <td class="text-right">
+                            {{ model.TotalAmount }}
+                          </td>
+                          <td class="text-center">
+                            <button (click)="RemoveHotel(i)" class="btn btn-sm btn-danger ">
+                              <i class="bi bi-trash-fill"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Payment Details</h5>
+            <form #formCanteenDetails="ngForm">
+              <div class="row">
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Total Amount</mat-label>
+                  <input matInput type="number" [(ngModel)]="Canteen.TotalAmount" name="TotalAmountAll" required
+                    class="no-spinner" readonly="true" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-lg-3">
+                  <mat-label>Payment Date</mat-label>
+                  <input matInput [matDatepicker]="pickers" [(ngModel)]="Canteen.PaymentDate" name="PaymentDate"
+                    required />
+                  <mat-datepicker-toggle matSuffix [for]="pickers"
+                    class="small-datepicker-icon"></mat-datepicker-toggle>
+                  <mat-datepicker #pickers></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Payment Collection</h5>
+            <form #formPaymentCollection="ngForm">
+              <div class="row">
+                <!-- Remarks -->
+                <mat-form-field appearance="outline" class="col-lg-6">
+                  <mat-label>Remarks</mat-label>
+                  <input matInput name="Remarks" [(ngModel)]="currentPayment.Remarks" />
+                </mat-form-field>
+
+                <!-- Amount -->
+                <mat-form-field appearance="outline" class="col-lg-2">
+                  <mat-label>Amount</mat-label>
+                  <input matInput type="number" name="PaidAmount" [(ngModel)]="currentPayment.PaidAmount" required
+                    class="no-spinner" />
+                </mat-form-field>
+
+                <!-- PaymentMode -->
+                <mat-form-field appearance="outline" class="col-sm-3">
+                  <mat-label>Payment Mode</mat-label>
+                  <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="currentPayment.PaymentMode"
+                    required class="no-spinner">
+                    <mat-option [value]="PaymentMode.Key || 1" *ngFor="let PaymentMode of PaymentModeList">{{
+                      PaymentMode.Value }}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="
+                      PaymentMode.dirty ||
+                      PaymentMode.touched ||
+                      (PaymentMode.invalid && isSubmitted)
+                    ">
+                    Payment Mode is <strong>required</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center items-center">
+    <button type="submit" mat-raised-button class="mdc-button-final" color="primary" (click)="saveCanteen()">
+      Submit
+    </button>
+  </div>
+</main>

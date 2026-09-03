@@ -1,0 +1,322 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>Medicine Stock List
+        </h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active">Medicine Stock List</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales">
+                    <div class="card-body pt-2">
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <!-- <button id="excel-table" class="btn btn-primary" (click)="ExportTOExcel1()">Export to
+                                    Excel</button> -->
+                                <button mat-raised-button color="primary" (click)="ExportTOExcel1()">
+                                    Export to
+                                    Excel</button>
+                            </div>
+                            <div class="dataTable-top" style="padding: 10px 10px 10px 10px;">
+                                <div class="dataTable-dropdown">
+                                    <select class="dataTable-selector form-select form-select-sm"
+                                        [(ngModel)]="itemPerPage">
+                                        <option *ngFor="let option of pageSize" [value]="option">{{option}} </option>
+                                    </select>
+                                    &nbsp; entries per page
+                                </div>
+                                <div class="dataTable-search"><input
+                                        class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                        placeholder="Search..." type="text"></div>
+                            </div>
+                            <div class="col-lg-12 table-responsive">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                                            <th class="text-center">Name</th>
+                                            <th class="text-center">HSN Code</th>
+                                            <th class="text-center">Batch No</th>
+                                            <!-- <th>Manufactured Date</th> -->
+                                            <th class="text-center">Expired Date</th>
+                                            <th class="text-right">MRP</th>
+                                            <th class="text-right">C.P</th>
+                                            <th class="text-center">Available Stock</th>
+                                            <th class="text-center">Available Stock(In Pcs)</th>
+                                            <th class="text-center">Unit</th>
+                                            <th class="text-right">Total MRP</th>
+                                            <th class="text-right">Total C.P</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let model of MedicineStockList|filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index">
+                                            <td class="text-center">{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                            <td class="text-center" *ngIf="action.CanEdit">
+                                                <button class="btn btn-sm btn-warning" (click)="editStock(model)"><i
+                                                        class="bi bi-pencil-square"></i> </button>
+                                            </td>
+                                            <td class="text-center">{{model.MedicineName}}</td>
+                                            <td class="text-center">{{model.HSNCode}}</td>
+                                            <td class="text-center">{{model.BatchNo}}</td>
+                                            <!-- <td>{{model.ManufacturedDate |date:'dd-MM-yyyy'}}</td> -->
+                                            <td class="text-center">{{model.ExpiredDate |date:'dd-MM-yyyy'}}</td>
+                                            <td class="text-right">{{model.MRP}}</td>
+                                            <td class="text-right">{{model.FullCostAmount}}</td>
+                                            <td class="text-center">{{model.StripValue + ( model.StripPeice > 0 ? " , "
+                                                + model.StripPeice :
+                                                '')}}</td>
+                                            <td class="text-center">{{model.AvailableQuantity}}</td>
+                                            <td class="text-center">{{model.UnitName}}</td>
+                                            <td class="text-right">{{model.FinalAmount}}</td>
+                                            <td class="text-right">{{model.FinalCP}}</td>
+
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-center" style="font-weight: 600;">Total</td>
+                                            <td class="text-right" style="font-weight: 600;">{{Total.FinalAmount}}</td>
+                                            <td class="text-right" style="font-weight: 600;">{{Total.FinalCP}}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                            <div class="dataTable-bottom">
+                                <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right;"
+                                    class="my-pagination"></pagination-controls>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+<div id="modal_popUp" class="modal fade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{Head.MedicineStockId > 0 ? 'Update' : 'New'}} Medicine Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form #myForm="ngForm">
+                    <div class="row">
+                        <!-- 
+                        <div class="col-sm-3 form-group">
+                            <label class="form-label">Medicine Name<span style="color: red;">*</span></label>
+                            <input type="text" placeholder="Enter Medicine Name" #Name="ngModel" [(ngModel)]="Head.Name"
+                                name="Name" class="form-control" disabled="disabled"
+                                [ngClass]="{'is-invalid':submitted && Name.invalid}" required autofocus>
+
+                            <div *ngIf="Name.invalid && (Name.dirty || Name.touched || submitted)" class="text-danger">
+                                <div *ngIf="Name.errors?.['required']">
+                                    Medicine Name is required.
+                                </div>
+                            </div>
+                        </div> -->
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Medicine Name</mat-label>
+                            <input matInput #MedicineName="ngModel" name="MedicineName" [(ngModel)]="Head.MedicineName"
+                                 autofocus readonly="">
+                            <mat-error
+                                *ngIf="(MedicineName.dirty  || MedicineName.touched) || (MedicineName.invalid && submitted)">
+                                Medicine Name is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">HSN Code<span style="color: red;">*</span></label>
+                            <input type="number" placeholder="Enter HSNCode" #HSNCode="ngModel"
+                                [(ngModel)]="Head.HSNCode" name="HSNCode" class="form-control" disabled="disabled"
+                                [ngClass]="{'is-invalid':submitted && HSNCode.invalid}" required autofocus>
+
+                            <div *ngIf="HSNCode.invalid && (HSNCode.dirty || HSNCode.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="HSNCode.errors?.['required']">
+                                    HSN Code is required.
+                                </div>
+                            </div>
+                        </div> -->
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>HSN Code</mat-label>
+                            <input matInput #HSNCode="ngModel" name="HSNCode" [(ngModel)]="Head.HSNCode"
+                                readonly="" autofocus>
+                            <mat-error *ngIf="(HSNCode.dirty  || HSNCode.touched) || (HSNCode.invalid && submitted)">
+                                HSN Code is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">BatchNo</label>
+                            <input type="text" placeholder="Enter BatchNo" #BatchNo="ngModel" [(ngModel)]="Head.BatchNo"
+                                name="BatchNo" class="form-control">
+                        </div> -->
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Batch No</mat-label>
+                            <input matInput #BatchNo="ngModel" name="BatchNo" [(ngModel)]="Head.BatchNo" required
+                                autofocus>
+                            <mat-error *ngIf="(BatchNo.dirty  || BatchNo.touched) || (BatchNo.invalid && submitted)">
+                                Batch No is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">Expiry Date<span style="color: red;">*</span></label>
+                            <input type="date" #ExpiredDate="ngModel" [(ngModel)]="Head.ExpiredDate" name="ExpiredDate"
+                                class="form-control" [ngClass]="{'is-invalid':submitted && ExpiredDate.invalid}"
+                                required autofocus>
+
+                            <div *ngIf="ExpiredDate.invalid && (ExpiredDate.dirty || ExpiredDate.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="ExpiredDate.errors?.['required']">
+                                    Expiry Date is required.
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <mat-form-field appearance="outline" class="col-lg-3">
+                            <mat-label>Expired Date</mat-label>
+                            <input matInput [matDatepicker]="picker" [(ngModel)]="Head.ExpiredDate" name="ExpiredDate"
+                                required />
+                            <mat-datepicker-toggle matSuffix [for]="picker"
+                                class="small-datepicker-icon"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+
+
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">MRP<span style="color: red;">*</span></label>
+                            <input type="text" #MRP="ngModel" placeholder="Enter MRP" [(ngModel)]="Head.MRP" name="MRP"
+                                class="form-control" [ngClass]="{'is-invalid':submitted && MRP.invalid}" required
+                                autofocus>
+
+                            <div *ngIf="MRP.invalid && (MRP.dirty || MRP.touched || submitted)" class="text-danger">
+                                <div *ngIf="MRP.errors?.['required']">
+                                    MRP is required.
+                                </div>
+                            </div>
+                        </div> -->
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>MRP </mat-label>
+                            <input type="number" class="no-spinner" matInput #MRP="ngModel" name="MRP"
+                                [(ngModel)]="Head.MRP" required autofocus>
+                            <mat-error *ngIf="(MRP.dirty  || MRP.touched) || (MRP.invalid && submitted)">
+                                Batch No is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">Cost Price<span style="color: red;">*</span></label>
+                            <input type="text" #CostPrice="ngModel" placeholder="Enter Cost Price"
+                                [(ngModel)]="Head.CostPrice" name="CostPrice" class="form-control"
+                                [ngClass]="{'is-invalid':submitted && CostPrice.invalid}" required autofocus>
+
+                            <div *ngIf="CostPrice.invalid && (CostPrice.dirty || CostPrice.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="CostPrice.errors?.['required']">
+                                    Cost Price is required.
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Cost Price<span class="text-danger"></span></mat-label>
+                            <input matInput class="no-spinner" type="number" placeholder="CostPrice"
+                                #CostAmount="ngModel" name="CostPrice" #CostPrice="ngModel" [(ngModel)]="Head.CostPrice"
+                                autofocus required="" />
+                            <mat-error
+                                *ngIf="(CostPrice.dirty  || CostPrice.touched) || (CostPrice.invalid && submitted)">
+                                Cost Price is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">Avl. Qty.<span style="color: red;">*</span></label>
+                            <input type="text" #AvailableQuantity="ngModel" placeholder="Enter AvailableQuantity"
+                                [(ngModel)]="Head.AvailableQuantity" name="AvailableQuantity" class="form-control"
+                                [ngClass]="{'is-invalid':submitted && AvailableQuantity.invalid}" required autofocus>
+
+                            <div *ngIf="AvailableQuantity.invalid && (AvailableQuantity.dirty || AvailableQuantity.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="AvailableQuantity.errors?.['required']">
+                                    Available Quantity is required.
+                                </div>
+                            </div>
+                        </div> -->
+
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Avl. Qty. <span class="text-danger"></span></mat-label>
+                            <input matInput class="no-spinner" type="number" placeholder="AvailableQuantity"
+                                #CostAmount="ngModel" name="AvailableQuantity" #AvailableQuantity="ngModel"
+                                [(ngModel)]="Head.AvailableQuantity" autofocus required="" />
+                            <mat-error
+                                *ngIf="(AvailableQuantity.dirty  || AvailableQuantity.touched) || (AvailableQuantity.invalid && submitted)">
+                                Avl. Qty. is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <!-- <div class="col-sm-3 form-group">
+                            <label class="form-label">Unit<span style="color: red;">*</span></label>
+                            <input type="text" #UnitName="ngModel" placeholder="Enter UnitName" disabled="disabled"
+                                [(ngModel)]="Head.UnitName" name="UnitName" class="form-control"
+                                [ngClass]="{'is-invalid':submitted && UnitName.invalid}" required autofocus>
+
+                            <div *ngIf="UnitName.invalid && (UnitName.dirty || UnitName.touched || submitted)"
+                                class="text-danger">
+                                <div *ngIf="UnitName.errors?.['required']">
+                                    UnitName is required.
+                                </div>
+                            </div>
+                        </div> -->
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Unit<span class="text-danger"></span></mat-label>
+                            <input matInput class="no-spinner" type="text" placeholder="UnitName"
+                                #CostAmount="ngModel" name="UnitName" #UnitName="ngModel"
+                                [(ngModel)]="Head.UnitName" autofocus readonly />
+                        </mat-form-field>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" (click)="EditMedicineStock(myForm)">Save changes</button> -->
+                <button mat-raised-button color="warn" data-bs-dismiss="modal">Close</button>
+          <button mat-raised-button color="primary" (click)="EditMedicineStock(myForm)">Save Changes</button>
+            </div>
+
+        </div>
+    </div>
+</div>

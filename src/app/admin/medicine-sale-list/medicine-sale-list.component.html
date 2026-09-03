@@ -1,0 +1,1211 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main">
+
+    <!-- ========================================= -->
+    <!-- PAGE TITLE -->
+    <!-- ========================================= -->
+
+    <div class="pagetitle">
+
+        <h1>
+            Medicine Sale List
+        </h1>
+
+        <nav>
+
+            <ol class="breadcrumb">
+
+                <li class="breadcrumb-item">
+                    <a routerLink="/admin/admin-dashboard">
+                        Home
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item">
+                    Pharmacy Report
+                </li>
+
+                <li class="breadcrumb-item active">
+                    Medicine Sale List
+                </li>
+
+            </ol>
+
+        </nav>
+
+    </div>
+
+
+    <section class="section">
+
+        <div class="row">
+
+            <div class="col-12">
+
+                <div class="card recent-sales">
+
+                    <div class="card-body pt-2">
+
+
+                        <!-- ========================================= -->
+                        <!-- SEARCH DATE -->
+                        <!-- ========================================= -->
+
+                        <div class="row">
+
+                            <mat-form-field
+                                appearance="outline"
+                                class="col-lg-4">
+
+                                <mat-label>
+                                    From Date
+                                </mat-label>
+
+                                <input
+                                    matInput
+                                    [matDatepicker]="pickers"
+                                    [(ngModel)]="opd.FromDate"
+                                    name="FromDate"
+                                    required />
+
+                                <mat-datepicker-toggle
+                                    matSuffix
+                                    [for]="pickers"
+                                    class="small-datepicker-icon">
+
+                                </mat-datepicker-toggle>
+
+                                <mat-datepicker
+                                    #pickers>
+
+                                </mat-datepicker>
+
+                            </mat-form-field>
+
+
+                            <mat-form-field
+                                appearance="outline"
+                                class="col-lg-4">
+
+                                <mat-label>
+                                    To Date
+                                </mat-label>
+
+                                <input
+                                    matInput
+                                    [matDatepicker]="picker"
+                                    [(ngModel)]="opd.ToDate"
+                                    name="ToDate"
+                                    required />
+
+                                <mat-datepicker-toggle
+                                    matSuffix
+                                    [for]="picker"
+                                    class="small-datepicker-icon">
+
+                                </mat-datepicker-toggle>
+
+                                <mat-datepicker
+                                    #picker>
+
+                                </mat-datepicker>
+
+                            </mat-form-field>
+
+
+                            <!-- SEARCH BUTTON -->
+
+                            <div
+                                class="col-md-2 form-group">
+
+                                <button
+                                    type="button"
+                                    mat-raised-button
+                                    color="primary"
+                                    style="margin-top: 5px;"
+                                    (click)="getPaymentCollectionList()"
+                                    class="px-3 py-1 text-sm">
+
+                                    Search
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- EXPORT BUTTON -->
+
+                            <div
+                                class="col-md-2">
+
+                                <button
+                                    mat-raised-button
+                                    color="primary"
+                                    style="margin-top: 5px;"
+                                    (click)="ExportTOExcel1()">
+
+                                    <i class="bi bi-file-earmark-excel">
+                                    </i>
+
+                                    Export Excel
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================================= -->
+                        <!-- TABLE CONTROLS -->
+                        <!-- ========================================= -->
+
+                        <div
+                            class="dataTable-top"
+                            style="padding: 10px;">
+
+                            <div
+                                class="dataTable-dropdown">
+
+                                <select
+                                    class="dataTable-selector form-select form-select-sm"
+                                    [(ngModel)]="itemPerPage"
+                                    (change)="p = 1">
+
+                                    <option
+                                        *ngFor="let option of pageSize"
+                                        [value]="option">
+
+                                        {{ option }}
+
+                                    </option>
+
+                                </select>
+
+                                &nbsp; entries per page
+
+                            </div>
+
+
+                            <div
+                                class="dataTable-search">
+
+                                <input
+                                    class="dataTable-input form-control form-control-sm"
+                                    [(ngModel)]="Search"
+                                    (ngModelChange)="p = 1"
+                                    placeholder="Search..."
+                                    type="text">
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================================= -->
+                        <!-- TABLE -->
+                        <!-- ========================================= -->
+
+                        <div #TABLE>
+
+                            <div
+                                class="col-lg-12 table-responsive">
+
+                                <table
+                                    class="table table-sm table-bordered table-hover">
+
+                                    <!-- ========================= -->
+                                    <!-- TABLE HEADER -->
+                                    <!-- ========================= -->
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th class="text-center">
+                                                #
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                Print
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                Edit
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                View
+                                            </th>
+
+
+                                            <th>
+                                                Patient Name
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                UHID
+                                            </th>
+
+
+                                            <!-- SORTABLE RECEIPT NO -->
+
+                                            <th
+                                                class="text-center"
+                                                style="cursor: pointer; user-select: none;"
+                                                (click)="sortReceiptNo()">
+
+                                                Receipt No
+
+                                                <i
+                                                    class="bi ms-1"
+                                                    [ngClass]="
+                                                        reverse
+                                                        ? 'bi-arrow-down'
+                                                        : 'bi-arrow-up'
+                                                    ">
+                                                </i>
+
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                Payment Date
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                Discount
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                Taxable Amount
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                CGST
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                SGST
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                IGST
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                Payable Amount
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                Paid Amount
+                                            </th>
+
+
+                                            <th class="text-right">
+                                                Due Amount
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                Payment Status
+                                            </th>
+
+
+                                            <th class="text-center">
+                                                Payment Mode
+                                            </th>
+
+
+                                            <th>
+                                                Doctor Remarks
+                                            </th>
+
+
+                                            <th>
+                                                Payment Remarks
+                                            </th>
+
+
+                                            <th>
+                                                Created By
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <!-- ========================= -->
+                                    <!-- TABLE BODY -->
+                                    <!-- ========================= -->
+
+                                    <tbody>
+
+                                        <tr
+                                            *ngFor="
+                                                let model of PaymentMedicineCollectionList
+                                                | filter: Search
+                                                | paginate: {
+                                                    itemsPerPage: itemPerPage,
+                                                    currentPage: p
+                                                };
+
+                                                let i = index
+                                            ">
+
+
+                                            <!-- SERIAL NUMBER -->
+
+                                            <td
+                                                class="text-center">
+
+                                                {{
+                                                    (itemPerPage * (p - 1))
+                                                    + i
+                                                    + 1
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- PRINT -->
+
+                                            <td
+                                                class="text-center">
+
+                                                <button
+                                                    class="btn btn-sm btn-success"
+                                                    (click)="printReciept(model)">
+
+                                                    <i
+                                                        class="bi bi-printer">
+                                                    </i>
+
+                                                </button>
+
+                                            </td>
+
+
+                                            <!-- EDIT -->
+
+                                            <td
+                                                class="text-center">
+
+                                                <button
+                                                    class="btn btn-sm btn-warning"
+                                                    (click)="editSale(model)">
+
+                                                    <i
+                                                        class="bi bi-pencil-square">
+                                                    </i>
+
+                                                </button>
+
+                                            </td>
+
+
+                                            <!-- VIEW -->
+
+                                            <td
+                                                class="text-center">
+
+                                                <button
+                                                    class="btn btn-sm btn-primary"
+                                                    (click)="getPaymentMedicineList(model)">
+
+                                                    <i
+                                                        class="bi bi-eye-fill">
+                                                    </i>
+
+                                                </button>
+
+                                            </td>
+
+
+                                            <!-- PATIENT NAME -->
+
+                                            <td>
+
+                                                {{ model.PatientName }}
+
+                                            </td>
+
+
+                                            <!-- UHID -->
+
+                                            <td
+                                                class="text-center">
+
+                                                {{ model.PatientCode }}
+
+                                            </td>
+
+
+                                            <!-- RECEIPT NUMBER -->
+
+                                            <td
+                                                class="text-center">
+
+                                                {{ model.ReceiptNo }}
+
+                                            </td>
+
+
+                                            <!-- PAYMENT DATE -->
+
+                                            <td
+                                                class="text-center">
+
+                                                {{
+                                                    model.PaymentDate
+                                                    | date:'dd-MM-yyyy'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- DISCOUNT -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.DiscountAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- TOTAL AMOUNT -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.TotalAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- CGST -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.CGST
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- SGST -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.SGST
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- IGST -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.IGST
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- PAYABLE -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.PayableAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- PAID -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.PaidAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- DUE -->
+
+                                            <td
+                                                class="text-right">
+
+                                                {{
+                                                    model.DueAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- PAYMENT STATUS -->
+
+                                            <td
+                                                class="text-center">
+
+                                                <span
+                                                    class="p-1"
+                                                    [ngClass]="
+                                                        model.PaymentStatus == 1
+                                                        ? 'badge text-bg-success'
+                                                        : 'badge text-bg-danger'
+                                                    ">
+
+                                                    {{
+                                                        AllStatusList[
+                                                            model.PaymentStatus
+                                                        ]
+                                                    }}
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <!-- PAYMENT MODE -->
+
+                                            <td
+                                                class="text-center">
+
+                                                <ng-container
+                                                    *ngFor="
+                                                        let mode of model.PaymentModeList;
+                                                        let last = last
+                                                    ">
+
+                                                    {{
+                                                        AllPaymentMode[mode]
+                                                    }}
+
+                                                    <span
+                                                        *ngIf="!last">
+
+                                                        ,
+
+                                                    </span>
+
+                                                </ng-container>
+
+                                            </td>
+
+
+                                            <!-- DOCTOR REMARKS -->
+
+                                            <td>
+
+                                                {{ model.Remarks }}
+
+                                            </td>
+
+
+                                            <!-- PAYMENT REMARKS -->
+
+                                            <td>
+
+                                                {{
+                                                    getPaymentDetailRemarks(
+                                                        model.PaymentDetailRemarks
+                                                    )
+                                                }}
+
+                                            </td>
+
+
+                                            <!-- CREATED BY -->
+
+                                            <td>
+
+                                                {{ model.CreatedByName }}
+
+                                            </td>
+
+
+                                        </tr>
+
+
+                                        <!-- NO RECORD FOUND -->
+
+                                        <tr
+                                            *ngIf="
+                                                !PaymentMedicineCollectionList ||
+                                                PaymentMedicineCollectionList.length === 0
+                                            ">
+
+                                            <td
+                                                colspan="21"
+                                                class="text-center text-danger p-3">
+
+                                                No records found.
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+
+                                    <!-- ========================= -->
+                                    <!-- TABLE FOOTER -->
+                                    <!-- ========================= -->
+
+                                    <tfoot>
+
+                                        <tr>
+
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+
+                                            <td
+                                                class="text-center"
+                                                style="font-weight: 600;">
+
+                                                TOTAL
+
+                                            </td>
+
+                                            <td></td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.DiscountAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.TotalAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.CGSTAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.SGSTAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.IGSTAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.PayableAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.PaidAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td
+                                                class="text-right"
+                                                style="font-weight: 600;">
+
+                                                {{
+                                                    SaleTotal.DueAmount
+                                                    | number:'1.2-2'
+                                                }}
+
+                                            </td>
+
+
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+
+                                        </tr>
+
+                                    </tfoot>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================================= -->
+                        <!-- PAGINATION -->
+                        <!-- ========================================= -->
+
+                        <div
+                            class="dataTable-bottom">
+
+                            <pagination-controls
+                                (pageChange)="onTableDataChange($event)"
+                                style="float: right;"
+                                class="my-pagination">
+
+                            </pagination-controls>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ========================================= -->
+<!-- SALE DETAIL MODAL -->
+<!-- ========================================= -->
+
+<div
+    id="modal_popUp"
+    class="modal fade">
+
+    <div
+        class="modal-dialog modal-xl">
+
+        <div
+            class="modal-content">
+
+
+            <!-- MODAL HEADER -->
+
+            <div
+                class="modal-header">
+
+                <h5
+                    class="modal-title">
+
+                    Sale Medicine Detail
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+
+                </button>
+
+            </div>
+
+
+            <!-- MODAL BODY -->
+
+            <div
+                class="modal-body">
+
+                <div
+                    class="form-group row">
+
+                    <div
+                        class="table-responsive">
+
+
+                        <!-- MEDICINE DETAILS -->
+
+                        <table
+                            class="table table-bordered table-hover table-sm">
+
+                            <thead
+                                class="thead-light">
+
+                                <tr>
+
+                                    <th>#</th>
+                                    <th>Medicine Name</th>
+                                    <th>Batch No.</th>
+                                    <th>HSN Code</th>
+                                    <th>Amount</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Discount %</th>
+                                    <th>Discount Amt.</th>
+                                    <th>Taxable Amt.</th>
+                                    <th>GST %</th>
+                                    <th>CGST</th>
+                                    <th>SGST</th>
+                                    <th>IGST</th>
+                                    <th>Total</th>
+                                    <th>Expired Date</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr
+                                    *ngFor="
+                                        let model of PaymentMedicineList;
+                                        let i = index
+                                    ">
+
+                                    <td>
+
+                                        {{ i + 1 }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.MedicineName }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.BatchNo }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.HSNCode }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.Amount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.Quantity }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.UnitName }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.DiscountPercentages }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.DiscountAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.TaxableAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.GSTPercentage }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.CGSTAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.SGSTAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.IGSTAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ model.TotalAmount }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{
+                                            model.ExpiredDate
+                                            | date:'dd-MM-yyyy'
+                                        }}
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+
+                        <!-- ========================================= -->
+                        <!-- PAYMENT DETAILS -->
+                        <!-- ========================================= -->
+
+                        <div
+                            class="mb-2 fw-bold">
+
+                            Payment Details
+
+                        </div>
+
+
+                        <div
+                            *ngIf="
+                                PaymentMedicineListPaymentList &&
+                                PaymentMedicineListPaymentList.length > 0
+                            ">
+
+
+                            <table
+                                class="table table-bordered table-hover">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>#</th>
+                                        <th>Payment Date</th>
+                                        <th>Amount</th>
+                                        <th>Payment Mode</th>
+                                        <th>Payment Remarks</th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr
+                                        *ngFor="
+                                            let item of PaymentMedicineListPaymentList;
+                                            let i = index
+                                        ">
+
+                                        <td>
+
+                                            {{ i + 1 }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{
+                                                item.PaymentDate
+                                                | date:'dd-MM-yyyy'
+                                            }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{
+                                                item.PaidAmount
+                                                | number:'1.2-2'
+                                            }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{
+                                                AllPaymentMode[
+                                                    item.PaymentMode
+                                                ]
+                                            }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.Remarks }}
+
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        <!-- NO PAYMENT DETAILS -->
+
+                        <div
+                            *ngIf="
+                                PaymentMedicineListPaymentList &&
+                                PaymentMedicineListPaymentList.length === 0
+                            "
+                            class="alert alert-warning mt-3">
+
+                            No payment details found for this bill.
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL FOOTER -->
+
+            <div
+                class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,488 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" (keypress)="keyPress($event)">
+    <div class="pagetitle">
+        <h1>Medicine Sale
+            <a class="text-link" style="float: right;font-size: 14px;"
+                [routerLink]="'/admin/patient-medicine-sale-list'">
+                Medicine Sale List</a>
+        </h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active">Medicine Sale</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales pt-3">
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <label class="form-label col-sm-2">Select Medicine<span class="text-danger">*</span></label>
+                            <mat-form-field appearance="outline" class="col-lg-3">
+                                <mat-label> Select Medicine </mat-label>
+                                <input matInput #MedicineId="ngModel" name="MedicineName"
+                                    (ngModelChange)="onSearchInput($event)" placeholder="Search By Medicine"
+                                    [(ngModel)]="PaymentMedicine.MedicineName" [matAutocomplete]="autoMedicine"
+                                    required />
+                                <mat-autocomplete #autoMedicine="matAutocomplete"
+                                    (optionSelected)="afterMedicineSelected($event)">
+                                    <mat-option *ngFor="let options of MedicineDetailList" [id]="options.MedicineId"
+                                        [value]="options.MedicineName">{{
+                                        options.MedicineName }}</mat-option>
+                                </mat-autocomplete>
+                                <button mat-icon-button matSuffix *ngIf="PaymentMedicine.MedicineName" color="primary"
+                                    (click)="clearMedicine()">
+                                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div *ngIf="MedicineStockMessage" class="alert alert-warning text-center mt-2">
+                            {{ MedicineStockMessage }}
+                        </div>
+
+                        <div *ngIf="MedicineStockList.length>0">
+                            <div class="form-group row">
+                                <h6>Available Stocks</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm" id="table_list">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Batch No</th>
+                                                <th>Expired Date</th>
+                                                <th>MRP</th>
+                                                <th>Available Stock</th>
+                                                <th>Unit</th>
+                                                <th>Selling Unit</th>
+                                                <th>Selling Quantity</th>
+                                                <th>Amount</th>
+                                                <th>Discount(%)</th>
+                                                <th>Discount(₹)</th>
+                                                <th>GST(%)</th>
+                                                <th>GST(₹)</th>
+                                                <th>Line Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let model of MedicineStockList">
+                                                <td>{{model.BatchNo}}</td>
+                                                <td>{{model.ExpiredDate |date:'dd-MM-yyyy'}}</td>
+                                                <td>{{model.MRP }}</td>
+                                                <td>{{model.AvailableQuantity}}</td>
+                                                <td>{{model.UnitName}}</td>
+                                                <td>
+                                                    <select [(ngModel)]="model.UnitId"
+                                                        (ngModelChange)="changeQuantity(model)" name="unitId">
+                                                        <option *ngFor="let p1 of model.UnitList" [ngValue]="p1.UnitId">
+                                                            {{ p1.UnitName }}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="no-spinner" [(ngModel)]="model.Quantity"
+                                                        (change)="changeQuantity(model)" style="width:100%" />
+                                                </td>
+                                                <td>{{model.Amount }}</td>
+                                                <td>
+                                                    <input type="number" class="no-spinner"
+                                                        [(ngModel)]="model.DiscountPercentages"
+                                                        (change)="changeQuantity(model)" style="width:100%" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="no-spinner"
+                                                        [(ngModel)]="model.DiscountAmount"
+                                                        (change)="changeQuantity(model,true)" style="width:100%" />
+                                                </td>
+                                                <td>
+                                                    <select [(ngModel)]="model.GSTId" (change)="calculateGST(model)">
+                                                        <option value="">GST</option>
+                                                        <option *ngFor="let r1 of GSTList" [value]="r1.GSTId">
+                                                            {{r1.GSTName}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>{{model.TotalGSTAmount }}</td>
+                                                <td>{{model.TotalAmount }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-12 text-center">
+                                    <button mat-raised-button color="primary" (click)="addMedicine()">Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group" *ngIf="PaymentMedicineList.length > 0">
+                            <h5>Medicines</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered  table-sm">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Medicine</th>
+                                            <th>HSN Code</th>
+                                            <th>Batch No</th>
+                                            <th>Expired Date</th>
+                                            <th>Unit</th>
+                                            <th>Quantity</th>
+                                            <th>Amount</th>
+                                            <th>Discount(%)</th>
+                                            <th>Discount(₹)</th>
+                                            <th>Taxable Amount</th>
+                                            <th>GST(%)</th>
+                                            <th>GST(₹)</th>
+                                            <th>Line Total</th>
+                                            <th>Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let model of PaymentMedicineList;let i = index">
+                                            <td>{{i+1}}</td>
+                                            <td>{{model.MedicineName}}</td>
+                                            <td>{{model.HSNCode}}</td>
+                                            <td>{{model.BatchNo}}</td>
+                                            <td>{{model.ExpiredDate |date:'dd-MM-yyyy'}}</td>
+                                            <td>
+                                                <select [(ngModel)]="model.UnitId" (change)="changeQuantity(model)">
+                                                    <option *ngFor="let p1 of UnitList" [value]="p1.UnitId">
+                                                        {{p1.UnitName}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" [(ngModel)]="model.Quantity"
+                                                    (change)="changeQuantity(model)" style="width:80px" />
+                                            </td>
+                                            <td>{{model.Amount}}</td>
+                                            <td>
+                                                <input type="number" [(ngModel)]="model.DiscountPercentages"
+                                                    (change)="changeQuantity(model)" style="width:80px" />
+                                            </td>
+                                            <td>
+                                                <input type="number" [(ngModel)]="model.DiscountAmount"
+                                                    (change)="changeQuantity(model,true)" style="width:80px" />
+                                            </td>
+                                            <td>{{model.TaxableAmount}}</td>
+                                            <td>
+                                                <select [(ngModel)]="model.GSTId" (change)="calculateGST(model)">
+                                                    <option value="">GST</option>
+                                                    <option *ngFor="let p1 of GSTList" [value]="p1.GSTId">
+                                                        {{p1.GSTName}}</option>
+                                                </select>
+                                            </td>
+                                            <td>{{model.TotalGSTAmount }}</td>
+                                            <td>{{model.TotalAmount }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-danger"
+                                                    (click)="removePaymentMedicine(i)"><i
+                                                        class="bi bi-trash-fill"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="list-group" style="margin-top: 10px;" *ngIf="PaymentMedicineList.length > 0">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Payment Details</h5>
+                                            <form #formPaymentCollection="ngForm">
+                                                <div class="row">
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Patient Name / Mobile / UHID</mat-label>
+                                                        <input matInput name="PackageCollectionName"
+                                                            [(ngModel)]="PaymentCollection.PatientName"
+                                                            (ngModelChange)="filterpatientList($event)"
+                                                            [matAutocomplete]="autoTransportPackageCollection"
+                                                            placeholder="Search Patient" required />
+
+                                                        <mat-autocomplete #autoTransportPackageCollection="matAutocomplete"
+                                                            (optionSelected)="afterPatientSelected($event)">
+                                                            <mat-option *ngFor="let option of filteredPatientList"
+                                                                [value]="option.PatientName">
+                                                                {{ option.PatientName }} / {{ option.UHID }} / {{ option.ContactNo }}
+                                                            </mat-option>
+                                                            <mat-option *ngIf="filteredPatientList.length === 0 && PaymentCollection.PatientName"
+                                                                [value]="PaymentCollection.PatientName"
+                                                                (click)="openNewPatientModal()"
+                                                                class="add-new-patient-option">
+                                                                <span class="text-primary">
+                                                                    <i class="bi bi-plus-circle-fill me-1"></i>
+                                                                    Add New Patient: "{{ PaymentCollection.PatientName }}"
+                                                                </span>
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                        <button mat-icon-button matSuffix *ngIf="PaymentMedicine.PatientName" 
+                                                            color="primary" (click)="clearPatient()">
+                                                            <mat-icon>close</mat-icon>
+                                                        </button>
+                                                        <mat-error *ngIf="!PaymentMedicine.PatientName">Required field !!</mat-error>
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total CGST</mat-label>
+                                                        <input matInput type="number" name="CGSTAmount" 
+                                                            [(ngModel)]="PaymentCollection.CGSTAmount" required readonly="true" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total SGST</mat-label>
+                                                        <input matInput type="number" name="SGSTAmount" 
+                                                            [(ngModel)]="PaymentCollection.SGSTAmount" required readonly="true" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Total IGST</mat-label>
+                                                        <input matInput type="number" name="IGSTAmount" 
+                                                            [(ngModel)]="PaymentCollection.IGSTAmount" required readonly="true" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Net Amount</mat-label>
+                                                        <input matInput type="number" name="NetPayableAmount"
+                                                            [(ngModel)]="PaymentCollection.NetPayableAmount" required readonly="true" />
+                                                    </mat-form-field>
+
+                                                    <!-- Point #5: Flat Direct Discount Box on Bill -->
+                                                    <mat-form-field appearance="outline" class="col-lg-2">
+                                                        <mat-label>Disc. on Bill (₹)</mat-label>
+                                                        <input matInput type="number" name="DiscOnBill"
+                                                            [(ngModel)]="PaymentCollection.DiscOnBill"
+                                                            (ngModelChange)="calulateTotal()" class="no-spinner" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Payable Amount</mat-label>
+                                                        <input class="no-spinner" matInput type="number" name="PayableAmount"
+                                                            [(ngModel)]="PaymentCollection.PayableAmount" required
+                                                            (change)="calulateTotal(true)" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-1">
+                                                        <mat-label>Due Amount</mat-label>
+                                                        <input matInput type="number" name="DueAmount" 
+                                                            [(ngModel)]="PaymentCollection.DueAmount" required readonly="true" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Payment Date</mat-label>
+                                                        <input matInput [matDatepicker]="pickers"
+                                                            [(ngModel)]="PaymentCollection.PaymentDate"
+                                                            name="PaymentDate" required />
+                                                        <mat-datepicker-toggle matSuffix [for]="pickers"
+                                                            class="small-datepicker-icon"></mat-datepicker-toggle>
+                                                        <mat-datepicker #pickers></mat-datepicker>
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-6">
+                                                        <mat-label>Doctor Remarks</mat-label>
+                                                        <input matInput name="Remarks"
+                                                            [(ngModel)]="PaymentCollection.Remarks" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Doctor Name</mat-label>
+                                                        <input matInput name="UnitName"
+                                                            (ngModelChange)="filterDoctorList($event)"
+                                                            placeholder="Search By Doctor"
+                                                            [(ngModel)]="PaymentCollection.DoctorName"
+                                                            [matAutocomplete]="autoDoctor" />
+                                                        <mat-autocomplete #autoDoctor="matAutocomplete"
+                                                            (optionSelected)="afterDoctorSelected($event)">
+                                                            <mat-option *ngFor="let options of DoctorDetailList"
+                                                                [id]="options.DoctorId" [value]="options.DoctorName">{{
+                                                                options.DoctorName }}</mat-option>
+                                                        </mat-autocomplete>
+                                                        <button mat-icon-button matSuffix
+                                                            *ngIf="PaymentCollection.DoctorName" color="primary"
+                                                            (click)="clearDoctor()">
+                                                            <mat-icon><i class="ri-close-circle-line"></i></mat-icon>
+                                                        </button>
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-3">
+                                                        <mat-label>Reffered Name</mat-label>
+                                                        <input matInput type="text" name="RefferedByName"
+                                                            [(ngModel)]="PaymentCollection.RefferedByName" required />
+                                                    </mat-form-field>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section" *ngIf="PaymentMedicineList.length > 0">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Payment Collection</h5>
+                                            <form #formPaymentCollection="ngForm">
+                                                <div class="row">
+                                                    <mat-form-field appearance="outline" class="col-lg-6">
+                                                        <mat-label>Remarks</mat-label>
+                                                        <input matInput name="Remarks"
+                                                            [(ngModel)]="currentPayment.Remarks" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-lg-2">
+                                                        <mat-label>Amount</mat-label>
+                                                        <input matInput type="number" name="PaidAmount"
+                                                            [(ngModel)]="currentPayment.PaidAmount" required
+                                                            class="no-spinner" />
+                                                    </mat-form-field>
+
+                                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                                        <mat-label>Payment Mode</mat-label>
+                                                        <mat-select name="PaymentMode"
+                                                            [(ngModel)]="currentPayment.PaymentMode" required
+                                                            class="no-spinner">
+                                                            <mat-option [value]="PaymentMode.Key"
+                                                                *ngFor="let PaymentMode of PaymentModeList">{{
+                                                                PaymentMode.Value }}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+
+                                                    <div class="col-sm-1 align-items-end">
+                                                        <button mat-flat-button color="primary" (click)="addToPaymentList()"
+                                                            type="button">
+                                                            ADD
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="SelectedPaymentCollectionList.length > 0" class="mt-3">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered table-hover">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Remarks</th>
+                                                                    <th>Amount</th>
+                                                                    <th>Payment Mode</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr *ngFor="let item of SelectedPaymentCollectionList; let i = index">
+                                                                    <td>{{ i + 1 }}</td>
+                                                                    <td>{{ item.Remarks }}</td>
+                                                                    <td>{{ item.PaidAmount }}</td>
+                                                                    <td>{{ AllPaymentModeList[item.PaymentMode] }}</td>
+                                                                    <td>
+                                                                        <button class="btn btn-sm btn-danger"
+                                                                            (click)="removePaymentItem(i)">
+                                                                            <i class="bi bi-trash-fill"></i>
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center" *ngIf="PaymentMedicineList.length > 0">
+                            <button type="button" class="btn btn-primary" (click)="saveMedicalPayment()">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="modal_popUp" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">
+                    {{ patient.PatientID > 0 ? 'Update' : 'New' }} Patient
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" 
+                    aria-label="Close" (click)="closePatientModal()">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form #formPatient="ngForm">
+                    <div class="container">
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Patient Name</mat-label>
+                                <input matInput #PatientName="ngModel" name="PatientName"
+                                    [(ngModel)]="patient.PatientName" required autofocus>
+                                <mat-error *ngIf="(PatientName.dirty || PatientName.touched) || (PatientName.invalid && isSubmitted)">
+                                    Patient name is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Patient Guardian Name</mat-label>
+                                <input matInput name="PatientGuardianName" [(ngModel)]="patient.PatientGuardianName">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Age</mat-label>
+                                <input matInput type="text" name="Age" [(ngModel)]="patient.Age" required />
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Address</mat-label>
+                                <textarea matInput name="Address" [(ngModel)]="patient.Address" required></textarea>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Contact No</mat-label>
+                                <input type="tel" matInput name="ContactNo" [(ngModel)]="patient.ContactNo" required maxlength="10">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Gender</mat-label>
+                                <mat-select name="Gender" [(ngModel)]="patient.Gender" required>
+                                    <mat-option [value]="Gender.Key" *ngFor="let Gender of GenderList">{{Gender.Value}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Category</mat-label>
+                                <mat-select name="Category" [(ngModel)]="patient.Category" required>
+                                    <mat-option [value]="Category.Key" *ngFor="let Category of CategoryList">{{Category.Value}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Status</mat-label>
+                                <mat-select name="Status" [(ngModel)]="patient.Status" required>
+                                    <mat-option [value]="status.Key" *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" mat-raised-button color="warn" class="me-2" 
+                    data-bs-dismiss="modal" (click)="closePatientModal()">
+                    Cancel
+                </button>
+                <button mat-raised-button color="primary" (click)="savePatient()">
+                    {{ patient.PatientID > 0 ? 'Update' : 'Submit' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

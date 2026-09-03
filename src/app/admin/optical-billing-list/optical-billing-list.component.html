@@ -1,0 +1,419 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="admin/admin-dashboard">Home</a>
+          </li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <mat-form-field appearance="outline" class="col-sm-2">
+                <mat-label>Entries per page</mat-label>
+                <mat-select [(ngModel)]="itemPerPage">
+                  <mat-option *ngFor="let option of PageSize" [value]="option">{{ option }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '30px' }">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="filterStartPicker" name="StartFrom" required #StartFrom="ngModel"
+                  [(ngModel)]="filterModel.StartFrom" />
+                <mat-datepicker-toggle matSuffix [for]="filterStartPicker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #filterStartPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-lg-2" [style]="{ 'margin-left': '10px' }">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="filterEndPicker" name="endFrom" required #endFrom="ngModel"
+                  [(ngModel)]="filterModel.EndFrom" />
+                <mat-datepicker-toggle matSuffix [for]="filterEndPicker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                <mat-datepicker #filterEndPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-1" [style]="{ 'margin-left': '10px' }">
+                <mat-label> Status</mat-label>
+                <mat-select [(ngModel)]="filterModel.PaymentStatus" name="PaymentStatus">
+                  <mat-option [value]="0">All</mat-option>
+                  <mat-option [value]="status.Key" *ngFor="let status of AmountPaymentStatusList">{{ status.Value }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button style="margin-top: 5px; margin-left: 10px" (click)="getOpticalsBillList()" mat-raised-button
+                color="primary">
+                Search
+              </button>
+              <mat-form-field appearance="outline" class="col-sm-3" [style]="{ 'margin-left': '10px' }">
+                <mat-label>Search</mat-label>
+                <input matInput [(ngModel)]="Search" placeholder="Search..." />
+              </mat-form-field>
+            </div>
+            <div class="dataTable-search"></div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th style="text-align: center">S.No</th>
+                <th style="cursor: pointer; text-align: center" (click)="sort('BillingDate')">
+                  Billing Date
+                </th>
+                <th style="cursor: pointer; text-align: center" (click)="sort('OpticalBillingCode')">
+                  Receipt No.
+                </th>
+                <th style="cursor: pointer" (click)="sort('UHID')">
+                  UHID
+                </th>
+                <th style="cursor: pointer" (click)="sort('PatientName')">
+                  Patient Name
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('Age')">
+                  Age
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('ContactNo')">
+                  Contact
+                </th>
+                <th style="cursor: pointer" (click)="sort('PayableAmount')">
+                  Payable Amount
+                </th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('PaidAmount')">
+                  Paid Amount
+                </th>
+                <th style="cursor: pointer; text-align: right; color: red; font-weight: 600;" (click)="sort('DueAmount')">
+                  Due Amount
+                </th>
+                <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('DeliveryStatus')">
+                  Delivery Status
+                </th>
+                <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('PaymentStatus')">
+                  Payment Status
+                </th>
+                <th class="text-center">Payment Mode</th>
+                <th class="text-center" style="cursor: pointer; text-align: center" (click)="sort('Status')">
+                  Pay
+                </th>
+                <th class="text-center">Bill</th>
+                <th class="text-center">View</th>
+                <th class="text-center" *ngIf="action.CanEdit">Edit</th>
+                <th class="text-center" *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of TotalRecords
+                    | filter : Search
+                    | orderBy : sortKey : false
+                    | paginate : { itemsPerPage: itemPerPage, currentPage: p };
+                  let i = index
+                ">
+                <td style="text-align: center">
+                  {{ itemPerPage * (p - 1) + i + 1 }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.BillingDate | date : "dd-MM-yyyy" }}
+                </td>
+                <td style="text-align: center">
+                  {{ item.OpticalBillingCode }}
+                </td>
+                <td>{{ item.UHID }}</td>
+                <td>{{ item.PatientName }}</td>
+                <td class="text-center">{{ item.Age }}</td>
+                <td class="text-center">{{ item.ContactNo }}</td>
+                <td class="text-end">{{ item.PayableAmount }}</td>
+                <td class="text-end">{{ item.PaidAmount }}</td>
+                <td class="text-end" style="color: red; font-weight: 600">
+                  {{ item.DueAmount }}
+                </td>
+
+                <td style="text-align: center">
+                  <span class="p-1" [ngClass]="
+                      item.DeliveryStatus === 1
+                        ? 'badge text-bg-success'
+                        : 'badge text-bg-danger'
+                    ">
+                    {{ getDeliveryStatus(item?.DeliveryStatus) }}
+                  </span>
+
+                  <ng-container *ngIf="item.DeliveryStatus === 2">
+                    <button style="margin-left: 14px" class="btn btn-primary btn-sm" (click)="DeliveryModal(item)">
+                      <i class="bi bi-check-circle"></i>
+                    </button>
+                  </ng-container>
+                </td>
+
+                <td class="text-center">
+                  <span class="p-1" [ngClass]="
+                      item.PaymentStatus == 1
+                        ? 'badge text-bg-success'
+                        : 'badge text-bg-danger'
+                    ">
+                    {{ AllStatusList[item.PaymentStatus] }}
+                  </span>
+                </td>
+                <td class="text-center">{{ item.PaymentModeName}}</td>
+
+                <td class="text-center">
+                  <ng-container *ngIf="item.PaymentStatus == 2; else paidTemplate">
+                    <button class="btn btn-sm btn btn-primary" (click)="openViewModalForDue(item)">
+                      <i class="bi bi-currency-rupee"></i>
+                    </button>
+                  </ng-container>
+                  <ng-template #paidTemplate>
+                    <button class="btn btn-sm" style="pointer-events: none">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                  </ng-template>
+                </td>
+
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" (click)="getPrint(item)">
+                    <i class="bi bi-printer"></i>
+                  </button>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn btn-primary" (click)="openViewModal(item)">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editPackageCollection(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="text-center" *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="DeleteOpticalBilling(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th></th><th></th><th></th><th></th><th></th><th></th>
+                <th style="font-weight: 600;" class="text-right">Total</th>
+                <th class="text-end">{{ OpticalTotal.TotalPayableAmount }}</th>
+                <th class="text-end">{{ OpticalTotal.PaidAmount }}</th>
+                <th class="text-end" style="color: red;">{{ OpticalTotal.DueAmountTotal }}</th>
+                <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right"
+              class="my-pagination"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- View Details Modal -->
+  <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewDetailsModalLabel">
+            Billing Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="selectedBill" class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Billing Date:</strong>
+                {{ selectedBill.BillingDate | date : "dd-MM-yyyy" }}
+              </div>
+              <div class="col-6">
+                <strong>Receipt No.:</strong>
+                {{ selectedBill.OpticalBillingCode }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Patient Name:</strong> {{ selectedBill.PatientName }}
+              </div>
+              <div class="col-6">
+                <strong>Status :</strong>
+                {{ AllStatusList[selectedBill.PaymentStatus] }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>UHID:</strong> {{ selectedBill.UHID }}
+              </div>
+              <div class="col-6">
+                <strong>Payable Amount:</strong>
+                {{ selectedBill.PayableAmount }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Age:</strong> {{ selectedBill.Age }}
+              </div>
+              <div class="col-6">
+                <strong>Paid Amount:</strong> {{ selectedBill.PaidAmount }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Contact:</strong> {{ selectedBill.ContactNo }}
+              </div>
+              <div class="col-6">
+                <strong>Due Amount:</strong> {{ selectedBill.DueAmount }}
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Delivery Status:</strong>
+                {{ getDeliveryStatus(selectedBill?.DeliveryStatus) }}
+              </div>
+            </div>
+          </div>
+          <div class="fw-bold mt-3 mb-1">Opticals Details</div>
+          <div *ngIf="OpticalSellListALL?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Item Name</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                  <th>Discount</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of OpticalSellListALL; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.OpticalName }}</td>
+                  <td>{{ item.OpticalItemRate | number : "1.2-2" }}</td>
+                  <td>{{ item.Quantity }}</td>
+                  <td>{{ item.Amount | number : "1.2-2" }}</td>
+                  <td>{{ item.Discount | number : "1.2-2" }}</td>
+                  <td>{{ item.LineTotal | number : "1.2-2" }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="OpticalSellListALL?.length === 0" class="alert alert-warning mt-3">
+            No item details found for this bill.
+          </div>
+
+          <div class="fw-bold mt-3 mb-1">Payments Details</div>
+          <div *ngIf="OpticalSellListPayments?.length > 0">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Payment Date</th>
+                  <th>Amount</th>
+                  <th>Payment Mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of OpticalSellListPayments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.PaymentDate | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.PaidAmount | number : "1.2-2" }}</td>
+                  <td>{{PaymentModeAll[item.PaymentMode] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Modal for Due Payment -->
+  <div class="modal fade" id="viewDueModal" tabindex="-2" aria-labelledby="viewDueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewDueModalLabel">Due Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div style="padding: 30px;" class="row align-items-center">
+          <mat-form-field appearance="outline" class="col-lg-3">
+            <mat-label>Payment date</mat-label>
+            <input matInput [matDatepicker]="duePaymentPicker" name="PaymentDate" required #PaymentDate="ngModel"
+              [(ngModel)]="DueBill.PaymentDate" />
+            <mat-datepicker-toggle matSuffix [for]="duePaymentPicker" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #duePaymentPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-lg-3">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" name="Amount" [(ngModel)]="DueBill.DueAmount" required class="no-spinner"
+              readonly />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-lg-3">
+            <mat-label>Payment Mode</mat-label>
+            <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="DueBill.PaymentMode" required
+              class="no-spinner">
+              <mat-option [value]="pm.Key" *ngFor="let pm of PaymentModeList">{{ pm.Value }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="col-lg-3 text-center">
+            <button (click)="ClearDueAmount(DueBill)" mat-raised-button color="primary" class="w-100">
+              Make Payment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Modal -->
+  <div class="modal fade" id="DeliveryModal" tabindex="-2" aria-labelledby="DeliveryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="DeliveryModalLabel">Delivery Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div style="padding: 30px;" class="row align-items-center">
+          <mat-form-field appearance="outline" class="col-lg-4">
+            <mat-label>Delivery date</mat-label>
+            <input matInput [matDatepicker]="deliveryDatepicker" name="DeliveryDate" required #DeliveryDate="ngModel"
+              [(ngModel)]="Deliverystatus.DeliveryDate" />
+            <mat-datepicker-toggle matSuffix [for]="deliveryDatepicker" class="small-datepicker-icon"></mat-datepicker-toggle>
+            <mat-datepicker #deliveryDatepicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-lg-4">
+            <mat-label>Delivery Status</mat-label>
+            <mat-select #DeliveryStatusModel="ngModel" name="DeliveryStatusModel" [(ngModel)]="Deliverystatus.DeliveryStatus" required
+              class="no-spinner">
+              <mat-option [value]="ds.Key" *ngFor="let ds of DeliveryStatusList">{{ ds.Value }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="col-lg-4 text-center">
+            <button (click)="DeliveryStatusUpdate(Deliverystatus)" mat-raised-button color="primary" class="w-100">
+              Delivery Optical
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

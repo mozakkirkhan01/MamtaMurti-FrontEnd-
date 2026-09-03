@@ -1,0 +1,218 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>Purchase List
+        </h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active"> Medicine Purchase List</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales">
+                    <div class="card-body pt-2">
+                        <div class="row">
+                            <div class="dataTable-top" style="padding: 10px 10px 10px 10px;">
+                                <div class="dataTable-dropdown">
+                                    <select class="dataTable-selector form-select form-select-sm"
+                                        [(ngModel)]="itemPerPage">
+                                        <option *ngFor="let option of pageSize" [value]="option">{{option}} </option>
+                                    </select>
+                                    &nbsp; entries per page
+                                </div>
+                                <div class="dataTable-search"><input
+                                        class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                        placeholder="Search..." type="text"></div>
+                            </div>
+                            <div class="col-lg-12 table-responsive">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" (click)="sort('itemPerPage')">#</th>
+                                            <th class="text-center" (click)="sort('InvoiceNo')">Invoice No.</th>
+                                            <th class="text-center" (click)="sort('InvoiceDate')">Invoice Date</th>
+                                            <th style="cursor: pointer;" (click)="sort('SupplierName')">Supplier</th>
+                                            <th class="text-right" (click)="sort('TotalBasicAmount')">Basic Amount</th>
+                                            <th class="text-right" (click)="sort('TotalDiscountAmount')">Discount Amount</th>
+                                            <th class="text-right" (click)="sort('TotalTaxableAmount')">Taxable Amount</th>
+                                            <th class="text-right" (click)="sort('TotalCGSTAmount')">CGST Amount</th>
+                                            <th class="text-right" (click)="sort('TotalSGSTAmount')">SGST Amount</th>
+                                            <th class="text-right" (click)="sort('TotalIGSTAmount')">IGST Amount</th>
+                                            <th class="text-right" (click)="sort('TotalGrandTotal')">Grand Total</th>
+                                            <!-- <th>Paid Amount</th>
+                                            <th>Dues Amount</th> -->
+                                            <th>Created On</th>
+                                            <th class="text-center" style="cursor: pointer" (click)="sort('Bill')">
+                                                Bill
+                                            </th>
+                                            <th style="cursor: pointer;" (click)="sort('StatusName')">Status</th>
+                                            <th>Veiw</th>
+                                            <th *ngIf="action.CanEdit">Edit</th>
+                                            <!-- <th>Delete</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let model of PurchaseList|filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index">
+                                            <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                            <td class="text-center">{{model.InvoiceNo}}</td>
+                                            <td class="text-center">{{model.InvoiceDate | date:'dd-MM-yyyy'}}</td>
+                                            <td>{{model.SupplierName }}</td>
+                                            <td class="text-right">{{model.TotalBasicAmount }}</td>
+                                            <td class="text-right">{{model.TotalDiscountAmount}}</td>
+                                            <td class="text-right">{{model.TotalTaxableAmount}}</td>
+                                            <td class="text-right">{{model.TotalCGSTAmount}}</td>
+                                            <td class="text-right">{{model.TotalSGSTAmount}}</td>
+                                            <td class="text-right">{{model.TotalIGSTAmount}}</td>
+                                            <td class="text-right">{{model.TotalGrandTotal}}</td>
+                                            <!-- <td>{{model.PaidAmount}}</td>
+                                            <td>{{model.DuesAmount}}</td> -->
+                                            <td>{{model.CreatedOn | date:'dd-MM-yyyy'}}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-success" (click)="getPrint(model)">
+                                                    <i class="bi bi-printer"></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center"><span
+                                                    [ngClass]="model.Status == 2 ?'badge bg-warning':'badge bg-success'">
+                                                    {{AllStatusList[model.Status]}}</span></td>
+                                            <td class="text-center ">
+                                                <button class="btn btn-sm btn btn-primary "
+                                                    (click)="getPurchaseProductList(model)">
+                                                    <i class="bi bi-eye-fill"></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center" *ngIf="action.CanEdit">
+                                                <button class="btn btn-sm btn-warning" (click)="editPurchase(model)"><i
+                                                        class="bi bi-pencil-square"></i> </button>
+                                            </td>
+                                            <!-- <td>
+                                                <button class="btn btn-sm btn-danger" (click)="deletePurchase(model)"><i
+                                                        class="bi bi-trash-fill"></i></button>
+                                            </td> -->
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>TOTAL</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalBasicAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalDiscountAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalTaxableAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalCGSTAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalSGSTAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalIGSTAmount|number}}</td>
+                                            <td class="text-right" style="font-weight: 600;">
+                                                {{PurchaseTotal.TotalGrandTotal|number}}</td>
+                                            <!-- <td>{{PurchaseTotal.PaidAmount|number}}</td>
+                                            <td>{{PurchaseTotal.DuesAmount|number}}</td> -->
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                            <div class="dataTable-bottom">
+                                <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right;"
+                                    class="my-pagination"></pagination-controls>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<div id="modal_popUp" class="modal fade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Purchase Medicine Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-sm" id="table_list">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Medicine Name</th>
+                                    <th>Batch No.</th>
+                                    <th>HSN Code</th>
+                                    <th>MRP</th>
+                                    <th>Rate</th>
+                                    <th>Discount %</th>
+                                    <th>Discount Amt.</th>
+                                    <th>Quantity</th>
+                                    <th>Free Qunatity</th>
+                                    <th>Unit</th>
+                                    <th>Basic Amt.</th>
+                                    <th>Taxable Amt.</th>
+                                    <th>GST %</th>
+                                    <th>CGST</th>
+                                    <th>SGST</th>
+                                    <th>IGST</th>
+                                    <th>Cost Amount</th>
+                                    <th>Grand Total</th>
+                                    <!-- <th>Manufactured Date</th> -->
+                                    <th>ExpiredDate</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr *ngFor="let model of PurchaseProductList;let i = index">
+                                    <td>{{ i+1}}</td>
+                                    <td>{{model.Name}}</td>
+                                    <td>{{model.BatchNo}}</td>
+                                    <td>{{model.HSNCode}}</td>
+                                    <td>{{model.MRP}}</td>
+                                    <td>{{model.Rate}}</td>
+                                    <td>{{model.DiscountPercent}}</td>
+                                    <td>{{model.DiscountAmount}}</td>
+                                    <td>{{model.Quantity}}</td>
+                                    <td>{{model.FreeQunatity}}</td>
+                                    <td>{{model.UnitName}}</td>
+                                    <td>{{model.BasicAmount}}</td>
+                                    <td>{{model.TaxableAmount}}</td>
+                                    <td>{{model.GSTValue}}</td>
+                                    <td>{{model.CGSTAmount}}</td>
+                                    <td>{{model.SGSTAmount}}</td>
+                                    <td>{{model.IGSTAmount}}</td>
+                                    <td>{{model.CostAmount}}</td>
+                                    <td>{{model.GrandTotal}}</td>
+                                    <!-- <td>{{model.ManufacturedDate | date:'dd-MM-yyyy'}}</td> -->
+                                    <td>{{model.ExpiredDate | date:'dd-MM-yyyy'}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>

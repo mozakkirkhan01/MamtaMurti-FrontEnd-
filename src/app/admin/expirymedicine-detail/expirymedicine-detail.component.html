@@ -1,0 +1,116 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Medicine Expiry List</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">Pharmacy</li>
+                <li class="breadcrumb-item active">Medicine Expiry List</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales">
+                    <div class="card-body pt-2">
+                        <div class="row align-items-center mb-3">
+                            <mat-form-field appearance="outline" class="col-lg-4">
+                                <mat-label>From Date</mat-label>
+                                <input matInput [matDatepicker]="pickers" [(ngModel)]="opd.FromDate" name="FromDate" required />
+                                <mat-datepicker-toggle matSuffix [for]="pickers" class="small-datepicker-icon"></mat-datepicker-toggle>
+                                <mat-datepicker #pickers></mat-datepicker>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-lg-4">
+                                <mat-label>To Date</mat-label>
+                                <input matInput [matDatepicker]="picker" [(ngModel)]="opd.ToDate" name="ToDate" required />
+                                <mat-datepicker-toggle matSuffix [for]="picker" class="small-datepicker-icon"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+
+                            <div class="col-md-2 form-group">
+                                <button type="submit" mat-raised-button color="primary" (click)="getExpiryMedicineList()" class="px-3 py-1 text-sm">
+                                    Search
+                                </button>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button mat-raised-button color="primary" (click)="ExportTOExcel1()">
+                                    Export to Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dataTable-top" style="padding:10px;">
+                            <div class="dataTable-dropdown">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of pageSize" [value]="option">{{option}}</option>
+                                </select>
+                                &nbsp; entries per page
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search" placeholder="Search..." type="text">
+                            </div>
+                        </div>
+
+                        <div #TABLE>
+                            <div class="col-lg-12 table-responsive">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th class="text-center" (click)="sort('ExpiredDate')" style="cursor: pointer;">
+                                                Expiry Date <i class="bi bi-arrow-down-up"></i>
+                                            </th>
+                                            <th (click)="sort('MedicineName')" style="cursor: pointer;">
+                                                Medicine <i class="bi bi-arrow-down-up"></i>
+                                            </th>
+                                            <th class="text-center">Batch No.</th>
+                                            <th class="text-center">HSN Code</th>
+                                            <th class="text-center">Unit</th>
+                                            <th class="text-left">Manufacturer</th>
+                                            <th class="text-center">Category</th>
+                                            <th class="text-center">Quantity</th>
+                                            <th class="text-right">MRP</th>
+                                            <th class="text-right">C.P</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let model of ExpiryMedicineList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                                            <td class="text-center">{{ (itemPerPage * (p - 1)) + i + 1 }}</td>
+                                            <td class="text-center">{{ model.ExpiredDate | date:'dd-MM-yyyy' }}</td>
+                                            <td class="text-left">{{ model.MedicineName }}</td>
+                                            <td class="text-center">{{ model.BatchNo }}</td>
+                                            <td class="text-center">{{ model.HSNCode }}</td>
+                                            <td class="text-center">{{ model.UnitName }}</td>
+                                            <td class="text-left">{{ model.ManufacturerName }}</td>
+                                            <td class="text-center">{{ model.CategoryName }}</td>
+                                            <td class="text-center">{{ model.AvailableQuantity }}</td>
+                                            <td class="text-right">{{ model.MRP }}</td>
+                                            <td class="text-right">{{ model.CostPrice }}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                            <td class="text-center" style="font-weight: 600;">TOTAL</td>
+                                            <td class="text-center" style="font-weight: 600;">{{ SaleTotal.AvailableQuantity | number }}</td>
+                                            <td class="text-right" style="font-weight: 600;">{{ SaleTotal.MRP | number }}</td>
+                                            <td class="text-right" style="font-weight: 600;">{{ SaleTotal.CostPrice | number }}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="onTableDataChange($event)" style="float: right;" class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
