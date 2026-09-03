@@ -75,6 +75,9 @@
                   Billing Date
                 </th>
                 
+                <th class="text-center" style="cursor: pointer" (click)="sort('ReceiptNo')">
+                  Receipt No
+                </th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('UHID')">
                   UHID
                 </th>
@@ -135,6 +138,7 @@
                 <td style="text-align: center">
                   {{ item.BillingDate | date : "dd-MM-yyyy" }}
                 </td>
+                <td class="text-center">{{ item.ReceiptNo }}</td>
                 <td class="text-center">{{ item.UHID }}</td>
                 <td>{{ item.PatientName }}</td>
                 <td class="text-center">{{ item.Age }}</td>
