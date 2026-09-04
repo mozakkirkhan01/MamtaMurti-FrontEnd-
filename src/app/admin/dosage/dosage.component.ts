@@ -18,7 +18,7 @@ declare var $: any;
 export class DosageComponent {
 
   dataLoading: boolean = false;
-  DosageList: any = [];
+  DosageList: any[] = [];
   Dosage: any = {};
   isSubmitted = false;
 
@@ -51,64 +51,71 @@ export class DosageComponent {
   }
 
   validiateMenu() {
-    var obj: RequestModel = {
+    const obj: RequestModel = {
       request: this.localService.encrypt(
-        JSON.stringify({ Url: this.router.url, StaffLoginId: this.staffLogin.StaffLoginId })
+        JSON.stringify({
+          Url: this.router.url,
+          StaffLoginId: this.staffLogin.StaffLoginId
+        })
       ).toString()
     };
 
     this.dataLoading = true;
-    this.service.validiateMenu(obj).subscribe((response: any) => {
-      this.action = this.loadData.validiateMenu(response, this.toastr, this.router);
-      this.dataLoading = false;
-    }, _ => {
-      this.toastr.error("Error while fetching records");
-      this.dataLoading = false;
+    this.service.validiateMenu(obj).subscribe({
+      next: (response: any) => {
+        this.action = this.loadData.validiateMenu(response, this.toastr, this.router);
+        this.dataLoading = false;
+      },
+      error: () => {
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
+      }
     });
   }
 
   @ViewChild('formDosage') formDosage!: NgForm;
 
   resetForm() {
-    this.Dosage = {};
+    this.Dosage = { Status: 1 };
+    this.isSubmitted = false;
+
     if (this.formDosage) {
       this.formDosage.control.markAsPristine();
       this.formDosage.control.markAsUntouched();
     }
-    this.isSubmitted = false;
-    this.Dosage.Status = 1;
   }
 
-  sort(key: any) {
+  sort(key: string) {
     this.sortKey = key;
     this.reverse = !this.reverse;
   }
 
-  onTableDataChange(p: any) {
-    this.p = p;
+  onTableDataChange(page: number) {
+    this.p = page;
   }
 
   // ==========================
   // GET DOSAGE LIST
   // ==========================
   getDosageList() {
-    var obj: RequestModel = {
+    const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify({})).toString()
     };
 
     this.dataLoading = true;
-    this.service.getDosageList(obj).subscribe((r1: any) => {
-      if (r1.Message == ConstantData.SuccessMessage) {
-        this.DosageList = r1.DosageList;
-        console.log(this.DosageList);
-        
-      } else {
-        this.toastr.error(r1.Message);
+    this.service.getDosageList(obj).subscribe({
+      next: (r1: any) => {
+        if (r1.Message === ConstantData.SuccessMessage) {
+          this.DosageList = r1.DosageList || [];
+        } else {
+          this.toastr.error(r1.Message);
+        }
+        this.dataLoading = false;
+      },
+      error: () => {
+        this.toastr.error("Error while fetching records");
+        this.dataLoading = false;
       }
-      this.dataLoading = false;
-    }, _ => {
-      this.toastr.error("Error while fetching records");
-      this.dataLoading = false;
     });
   }
 
@@ -120,59 +127,74 @@ export class DosageComponent {
     this.formDosage.control.markAllAsTouched();
 
     if (this.formDosage.invalid) {
-      this.toastr.error("Fill all the required fields !!");
+      this.toastr.warning("Please fill all required fields.");
       return;
     }
 
-    var obj: RequestModel = {
+    this.Dosage.CreatedBy = this.staffLogin.StaffId;
+    this.Dosage.UpdatedBy = this.staffLogin.StaffId;
+
+    const obj: RequestModel = {
       request: this.localService.encrypt(JSON.stringify(this.Dosage)).toString()
     };
 
-    this.service.saveDosage(obj).subscribe((r1: any) => {
-      if (r1.Message == ConstantData.SuccessMessage) {
-        if (this.Dosage.DosageId > 0) {
-          this.toastr.success("Dosage updated successfully");
+    this.dataLoading = true;
+    this.service.saveDosage(obj).subscribe({
+      next: (r1: any) => {
+        if (r1.Message === ConstantData.SuccessMessage) {
+          if (this.Dosage.DosageId > 0) {
+            this.toastr.success("Dosage updated successfully");
+          } else {
+            this.toastr.success("Dosage added successfully");
+          }
           $('#staticBackdrop').modal('hide');
+          this.resetForm();
+          this.getDosageList();
         } else {
-          this.toastr.success("Dosage added successfully");
+          this.toastr.error(r1.Message);
         }
-        this.resetForm();
-        this.getDosageList();
-      } else {
-        this.toastr.error(r1.Message);
+        this.dataLoading = false;
+      },
+      error: () => {
+        this.toastr.error("Error occurred while submitting data");
+        this.dataLoading = false;
       }
-    }, _ => {
-      this.toastr.error("Error occurred while submitting data");
     });
   }
 
   // ==========================
   // DELETE DOSAGE
   // ==========================
-  deleteDosage(obj: any) {
+  deleteDosage(item: any) {
     if (confirm("Are you sure you want to delete this record?")) {
-      var request: RequestModel = {
-        request: this.localService.encrypt(JSON.stringify(obj)).toString()
+      const request: RequestModel = {
+        request: this.localService.encrypt(JSON.stringify(item)).toString()
       };
 
       this.dataLoading = true;
-      this.service.deleteDosage(request).subscribe((r1: any) => {
-        if (r1.Message == ConstantData.SuccessMessage) {
-          this.toastr.success("Record deleted successfully");
-          this.getDosageList();
-        } else {
-          this.toastr.error(r1.Message);
+      this.service.deleteDosage(request).subscribe({
+        next: (r1: any) => {
+          if (r1.Message === ConstantData.SuccessMessage) {
+            this.toastr.success("Record deleted successfully");
+            this.getDosageList();
+          } else {
+            this.toastr.error(r1.Message);
+          }
+          this.dataLoading = false;
+        },
+        error: () => {
+          this.toastr.error("Error occurred while deleting the record");
+          this.dataLoading = false;
         }
-        this.dataLoading = false;
-      }, _ => {
-        this.toastr.error("Error occurred while deleting the record");
-        this.dataLoading = false;
       });
     }
   }
 
-  editDosage(obj: any) {
+  // ==========================
+  // EDIT DOSAGE
+  // ==========================
+  editDosage(item: any) {
     this.resetForm();
-    this.Dosage = { ...obj };
+    this.Dosage = { ...item };
   }
 }
