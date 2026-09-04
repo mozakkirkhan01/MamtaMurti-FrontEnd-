@@ -73,6 +73,7 @@
                 <th>S.No</th>
                 <!-- <th>Print Bill</th> -->
                 <th class="text-center" style="cursor: pointer" (click)="sort('SurgeryDate')">Surgery Date</th>
+                <th class="text-center" style="cursor: pointer" (click)="sort('ReceiptNo')">Receipt No</th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('SurgeryCode')">Surgery Code</th>
                 <th class="text-center" style="cursor: pointer" (click)="sort('UHID')">UHID</th>
                 <th style="cursor: pointer" (click)="sort('PatientName')">Patient Name</th>
@@ -104,6 +105,7 @@
                 <!-- <td><Button (click)="PrintBill(item)">🖨️</Button></td> -->
                 <td class="text-center">{{ itemPerPage * (p - 1) + i + 1 }}</td>
                 <td class="text-center">{{ item.SurgeryDate | date:'dd-MM-yyyy' }}</td>
+                <td class="text-center">{{ item.ReceiptNo }}</td>
                 <td class="text-center">{{ item.SurgeryCode }}</td>
                 <td class="text-center">{{ item.UHID }}</td>
                 <td>{{ item.PatientName }}</td>
