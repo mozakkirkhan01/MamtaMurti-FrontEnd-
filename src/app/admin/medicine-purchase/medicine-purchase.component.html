@@ -514,109 +514,302 @@
     </section>
 </main>
 
-<div id="modal_popUp" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-capsule me-2 text-primary"></i>Add New Medicine
-                </h5>
+<div id="modal_popUp" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom bg-light px-4 py-3 align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="modal-icon-badge me-3 shadow-sm">
+                        <i class="bi bi-capsule text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0">Add New Medicine</h5>
+                        <small class="text-muted">Register master medicine with packaging, tax & classification</small>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeMedicineModal()"></button>
             </div>
-            <div class="modal-body">
-                <form #formMedicine="ngForm">
-                    <div class="row">
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Medicine Name</mat-label>
-                            <input matInput #MedicineName="ngModel" name="MedicineName"
-                                [(ngModel)]="Medicine.MedicineName" required autofocus>
-                            <mat-error *ngIf="(MedicineName.dirty || MedicineName.touched) || (MedicineName.invalid && submitted)">
-                                Medicine Name is <strong>required</strong>
-                            </mat-error>
-                        </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>HSN Code</mat-label>
-                            <input matInput #HSNCode="ngModel" name="HSNCode"
-                                [(ngModel)]="Medicine.HSNCode" required>
-                            <mat-error *ngIf="(HSNCode.dirty || HSNCode.touched) || (HSNCode.invalid && submitted)">
-                                HSN Code is <strong>required</strong>
-                            </mat-error>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Unit</mat-label>
-                            <mat-select #ModalUnitId="ngModel" [(ngModel)]="Medicine.UnitId" name="UnitId" required>
-                                <mat-option value="">--Select Unit--</mat-option>
-                                <mat-option *ngFor="let model of UnitList" [value]="model.UnitId">
-                                    {{ model.UnitName }}
-                                </mat-option>
-                            </mat-select>
-                            <mat-error *ngIf="(ModalUnitId.dirty || ModalUnitId.touched) || (ModalUnitId.invalid && submitted)">
-                                Unit is <strong>required</strong>
-                            </mat-error>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>GST</mat-label>
-                            <mat-select #ModalGSTId="ngModel" [(ngModel)]="Medicine.GSTId" name="GSTId" required>
-                                <mat-option value="">--Select GST--</mat-option>
-                                <mat-option *ngFor="let model of GSTList" [value]="model.GSTId">
-                                    {{ model.GSTName }}
-                                </mat-option>
-                            </mat-select>
-                            <mat-error *ngIf="(ModalGSTId.dirty || ModalGSTId.touched) || (ModalGSTId.invalid && submitted)">
-                                GST is <strong>required</strong>
-                            </mat-error>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Category</mat-label>
-                            <mat-select #ModalCategoryId="ngModel" [(ngModel)]="Medicine.CategoryId" name="CategoryId">
-                                <mat-option value="">--Select Category--</mat-option>
-                                <mat-option *ngFor="let model of CategoryList" [value]="model.CategoryId">
-                                    {{ model.CategoryName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Manufacturer</mat-label>
-                            <mat-select #ModalManufacturerId="ngModel" [(ngModel)]="Medicine.ManufacturerId" name="ManufacturerId">
-                                <mat-option value="">--Select Manufacturer--</mat-option>
-                                <mat-option *ngFor="let model of ManufacturerList" [value]="model.ManufacturerId">
-                                    {{ model.ManufacturerName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Medicine Type</mat-label>
-                            <mat-select #ModalMedicineTypeId="ngModel" [(ngModel)]="Medicine.MedicineTypeId" name="MedicineTypeId" required>
-                                <mat-option value="">--Select Medicine Type--</mat-option>
-                                <mat-option *ngFor="let model of MedicineTypeList" [value]="model.MedicineTypeId">
-                                    {{ model.MedicineTypeName }}
-                                </mat-option>
-                            </mat-select>
-                            <mat-error *ngIf="(ModalMedicineTypeId.dirty || ModalMedicineTypeId.touched) || (ModalMedicineTypeId.invalid && submitted)">
-                                Medicine Type is <strong>required</strong>
-                            </mat-error>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-sm-6">
-                            <mat-label>Status</mat-label>
-                            <mat-select [(ngModel)]="Medicine.Status" name="Status" required>
-                                <mat-option *ngFor="let model of StatusList" [value]="model.Key">
-                                    {{ model.Value }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
+            <!-- Modal Body -->
+            <div class="modal-body px-4 py-3">
+                <form #formMedicine="ngForm" autocomplete="off">
+                    
+                    <!-- Section 1: Basic Information -->
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="section-badge"><i class="bi bi-info-circle me-1"></i> 1. Basic Information</span>
+                        <div class="flex-grow-1 ms-2 border-top"></div>
                     </div>
+                    
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-8">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Medicine Name</mat-label>
+                                <input matInput #MedicineName="ngModel" name="MedicineName"
+                                    [(ngModel)]="Medicine.MedicineName" placeholder="Enter medicine name" required autofocus>
+                                <mat-icon matSuffix class="text-muted"><i class="bi bi-capsule"></i></mat-icon>
+                                <mat-error *ngIf="(MedicineName.dirty || MedicineName.touched) || (MedicineName.invalid && submitted)">
+                                    Medicine Name is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-4">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>HSN Code</mat-label>
+                                <input matInput #HSNCode="ngModel" name="HSNCode"
+                                    [(ngModel)]="Medicine.HSNCode" placeholder="e.g. 3004" required>
+                                <mat-icon matSuffix class="text-muted"><i class="bi bi-upc-scan"></i></mat-icon>
+                                <mat-error *ngIf="(HSNCode.dirty || HSNCode.touched) || (HSNCode.invalid && submitted)">
+                                    HSN Code is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Packaging & Classification -->
+                    <div class="d-flex align-items-center mb-3 mt-1">
+                        <span class="section-badge"><i class="bi bi-boxes me-1"></i> 2. Packaging & Classification</span>
+                        <div class="flex-grow-1 ms-2 border-top"></div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Unit with Quick Add -->
+                        <div class="col-md-6 mb-2">
+                            <div class="field-container p-2 rounded-3 border bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                                    <span class="form-field-header-label">Unit / Packaging <span class="text-danger">*</span></span>
+                                    <button type="button" class="btn btn-sm btn-quick-trigger" (click)="toggleAddUnit()" title="Create New Unit">
+                                        <i class="bi bi-plus-lg me-1"></i>New Unit
+                                    </button>
+                                </div>
+                                <mat-form-field appearance="outline" class="w-100 mb-0">
+                                    <mat-label>Select Unit</mat-label>
+                                    <mat-select #ModalUnitId="ngModel" [(ngModel)]="Medicine.UnitId" name="UnitId" required>
+                                        <mat-option value="">-- Select Unit --</mat-option>
+                                        <mat-option *ngFor="let model of UnitList" [value]="model.UnitId">
+                                            {{ model.UnitName }}{{ model.Value && model.Value > 1 ? ' (' + model.Value + ' pcs)' : '' }}
+                                        </mat-option>
+                                        <mat-option (click)="toggleAddUnit(true)" class="quick-add-dropdown-item text-primary fw-bold border-top">
+                                            <i class="bi bi-plus-circle me-1"></i>+ Add New Unit
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="(ModalUnitId.dirty || ModalUnitId.touched) || (ModalUnitId.invalid && submitted)">
+                                        Unit is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Quick Add Unit Drawer -->
+                                <div *ngIf="showAddUnit" class="quick-add-panel p-3 rounded-3 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-primary small"><i class="bi bi-box-seam me-1"></i>Create New Unit</span>
+                                        <button type="button" class="btn-close btn-sm" (click)="toggleAddUnit(false)"></button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-7">
+                                            <label class="form-label-xs mb-1">Unit Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" [(ngModel)]="newUnitName" [ngModelOptions]="{standalone: true}"
+                                                placeholder="e.g. Strip-10, Bottle, PCS" (keyup.enter)="saveQuickUnit()" />
+                                        </div>
+                                        <div class="col-5">
+                                            <label class="form-label-xs mb-1">Pack Value / Pcs <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control form-control-sm" [(ngModel)]="newUnitValue" [ngModelOptions]="{standalone: true}"
+                                                min="1" placeholder="10" (keyup.enter)="saveQuickUnit()" />
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" (click)="toggleAddUnit(false)">Cancel</button>
+                                        <button type="button" class="btn btn-sm btn-primary py-0 px-3" (click)="saveQuickUnit()">
+                                            <i class="bi bi-check-lg me-1"></i>Save Unit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medicine Type with Quick Add -->
+                        <div class="col-md-6 mb-2">
+                            <div class="field-container p-2 rounded-3 border bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                                    <span class="form-field-header-label">Medicine Type <span class="text-danger">*</span></span>
+                                    <button type="button" class="btn btn-sm btn-quick-trigger" (click)="toggleAddMedicineType()" title="Create New Type">
+                                        <i class="bi bi-plus-lg me-1"></i>New Type
+                                    </button>
+                                </div>
+                                <mat-form-field appearance="outline" class="w-100 mb-0">
+                                    <mat-label>Select Medicine Type</mat-label>
+                                    <mat-select #ModalMedicineTypeId="ngModel" [(ngModel)]="Medicine.MedicineTypeId" name="MedicineTypeId" required>
+                                        <mat-option value="">-- Select Medicine Type --</mat-option>
+                                        <mat-option *ngFor="let model of MedicineTypeList" [value]="model.MedicineTypeId">
+                                            {{ model.MedicineTypeName }}
+                                        </mat-option>
+                                        <mat-option (click)="toggleAddMedicineType(true)" class="quick-add-dropdown-item text-primary fw-bold border-top">
+                                            <i class="bi bi-plus-circle me-1"></i>+ Add New Medicine Type
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="(ModalMedicineTypeId.dirty || ModalMedicineTypeId.touched) || (ModalMedicineTypeId.invalid && submitted)">
+                                        Medicine Type is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Quick Add Medicine Type Drawer -->
+                                <div *ngIf="showAddMedicineType" class="quick-add-panel p-3 rounded-3 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-primary small"><i class="bi bi-capsule me-1"></i>Create Medicine Type</span>
+                                        <button type="button" class="btn-close btn-sm" (click)="toggleAddMedicineType(false)"></button>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label-xs mb-1">Type Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newMedicineTypeName" [ngModelOptions]="{standalone: true}"
+                                            placeholder="e.g. Syrup, Tablet, Drops, Eye Drop" (keyup.enter)="saveQuickMedicineType()" />
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" (click)="toggleAddMedicineType(false)">Cancel</button>
+                                        <button type="button" class="btn btn-sm btn-primary py-0 px-3" (click)="saveQuickMedicineType()">
+                                            <i class="bi bi-check-lg me-1"></i>Save Type
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category with Quick Add -->
+                        <div class="col-md-6 mb-2">
+                            <div class="field-container p-2 rounded-3 border bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                                    <span class="form-field-header-label">Category</span>
+                                    <button type="button" class="btn btn-sm btn-quick-trigger" (click)="toggleAddCategory()" title="Create New Category">
+                                        <i class="bi bi-plus-lg me-1"></i>New Category
+                                    </button>
+                                </div>
+                                <mat-form-field appearance="outline" class="w-100 mb-0">
+                                    <mat-label>Select Category</mat-label>
+                                    <mat-select #ModalCategoryId="ngModel" [(ngModel)]="Medicine.CategoryId" name="CategoryId">
+                                        <mat-option value="">-- Select Category --</mat-option>
+                                        <mat-option *ngFor="let model of CategoryList" [value]="model.CategoryId">
+                                            {{ model.CategoryName }}
+                                        </mat-option>
+                                        <mat-option (click)="toggleAddCategory(true)" class="quick-add-dropdown-item text-primary fw-bold border-top">
+                                            <i class="bi bi-plus-circle me-1"></i>+ Add New Category
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Quick Add Category Drawer -->
+                                <div *ngIf="showAddCategory" class="quick-add-panel p-3 rounded-3 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-primary small"><i class="bi bi-tags me-1"></i>Create New Category</span>
+                                        <button type="button" class="btn-close btn-sm" (click)="toggleAddCategory(false)"></button>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label-xs mb-1">Category Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newCategoryName" [ngModelOptions]="{standalone: true}"
+                                            placeholder="e.g. Antibiotic, Antiseptic, NSAID" (keyup.enter)="saveQuickCategory()" />
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" (click)="toggleAddCategory(false)">Cancel</button>
+                                        <button type="button" class="btn btn-sm btn-primary py-0 px-3" (click)="saveQuickCategory()">
+                                            <i class="bi bi-check-lg me-1"></i>Save Category
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manufacturer with Quick Add -->
+                        <div class="col-md-6 mb-2">
+                            <div class="field-container p-2 rounded-3 border bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                                    <span class="form-field-header-label">Manufacturer</span>
+                                    <button type="button" class="btn btn-sm btn-quick-trigger" (click)="toggleAddManufacturer()" title="Create New Manufacturer">
+                                        <i class="bi bi-plus-lg me-1"></i>New Mfr
+                                    </button>
+                                </div>
+                                <mat-form-field appearance="outline" class="w-100 mb-0">
+                                    <mat-label>Select Manufacturer</mat-label>
+                                    <mat-select #ModalManufacturerId="ngModel" [(ngModel)]="Medicine.ManufacturerId" name="ManufacturerId">
+                                        <mat-option value="">-- Select Manufacturer --</mat-option>
+                                        <mat-option *ngFor="let model of ManufacturerList" [value]="model.ManufacturerId">
+                                            {{ model.ManufacturerName }}
+                                        </mat-option>
+                                        <mat-option (click)="toggleAddManufacturer(true)" class="quick-add-dropdown-item text-primary fw-bold border-top">
+                                            <i class="bi bi-plus-circle me-1"></i>+ Add New Manufacturer
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Quick Add Manufacturer Drawer -->
+                                <div *ngIf="showAddManufacturer" class="quick-add-panel p-3 rounded-3 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-primary small"><i class="bi bi-building me-1"></i>Create Manufacturer</span>
+                                        <button type="button" class="btn-close btn-sm" (click)="toggleAddManufacturer(false)"></button>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label-xs mb-1">Manufacturer Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newManufacturerName" [ngModelOptions]="{standalone: true}"
+                                            placeholder="e.g. Cipla, Sun Pharma, Alcon" (keyup.enter)="saveQuickManufacturer()" />
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-2 pt-2 border-top">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" (click)="toggleAddManufacturer(false)">Cancel</button>
+                                        <button type="button" class="btn btn-sm btn-primary py-0 px-3" (click)="saveQuickManufacturer()">
+                                            <i class="bi bi-check-lg me-1"></i>Save Mfr
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Tax & Status -->
+                    <div class="d-flex align-items-center mb-3 mt-2">
+                        <span class="section-badge"><i class="bi bi-receipt me-1"></i> 3. Tax & Status</span>
+                        <div class="flex-grow-1 ms-2 border-top"></div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>GST Rate</mat-label>
+                                <mat-select #ModalGSTId="ngModel" [(ngModel)]="Medicine.GSTId" name="GSTId" required>
+                                    <mat-option value="">-- Select GST --</mat-option>
+                                    <mat-option *ngFor="let model of GSTList" [value]="model.GSTId">
+                                        {{ model.GSTName }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="(ModalGSTId.dirty || ModalGSTId.touched) || (ModalGSTId.invalid && submitted)">
+                                    GST is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-6">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Status</mat-label>
+                                <mat-select [(ngModel)]="Medicine.Status" name="Status" required>
+                                    <mat-option *ngFor="let model of StatusList" [value]="model.Key">
+                                        {{ model.Value }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
                 </form>
             </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="warn" type="button" data-bs-dismiss="modal" (click)="closeMedicineModal()">Close</button>
-                <button mat-raised-button color="primary" type="button" (click)="saveMedicine()">Save Medicine</button>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer border-top bg-light px-4 py-3 justify-content-between">
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>Fields marked with <span class="text-danger">*</span> are mandatory
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary px-3 rounded-pill" data-bs-dismiss="modal" (click)="closeMedicineModal()">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary px-4 rounded-pill shadow-sm" (click)="saveMedicine()">
+                        <i class="bi bi-check2-circle me-1"></i> Save Medicine
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -205,12 +205,35 @@ export class MedicinePurchaseComponent implements OnInit {
     this.Medicine.MedicineTypeId = '';
     this.Medicine.HSNCode = '';
     this.Medicine.MedicineName = '';
+    this.showAddCategory = false;
+    this.newCategoryName = '';
+    this.showAddManufacturer = false;
+    this.newManufacturerName = '';
+    this.showAddMedicineType = false;
+    this.newMedicineTypeName = '';
+    this.showAddUnit = false;
+    this.newUnitName = '';
+    this.newUnitValue = 1;
     if (this.formMedicine) {
       this.formMedicine.control.markAsPristine();
       this.formMedicine.control.markAsUntouched();
     }
     this.submitted = false;
   }
+
+  // Quick Add properties for Add New Medicine modal
+  showAddCategory: boolean = false;
+  newCategoryName: string = '';
+
+  showAddManufacturer: boolean = false;
+  newManufacturerName: string = '';
+
+  showAddMedicineType: boolean = false;
+  newMedicineTypeName: string = '';
+
+  showAddUnit: boolean = false;
+  newUnitName: string = '';
+  newUnitValue: number = 1;
 
   openNewMedicineModal(): void {
     this.resetMedicine();
@@ -226,6 +249,233 @@ export class MedicinePurchaseComponent implements OnInit {
 
   newMedicine() {
     this.openNewMedicineModal();
+  }
+
+  toggleAddUnit(show?: boolean) {
+    this.showAddUnit = show !== undefined ? show : !this.showAddUnit;
+    if (!this.showAddUnit) {
+      this.newUnitName = '';
+      this.newUnitValue = 1;
+    }
+  }
+
+  saveQuickUnit() {
+    if (!this.newUnitName || !this.newUnitName.trim()) {
+      this.toastr.warning('Please enter unit name.');
+      return;
+    }
+
+    const employeeId = this.employeeDetail ? this.employeeDetail.EmployeeId : (this.staffLogin ? this.staffLogin.StaffId : 0);
+    const unitData = {
+      UnitName: this.newUnitName.trim(),
+      Value: Number(this.newUnitValue) || 1,
+      Status: 1,
+      CreatedBy: employeeId,
+      UpdatedBy: employeeId,
+    };
+
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify(unitData)).toString(),
+    };
+
+    this.dataLoading = true;
+    this.service.saveUnit(obj).subscribe(
+      (r1: any) => {
+        const response = r1 as any;
+        if (response.Message === ConstantData.SuccessMessage) {
+          this.toastr.success('Unit added successfully.');
+          const savedId = response.UnitId;
+          this.showAddUnit = false;
+          this.newUnitName = '';
+          this.newUnitValue = 1;
+
+          var getObj: RequestModel = {
+            request: this.localService.encrypt(JSON.stringify({})).toString(),
+          };
+          this.service.getUnitList(getObj).subscribe((res: any) => {
+            if (res.Message === ConstantData.SuccessMessage) {
+              this.UnitList = res.UnitList;
+              this.Medicine.UnitId = savedId;
+            }
+          });
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error occurred while saving unit.');
+        this.dataLoading = false;
+      }
+    );
+  }
+
+  toggleAddCategory(show?: boolean) {
+    this.showAddCategory = show !== undefined ? show : !this.showAddCategory;
+    if (!this.showAddCategory) {
+      this.newCategoryName = '';
+    }
+  }
+
+  saveQuickCategory() {
+    if (!this.newCategoryName || !this.newCategoryName.trim()) {
+      this.toastr.warning('Please enter category name.');
+      return;
+    }
+
+    const employeeId = this.employeeDetail ? this.employeeDetail.EmployeeId : (this.staffLogin ? this.staffLogin.StaffId : 0);
+    const categoryData = {
+      CategoryName: this.newCategoryName.trim(),
+      Status: 1,
+      CreatedBy: employeeId,
+      UpdatedBy: employeeId,
+    };
+
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify(categoryData)).toString(),
+    };
+
+    this.dataLoading = true;
+    this.service.saveCategory(obj).subscribe(
+      (r1: any) => {
+        const response = r1 as any;
+        if (response.Message === ConstantData.SuccessMessage) {
+          this.toastr.success('Category added successfully.');
+          const savedId = response.CategoryId;
+          this.showAddCategory = false;
+          this.newCategoryName = '';
+
+          var getObj: RequestModel = {
+            request: this.localService.encrypt(JSON.stringify({})).toString(),
+          };
+          this.service.getCategoryList(getObj).subscribe((res: any) => {
+            if (res.Message === ConstantData.SuccessMessage) {
+              this.CategoryList = res.CategoryList;
+              this.Medicine.CategoryId = savedId;
+            }
+          });
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error occurred while saving category.');
+        this.dataLoading = false;
+      }
+    );
+  }
+
+  toggleAddManufacturer(show?: boolean) {
+    this.showAddManufacturer = show !== undefined ? show : !this.showAddManufacturer;
+    if (!this.showAddManufacturer) {
+      this.newManufacturerName = '';
+    }
+  }
+
+  saveQuickManufacturer() {
+    if (!this.newManufacturerName || !this.newManufacturerName.trim()) {
+      this.toastr.warning('Please enter manufacturer name.');
+      return;
+    }
+
+    const employeeId = this.employeeDetail ? this.employeeDetail.EmployeeId : (this.staffLogin ? this.staffLogin.StaffId : 0);
+    const manData = {
+      ManufacturerName: this.newManufacturerName.trim(),
+      Status: 1,
+      CreatedBy: employeeId,
+      UpdatedBy: employeeId,
+    };
+
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify(manData)).toString(),
+    };
+
+    this.dataLoading = true;
+    this.service.saveManufacturer(obj).subscribe(
+      (r1: any) => {
+        const response = r1 as any;
+        if (response.Message === ConstantData.SuccessMessage) {
+          this.toastr.success('Manufacturer added successfully.');
+          const savedId = response.ManufacturerId;
+          this.showAddManufacturer = false;
+          this.newManufacturerName = '';
+
+          var getObj: RequestModel = {
+            request: this.localService.encrypt(JSON.stringify({})).toString(),
+          };
+          this.service.getManufacturerList(getObj).subscribe((res: any) => {
+            if (res.Message === ConstantData.SuccessMessage) {
+              this.ManufacturerList = res.ManufacturerList;
+              this.Medicine.ManufacturerId = savedId;
+            }
+          });
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error occurred while saving manufacturer.');
+        this.dataLoading = false;
+      }
+    );
+  }
+
+  toggleAddMedicineType(show?: boolean) {
+    this.showAddMedicineType = show !== undefined ? show : !this.showAddMedicineType;
+    if (!this.showAddMedicineType) {
+      this.newMedicineTypeName = '';
+    }
+  }
+
+  saveQuickMedicineType() {
+    if (!this.newMedicineTypeName || !this.newMedicineTypeName.trim()) {
+      this.toastr.warning('Please enter medicine type name.');
+      return;
+    }
+
+    const employeeId = this.employeeDetail ? this.employeeDetail.EmployeeId : (this.staffLogin ? this.staffLogin.StaffId : 0);
+    const typeData = {
+      MedicineTypeName: this.newMedicineTypeName.trim(),
+      Status: 1,
+      CreatedBy: employeeId,
+      UpdatedBy: employeeId,
+    };
+
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify(typeData)).toString(),
+    };
+
+    this.dataLoading = true;
+    this.service.saveMedicineType(obj).subscribe(
+      (r1: any) => {
+        const response = r1 as any;
+        if (response.Message === ConstantData.SuccessMessage) {
+          this.toastr.success('Medicine Type added successfully.');
+          const savedId = response.MedicineTypeId;
+          this.showAddMedicineType = false;
+          this.newMedicineTypeName = '';
+
+          var getObj: RequestModel = {
+            request: this.localService.encrypt(JSON.stringify({})).toString(),
+          };
+          this.service.getMedicineTypeList(getObj).subscribe((res: any) => {
+            if (res.Message === ConstantData.SuccessMessage) {
+              this.MedicineTypeList = res.MedicineTypeList;
+              this.Medicine.MedicineTypeId = savedId;
+            }
+          });
+        } else {
+          this.toastr.error(response.Message);
+        }
+        this.dataLoading = false;
+      },
+      (err) => {
+        this.toastr.error('Error occurred while saving medicine type.');
+        this.dataLoading = false;
+      }
+    );
   }
 
   CategoryList: any[] = [];

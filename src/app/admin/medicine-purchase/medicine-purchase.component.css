@@ -1,0 +1,110 @@
+/* Add New Medicine Modal Enhancements */
+.modal-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #e7f1ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.section-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #334155;
+    padding: 3px 10px;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.field-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-container:focus-within {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.08);
+}
+
+.form-field-header-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-quick-trigger {
+    font-size: 0.72rem;
+    padding: 2px 10px !important;
+    font-weight: 600;
+    border-radius: 20px;
+    border: 1px solid #b6d4fe;
+    color: #0d6efd;
+    background-color: #f0f7ff;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-quick-trigger:hover {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border-color: #0d6efd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+}
+
+.quick-add-panel {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1 !important;
+    border-left: 3px solid #0d6efd !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    animation: fadeInQuickAdd 0.22s ease-out;
+}
+
+@keyframes fadeInQuickAdd {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-label-xs {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.quick-add-dropdown-item {
+    background-color: #f8fafc !important;
+    transition: background-color 0.15s;
+}
+
+.quick-add-dropdown-item:hover {
+    background-color: #e7f1ff !important;
+}
+
+#modal_popUp .modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+#modal_popUp mat-form-field {
+    width: 100%;
+}
+
+#modal_popUp mat-form-field .mat-form-field-wrapper {
+    padding-bottom: 0.4em;
+}
