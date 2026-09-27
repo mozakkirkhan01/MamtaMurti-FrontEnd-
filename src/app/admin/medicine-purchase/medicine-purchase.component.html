@@ -77,29 +77,31 @@
                                     <mat-form-field appearance="outline" class="col-lg-3">
                                         <mat-label> Select Medicine </mat-label>
                                         <input matInput #MedicineId="ngModel" name="MedicineName"
-                                            (ngModelChange)="onSearchInput($event)" placeholder="Search or Create Medicine"
+                                            (ngModelChange)="onSearchInput($event)" placeholder="Search Medicine"
                                             [(ngModel)]="PurchaseProduct.MedicineName" [matAutocomplete]="autoMedicine"
                                             required />
                                         <mat-autocomplete #autoMedicine="matAutocomplete"
                                             (optionSelected)="afterMedicineSelected($event)">
                                             <mat-option *ngFor="let options of MedicineDetailList"
                                                 [id]="options.MedicineId" [value]="options.MedicineName">
-                                                <!-- <span class="badge bg-success me-2">
-                                                    <i class="bi bi-check-circle"></i>
-                                                </span> -->
                                                 {{ options.MedicineName }}
                                             </mat-option>
                                             <mat-option *ngIf="PurchaseProduct.MedicineName && MedicineDetailList.length === 0"
-                                                [value]="PurchaseProduct.MedicineName">
-                                                <span class="badge bg-info me-2">
-                                                    <i class="bi bi-plus-circle"></i> New
+                                                id="new_medicine_opt"
+                                                [value]="PurchaseProduct.MedicineName"
+                                                (click)="openNewMedicineModal()">
+                                                <span class="text-primary fw-bold">
+                                                    <i class="bi bi-plus-circle-fill me-1"></i> Add New Medicine: "{{ PurchaseProduct.MedicineName }}"
                                                 </span>
-                                                {{ PurchaseProduct.MedicineName }}
                                             </mat-option>
                                         </mat-autocomplete>
                                         <button mat-icon-button matSuffix *ngIf="PurchaseProduct.MedicineName"
-                                            color="primary" (click)="clearMedicine()">
+                                            color="primary" (click)="clearMedicine()" title="Clear">
                                             <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                        </button>
+                                        <button mat-icon-button matSuffix type="button"
+                                            color="primary" (click)="openNewMedicineModal()" title="Add New Medicine">
+                                            <mat-icon><i class="bi bi-plus-circle"></i> </mat-icon>
                                         </button>
                                         <mat-hint *ngIf="PurchaseProduct.IsNewMedicine" class="text-info">
                                             <i class="bi bi-info-circle"></i> This medicine will be created
@@ -511,6 +513,114 @@
         </div>
     </section>
 </main>
+
+<div id="modal_popUp" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-capsule me-2 text-primary"></i>Add New Medicine
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeMedicineModal()"></button>
+            </div>
+            <div class="modal-body">
+                <form #formMedicine="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Medicine Name</mat-label>
+                            <input matInput #MedicineName="ngModel" name="MedicineName"
+                                [(ngModel)]="Medicine.MedicineName" required autofocus>
+                            <mat-error *ngIf="(MedicineName.dirty || MedicineName.touched) || (MedicineName.invalid && submitted)">
+                                Medicine Name is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>HSN Code</mat-label>
+                            <input matInput #HSNCode="ngModel" name="HSNCode"
+                                [(ngModel)]="Medicine.HSNCode" required>
+                            <mat-error *ngIf="(HSNCode.dirty || HSNCode.touched) || (HSNCode.invalid && submitted)">
+                                HSN Code is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Unit</mat-label>
+                            <mat-select #ModalUnitId="ngModel" [(ngModel)]="Medicine.UnitId" name="UnitId" required>
+                                <mat-option value="">--Select Unit--</mat-option>
+                                <mat-option *ngFor="let model of UnitList" [value]="model.UnitId">
+                                    {{ model.UnitName }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(ModalUnitId.dirty || ModalUnitId.touched) || (ModalUnitId.invalid && submitted)">
+                                Unit is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>GST</mat-label>
+                            <mat-select #ModalGSTId="ngModel" [(ngModel)]="Medicine.GSTId" name="GSTId" required>
+                                <mat-option value="">--Select GST--</mat-option>
+                                <mat-option *ngFor="let model of GSTList" [value]="model.GSTId">
+                                    {{ model.GSTName }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(ModalGSTId.dirty || ModalGSTId.touched) || (ModalGSTId.invalid && submitted)">
+                                GST is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Category</mat-label>
+                            <mat-select #ModalCategoryId="ngModel" [(ngModel)]="Medicine.CategoryId" name="CategoryId">
+                                <mat-option value="">--Select Category--</mat-option>
+                                <mat-option *ngFor="let model of CategoryList" [value]="model.CategoryId">
+                                    {{ model.CategoryName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Manufacturer</mat-label>
+                            <mat-select #ModalManufacturerId="ngModel" [(ngModel)]="Medicine.ManufacturerId" name="ManufacturerId">
+                                <mat-option value="">--Select Manufacturer--</mat-option>
+                                <mat-option *ngFor="let model of ManufacturerList" [value]="model.ManufacturerId">
+                                    {{ model.ManufacturerName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Medicine Type</mat-label>
+                            <mat-select #ModalMedicineTypeId="ngModel" [(ngModel)]="Medicine.MedicineTypeId" name="MedicineTypeId" required>
+                                <mat-option value="">--Select Medicine Type--</mat-option>
+                                <mat-option *ngFor="let model of MedicineTypeList" [value]="model.MedicineTypeId">
+                                    {{ model.MedicineTypeName }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(ModalMedicineTypeId.dirty || ModalMedicineTypeId.touched) || (ModalMedicineTypeId.invalid && submitted)">
+                                Medicine Type is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Status</mat-label>
+                            <mat-select [(ngModel)]="Medicine.Status" name="Status" required>
+                                <mat-option *ngFor="let model of StatusList" [value]="model.Key">
+                                    {{ model.Value }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button color="warn" type="button" data-bs-dismiss="modal" (click)="closeMedicineModal()">Close</button>
+                <button mat-raised-button color="primary" type="button" (click)="saveMedicine()">Save Medicine</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- <style>
     .table-warning {

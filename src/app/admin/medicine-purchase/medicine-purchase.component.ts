@@ -200,9 +200,11 @@ export class MedicinePurchaseComponent implements OnInit {
     this.Medicine.Status = 1;
     this.Medicine.UnitId = '';
     this.Medicine.GSTId = '';
-    this.Medicine.SizeId = '';
     this.Medicine.CategoryId = '';
     this.Medicine.ManufacturerId = '';
+    this.Medicine.MedicineTypeId = '';
+    this.Medicine.HSNCode = '';
+    this.Medicine.MedicineName = '';
     if (this.formMedicine) {
       this.formMedicine.control.markAsPristine();
       this.formMedicine.control.markAsUntouched();
@@ -210,9 +212,20 @@ export class MedicinePurchaseComponent implements OnInit {
     this.submitted = false;
   }
 
-  newMedicine() {
+  openNewMedicineModal(): void {
     this.resetMedicine();
+    if (this.PurchaseProduct && this.PurchaseProduct.MedicineName) {
+      this.Medicine.MedicineName = this.PurchaseProduct.MedicineName.trim();
+    }
     $('#modal_popUp').modal('show');
+  }
+
+  closeMedicineModal(): void {
+    $('#modal_popUp').modal('hide');
+  }
+
+  newMedicine() {
+    this.openNewMedicineModal();
   }
 
   CategoryList: any[] = [];
@@ -334,42 +347,65 @@ export class MedicinePurchaseComponent implements OnInit {
 
   saveMedicine() {
     this.submitted = true;
-    if (this.formMedicine.invalid) {
+    if (this.formMedicine && this.formMedicine.invalid) {
       this.toastr.warning('Fill all the Required Fields.', 'Invalid Form');
-      this.dataLoading = false;
       return;
     }
-    this.Medicine.UpdatedBy = this.employeeDetail.EmployeeId;
-    this.Medicine.CreatedBy = this.employeeDetail.EmployeeId;
+
+    if (!this.Medicine.MedicineName || !this.Medicine.MedicineName.trim()) {
+      this.toastr.warning('Medicine Name is required.');
+      return;
+    }
+
+    if (!this.Medicine.HSNCode || !this.Medicine.HSNCode.trim()) {
+      this.toastr.warning('HSN Code is required.');
+      return;
+    }
+
+    if (!this.Medicine.UnitId) {
+      this.toastr.warning('Unit is required.');
+      return;
+    }
+
+    if (!this.Medicine.GSTId) {
+      this.toastr.warning('GST is required.');
+      return;
+    }
+
+    if (!this.Medicine.MedicineTypeId) {
+      this.toastr.warning('Medicine Type is required.');
+      return;
+    }
+
+    const employeeId = this.employeeDetail ? this.employeeDetail.EmployeeId : (this.staffLogin ? this.staffLogin.StaffId : 0);
+    this.Medicine.UpdatedBy = employeeId;
+    this.Medicine.CreatedBy = employeeId;
+
+    var obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify(this.Medicine)).toString(),
+    };
+
     this.dataLoading = true;
-    this.service.saveMedicine(this.Medicine).subscribe(
+    this.service.saveMedicine(obj).subscribe(
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
-          if (this.Medicine.MedicineId > 0) {
-            this.toastr.success('Product detail updated successfully.');
-            $('#modal_popUp').modal('hide');
-          } else {
-            this.toastr.success('Product created successfully.');
-            $('#modal_popUp').modal('hide');
-            this.getMedicineList(response.MedicineId);
-            this.Medicine.MedicineId = null;
-            this.Medicine.Name = '';
-            this.Medicine.HSNCode = '';
-            if (this.formMedicine) {
-              this.formMedicine.control.markAsPristine();
-              this.formMedicine.control.markAsUntouched();
-            }
-            this.submitted = false;
-          }
-          this.getMedicineList(response.MedicineId);
+          this.toastr.success('Medicine created successfully.');
+          $('#modal_popUp').modal('hide');
+
+          const newMedName = this.Medicine.MedicineName;
+          const newMedId = response.MedicineId || 0;
+
+          this.getMedicineList(newMedId, newMedName);
+
+          this.resetMedicine();
         } else {
           this.toastr.error(response.Message);
-          this.dataLoading = false;
         }
+        this.dataLoading = false;
       },
       (err) => {
-        this.toastr.error('Error Occurred while fetching data.');
+        this.toastr.error('Error Occurred while saving data.');
         this.dataLoading = false;
       }
     );
@@ -465,11 +501,11 @@ export class MedicinePurchaseComponent implements OnInit {
     );
   }
 
-  getMedicineList(MedicineId: number) {
+  getMedicineList(MedicineId?: number, MedicineName?: string) {
     this.dataLoading = true;
     var obj: RequestModel = {
       request: this.localService
-        .encrypt(JSON.stringify({ MedicineId: MedicineId }))
+        .encrypt(JSON.stringify({ MedicineId: MedicineId || 0 }))
         .toString(),
     };
     this.service.getMedicineList(obj).subscribe(
@@ -479,15 +515,17 @@ export class MedicinePurchaseComponent implements OnInit {
           this.MedicineList = response.MedicineList;
           this.MedicineDetailList = this.MedicineList.slice(0, 50);
 
-          if (MedicineId > 0) {
-            for (let i = 0; i < this.MedicineList.length; i++) {
-              const e = this.MedicineList[i];
-              if (e.MedicineId == MedicineId) {
-                this.PurchaseProduct.MedicineName = e.MedicineName;
-                this.PurchaseProduct.MedicineId = e.MedicineId;
-                this.afterMedicineSelected({ option: { id: e.MedicineId, value: e.MedicineName } });
-                break;
-              }
+          if (MedicineId && MedicineId > 0) {
+            const found = this.MedicineList.find((e: any) => e.MedicineId == MedicineId);
+            if (found) {
+              this.applySelectedMedicine(found);
+            }
+          } else if (MedicineName) {
+            const foundByName = this.MedicineList.find(
+              (e: any) => e.MedicineName && e.MedicineName.toLowerCase() === MedicineName.toLowerCase().trim()
+            );
+            if (foundByName) {
+              this.applySelectedMedicine(foundByName);
             }
           }
         } else {
@@ -500,6 +538,22 @@ export class MedicinePurchaseComponent implements OnInit {
         this.dataLoading = false;
       }
     );
+  }
+
+  applySelectedMedicine(SelectedMedicine: any) {
+    this.PurchaseProduct.MedicineId = SelectedMedicine.MedicineId;
+    this.PurchaseProduct.MedicineName = SelectedMedicine.MedicineName;
+    this.PurchaseProduct.HSNCode = SelectedMedicine.HSNCode;
+    this.PurchaseProduct.UnitId = SelectedMedicine.UnitId;
+    this.PurchaseProduct.UnitName = SelectedMedicine.UnitName;
+    this.PurchaseProduct.GSTId = SelectedMedicine.GSTId;
+    this.PurchaseProduct.ManufacturerId = SelectedMedicine.ManufacturerId;
+    this.PurchaseProduct.CategoryId = SelectedMedicine.CategoryId;
+    this.PurchaseProduct.MedicineTypeId = SelectedMedicine.MedicineTypeId;
+    this.PurchaseProduct.IsNewMedicine = false;
+    if (this.PurchaseProduct.GSTId > 0 && this.Purchase.SupplierId > 0) {
+      this.calculateGST(this.PurchaseProduct);
+    }
   }
 
   isSubmittedPurchaseProduct: boolean = false;
@@ -554,39 +608,36 @@ export class MedicinePurchaseComponent implements OnInit {
   }
 
   afterMedicineSelected(event: any) {
+    const selectedValue = event.option.value;
+    const selectedId = event.option.id;
 
-    console.log(event.option.id);
-    console.log(event.option.value);
-    
-      if (typeof event.option.id === 'string') {
-    this.PurchaseProduct.MedicineId = 0;
-  } else {
-    this.PurchaseProduct.MedicineId = event.option.id;
-  }
-    this.PurchaseProduct.MedicineName = event.option.value;
-    
+    // Check if user clicked the "Add New Medicine" option
+    if (selectedId === 'new_medicine_opt' || 
+        (!selectedId && selectedValue === this.PurchaseProduct.MedicineName && this.MedicineDetailList.length === 0)) {
+      this.openNewMedicineModal();
+      return;
+    }
 
-    console.log(this.PurchaseProduct.MedicineId);
-    
-    var SelectedMedicine = this.MedicineDetailList.find(
+    if (typeof selectedId === 'string' && selectedId.startsWith('new_')) {
+      this.openNewMedicineModal();
+      return;
+    }
+
+    if (typeof selectedId === 'string') {
+      this.PurchaseProduct.MedicineId = 0;
+    } else {
+      this.PurchaseProduct.MedicineId = selectedId;
+    }
+    this.PurchaseProduct.MedicineName = selectedValue;
+
+    var SelectedMedicine = this.MedicineList.find(
       (x: any) => x.MedicineId == this.PurchaseProduct.MedicineId
     );
 
     if (SelectedMedicine) {
-      this.PurchaseProduct.HSNCode = SelectedMedicine.HSNCode;
-      this.PurchaseProduct.UnitId = SelectedMedicine.UnitId;
-      this.PurchaseProduct.UnitName = SelectedMedicine.UnitName;
-      this.PurchaseProduct.GSTId = SelectedMedicine.GSTId;
-      this.PurchaseProduct.IsNewMedicine = false;
-      this.PurchaseProduct.ManufacturerId = SelectedMedicine.ManufacturerId;
-      this.PurchaseProduct.CategoryId = SelectedMedicine.CategoryId;
-      this.PurchaseProduct.MedicineTypeId = SelectedMedicine.MedicineTypeId;
+      this.applySelectedMedicine(SelectedMedicine);
     } else {
-      // New medicine being created
-      this.PurchaseProduct.IsNewMedicine = true;
-      this.PurchaseProduct.UnitId = this.UnitList.length > 0 ? this.UnitList[0].UnitId : '';
-      this.PurchaseProduct.GSTId = this.GSTList.length > 0 ? this.GSTList[0].GSTId : '';
-      // this.toastr.info('New medicine will be created: ' + this.PurchaseProduct.MedicineName);
+      this.openNewMedicineModal();
     }
   }
 
