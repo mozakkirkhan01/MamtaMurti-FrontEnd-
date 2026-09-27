@@ -145,6 +145,27 @@ export class MedicineSaleComponent implements OnInit {
             this.PaymentCollection.PaymentDate
           );
           this.PaymentMedicineList = response.PaymentMedicineList;
+          if (this.PaymentMedicineList && this.PaymentMedicineList.length > 0) {
+            this.PaymentMedicineList.forEach((e1: any) => {
+              var pcsUnit = { UnitId: 24, UnitName: 'PCS', Value: 1 };
+              var isStrip = (Number(e1.PurchaseUnitValue) > 1)
+                            || (Number(e1.UnitValue) > 1)
+                            || (e1.UnitName && e1.UnitName.toLowerCase().includes('strip'));
+              if (isStrip) {
+                var stripVal = Number(e1.PurchaseUnitValue || (e1.UnitValue > 1 ? e1.UnitValue : 10)) || 10;
+                e1.UnitList = [
+                  {
+                    UnitId: e1.UnitValue > 1 ? e1.UnitId : (e1.PurchaseUnitId || 26),
+                    UnitName: 'Strip',
+                    Value: stripVal
+                  },
+                  pcsUnit
+                ];
+              } else {
+                e1.UnitList = [pcsUnit];
+              }
+            });
+          }
           this.SelectedPaymentCollectionList =
             response.SelectedPaymentCollectionList;
 
@@ -390,16 +411,58 @@ export class MedicineSaleComponent implements OnInit {
           this.MedicineStockMessage = response.MedicineStockMessage;
 
           this.MedicineStockList.forEach((e1) => {
+            var matchedUnit = this.UnitList.find((u) => u.UnitId == e1.UnitId);
+            e1.PurchaseUnitValue = Number(e1.PurchaseUnitValue || (matchedUnit ? matchedUnit.Value : 1)) || 1;
+
             // set default only if UnitId is missing or null
             if (!e1.UnitId) {
               e1.UnitId = 24;
             }
 
+            var pcsUnit = this.UnitList.find((x) => x.UnitName && x.UnitName.toUpperCase() === 'PCS') 
+                          || { UnitId: 24, UnitName: 'PCS', Value: 1 };
+            var stockUnit = matchedUnit || {
+              UnitId: e1.UnitId,
+              UnitName: e1.UnitName || 'Strip',
+              Value: e1.PurchaseUnitValue
+            };
+
+            var isStrip = (e1.PurchaseUnitValue > 1)
+                          || (stockUnit.Value > 1)
+                          || (stockUnit.UnitName && stockUnit.UnitName.toLowerCase().includes('strip'))
+                          || (e1.UnitName && e1.UnitName.toLowerCase().includes('strip'));
+
+            if (isStrip) {
+              var stripVal = stockUnit.Value > 1 ? stockUnit.Value : e1.PurchaseUnitValue;
+              e1.UnitList = [
+                {
+                  UnitId: stockUnit.UnitId,
+                  UnitName: 'Strip',
+                  Value: stripVal
+                },
+                {
+                  UnitId: pcsUnit.UnitId || 24,
+                  UnitName: 'PCS',
+                  Value: 1
+                }
+              ];
+              e1.UnitValue = stripVal;
+            } else {
+              e1.UnitList = [
+                {
+                  UnitId: pcsUnit.UnitId || 24,
+                  UnitName: 'PCS',
+                  Value: 1
+                }
+              ];
+              e1.UnitValue = 1;
+            }
+
             e1.SellingUnitId = e1.UnitId;
 
-            e1.UnitList = this.UnitList.filter(
-              (x2) => x2.UnitId == e1.UnitId || x2.Value == 1
-            );
+            e1.Amount = e1.PurchaseUnitValue > 0
+              ? this.loadData.round((e1.MRP * e1.UnitValue) / e1.PurchaseUnitValue, 2)
+              : e1.MRP;
           });
           // this.MedicineStockList.map(x1 => x1.SellingUnitId = `${x1.Name} - ${x1.HSNCode}`)
         } else {
@@ -417,13 +480,13 @@ export class MedicineSaleComponent implements OnInit {
 changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
   PaymentMedicineModel.Unit = PaymentMedicineModel.Unit || {};
 
-  for (var i = 0; i < this.UnitList.length; i++) {
-    if (this.UnitList[i].UnitId == PaymentMedicineModel.UnitId) {
-      PaymentMedicineModel.Unit = this.UnitList[i];
-      PaymentMedicineModel.UnitValue = this.UnitList[i].Value || 1;
-      PaymentMedicineModel.UnitId = this.UnitList[i].UnitId;
-      break;
-    }
+  var matchedUnit = (PaymentMedicineModel.UnitList || []).find((u: any) => u.UnitId == PaymentMedicineModel.UnitId)
+                    || this.UnitList.find((u: any) => u.UnitId == PaymentMedicineModel.UnitId);
+
+  if (matchedUnit) {
+    PaymentMedicineModel.Unit = matchedUnit;
+    PaymentMedicineModel.UnitValue = Number(matchedUnit.Value) || 1;
+    PaymentMedicineModel.UnitId = matchedUnit.UnitId;
   }
 
   // Ensure default numbers to prevent NaN
@@ -443,7 +506,7 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
     return;
   }
 
-  if (PaymentMedicineModel.Unit.Value != PaymentMedicineModel.PurchaseUnitValue) {
+  if (PaymentMedicineModel.PurchaseUnitValue > 0) {
     PaymentMedicineModel.Amount = this.loadData.round(
       (PaymentMedicineModel.MRP * PaymentMedicineModel.UnitValue) /
         PaymentMedicineModel.PurchaseUnitValue,

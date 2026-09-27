@@ -149,8 +149,8 @@
                                             <td>{{model.BatchNo}}</td>
                                             <td>{{model.ExpiredDate |date:'dd-MM-yyyy'}}</td>
                                             <td>
-                                                <select [(ngModel)]="model.UnitId" (change)="changeQuantity(model)">
-                                                    <option *ngFor="let p1 of UnitList" [value]="p1.UnitId">
+                                                <select [(ngModel)]="model.UnitId" (ngModelChange)="changeQuantity(model)">
+                                                    <option *ngFor="let p1 of model.UnitList" [ngValue]="p1.UnitId">
                                                         {{p1.UnitName}}</option>
                                                 </select>
                                             </td>
