@@ -79,7 +79,7 @@
                                         <input matInput #MedicineId="ngModel" name="MedicineName"
                                             (ngModelChange)="onSearchInput($event)" placeholder="Search Medicine"
                                             [(ngModel)]="PurchaseProduct.MedicineName" [matAutocomplete]="autoMedicine"
-                                            required />
+                                            #medicineInput #medicineTrigger="matAutocompleteTrigger" required />
                                         <mat-autocomplete #autoMedicine="matAutocomplete"
                                             (optionSelected)="afterMedicineSelected($event)">
                                             <mat-option *ngFor="let options of MedicineDetailList"
@@ -100,7 +100,8 @@
                                             <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
                                         </button>
                                         <button mat-icon-button matSuffix type="button"
-                                            color="primary" (click)="openNewMedicineModal()" title="Add New Medicine">
+                                            color="primary" (click)="openNewMedicineModal()"
+                                            title="Add New Medicine">
                                             <mat-icon><i class="bi bi-plus-circle"></i> </mat-icon>
                                         </button>
                                         <mat-hint *ngIf="PurchaseProduct.IsNewMedicine" class="text-info">

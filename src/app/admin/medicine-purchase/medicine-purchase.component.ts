@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { NgForm } from '@angular/forms';
 declare var $: any;
 declare var toastr: any;
@@ -194,6 +195,8 @@ export class MedicinePurchaseComponent implements OnInit {
   }
 
   @ViewChild('formMedicine') formMedicine!: NgForm;
+  @ViewChild('medicineInput') medicineInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('medicineTrigger') medicineTrigger!: MatAutocompleteTrigger;
 
   resetMedicine() {
     this.Medicine = {};
@@ -240,6 +243,10 @@ export class MedicinePurchaseComponent implements OnInit {
     if (this.PurchaseProduct && this.PurchaseProduct.MedicineName) {
       this.Medicine.MedicineName = this.PurchaseProduct.MedicineName.trim();
     }
+    $('#modal_popUp').one('shown.bs.modal', () => {
+      this.medicineTrigger?.closePanel();
+      this.medicineInput?.nativeElement.blur();
+    });
     $('#modal_popUp').modal('show');
   }
 
