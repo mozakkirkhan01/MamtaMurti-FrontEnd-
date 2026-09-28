@@ -1,4 +1,17 @@
 /* Add New Medicine Modal Enhancements */
+.add-medicine-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.add-medicine-icon i {
+    display: block;
+    font-size: 20px;
+    line-height: 1;
+}
+
 .modal-icon-badge {
     width: 44px;
     height: 44px;
