@@ -111,6 +111,7 @@ export class MedicineSaleComponent implements OnInit {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
           this.DoctorList = response.DoctorList;
+          this.DoctorDetailList = this.DoctorList;
         } else {
           this.toastr.error(response.Message);
         }
@@ -148,7 +149,18 @@ export class MedicineSaleComponent implements OnInit {
           this.PaymentCollection.PaymentDate = this.loadData.loadDateYMD(
             this.PaymentCollection.PaymentDate
           );
-          this.PaymentMedicineList = response.PaymentMedicineList;
+          if (!this.PaymentCollection.DoctorName && this.PaymentCollection.RefferedByName) {
+            this.PaymentCollection.DoctorName = this.PaymentCollection.RefferedByName;
+          }
+          if (!this.PaymentCollection.DoctorId && this.PaymentCollection.RefferedBy) {
+            this.PaymentCollection.DoctorId = this.PaymentCollection.RefferedBy;
+          }
+          if (this.PaymentCollection.PatientName) {
+            this.PaymentMedicine.PatientName = this.PaymentCollection.PatientName;
+            this.PaymentMedicine.PatientId = this.PaymentCollection.PatientId;
+          }
+          this.PaymentCollection.DiscOnBill = this.PaymentCollection.DiscountAmount || 0;
+          this.PaymentMedicineList = response.PaymentMedicineList || [];
           if (this.PaymentMedicineList && this.PaymentMedicineList.length > 0) {
             this.PaymentMedicineList.forEach((e1: any) => {
               var pcsUnit = { UnitId: 24, UnitName: 'PCS', Value: 1 };
@@ -168,10 +180,18 @@ export class MedicineSaleComponent implements OnInit {
               } else {
                 e1.UnitList = [pcsUnit];
               }
+
+              if (e1.UnitId && !e1.UnitList.some((u: any) => u.UnitId === e1.UnitId)) {
+                e1.UnitList.unshift({
+                  UnitId: e1.UnitId,
+                  UnitName: e1.UnitName || 'Unit',
+                  Value: e1.UnitValue || 1
+                });
+              }
             });
           }
           this.SelectedPaymentCollectionList =
-            response.SelectedPaymentCollectionList;
+            response.SelectedPaymentCollectionList || [];
 
           // this.PaymentMedicineList[0].UnitId = 23;
           // for (let i = 0; i < this.PaymentMedicineList.length; i++) {
@@ -1017,8 +1037,11 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
       (r1) => {
         let response = r1 as any;
         if (response.Message == ConstantData.SuccessMessage) {
+          const isEdit = this.PaymentCollection.PaymentCollectionId > 0;
           this.toastr.success(
-            'One record created successfully.',
+            isEdit
+              ? 'Record updated successfully.'
+              : 'One record created successfully.',
             'Operation Success'
           );
 
@@ -1026,6 +1049,9 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
           this.resetForm();
           this.resetFormPaymentMedicine();
           this.SelectedPaymentCollectionList = [];
+          if (isEdit && this.redUrl) {
+            this.router.navigate([this.redUrl]);
+          }
         } else {
           this.toastr.error(response.Message);
         }
@@ -1207,11 +1233,14 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
     if (selected) {
       this.PaymentMedicine = { ...selected };
       this.PaymentCollection.PatientId = selected.PatientID;
+      this.PaymentCollection.PatientName = selected.PatientName;
     }
   }
 
   clearPatient() {
     this.PaymentMedicine.PatientName = '';
+    this.PaymentCollection.PatientName = '';
+    this.PaymentCollection.PatientId = null;
     this.filteredPatientList = this.PatientList;
   }
 

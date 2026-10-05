@@ -220,11 +220,11 @@
                                                                 </span>
                                                             </mat-option>
                                                         </mat-autocomplete>
-                                                        <button mat-icon-button matSuffix *ngIf="PaymentMedicine.PatientName" 
+                                                        <button mat-icon-button matSuffix *ngIf="PaymentCollection.PatientName" 
                                                             color="primary" (click)="clearPatient()">
                                                             <mat-icon>close</mat-icon>
                                                         </button>
-                                                        <mat-error *ngIf="!PaymentMedicine.PatientName">Required field !!</mat-error>
+                                                        <mat-error *ngIf="!PaymentCollection.PatientName">Required field !!</mat-error>
                                                     </mat-form-field>
 
                                                     <mat-form-field appearance="outline" class="col-lg-1">
@@ -397,7 +397,9 @@
                             </div>
                         </div>
                         <div class="card-footer text-center" *ngIf="PaymentMedicineList.length > 0">
-                            <button type="button" class="btn btn-primary" (click)="saveMedicalPayment()">Submit</button>
+                            <button type="button" class="btn btn-primary" (click)="saveMedicalPayment()">
+                                {{ PaymentCollection.PaymentCollectionId > 0 ? 'Update' : 'Submit' }}
+                            </button>
                         </div>
                     </div>
                 </div>
