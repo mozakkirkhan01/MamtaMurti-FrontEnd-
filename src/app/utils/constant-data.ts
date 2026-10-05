@@ -11,7 +11,7 @@ export class ConstantData {
     private static readonly baseUrl: string = "http://localhost:44444/";
     // private static readonly baseUrl: string = "https://api.mmnetralaya.in/";
     //private static readonly baseUrl: string = "http://192.168.192.39:7777/";
-    // private static readonly baseUrl: string = "https://api.mmnetralaya.com/";
+    // private static readonly baseUrl: string = "https://api.mmnetralaya.com/"; Older
     
     public static getBaseUrl(): string {
         return this.baseUrl;
