@@ -42,7 +42,11 @@ export class MedicineSaleComponent implements OnInit {
   PatientDetailList: any = [];
   filteredPatientList: any = [];
   DoctorDetailList: any[];
-  currentPayment: any = [];
+  currentPayment: any = {
+    Remarks: '',
+    PaymentMode: '',
+    PaidAmount: 0,
+  };
   SelectedPaymentCollectionList: any[] = [];
   PaymentModeList = this.loadData.GetEnumList(PaymentMode);
   AllPaymentModeList = PaymentMode;
@@ -262,6 +266,12 @@ export class MedicineSaleComponent implements OnInit {
     this.PaymentCollection.RefferedByName = 'SELF';
     this.PaymentCollection.BillingOf = 1;
     this.PaymentCollection.PaymentDate = this.loadData.loadDateYMD(new Date());
+    this.SelectedPaymentCollectionList = [];
+    this.currentPayment = {
+      Remarks: '',
+      PaymentMode: '',
+      PaidAmount: 0,
+    };
     if (this.formPaymentCollection) {
       this.formPaymentCollection.control.markAsPristine();
       this.formPaymentCollection.control.markAsUntouched();
@@ -961,24 +971,37 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
 
   saveMedicalPayment() {
     this.submitted = true;
-    this.formPaymentCollection.control.markAllAsTouched();
-    if (this.formPaymentCollection.invalid) {
-      this.toastr.warning('Fill all the Required Fields.', 'Invailid Form');
+
+    if (!this.PaymentMedicineList || this.PaymentMedicineList.length === 0) {
+      this.toastr.warning('No product is added!!');
       return;
     }
+
     if (this.PaymentCollection.PatientId == null) {
       this.toastr.warning('Invalid Patients!!');
       return;
     }
 
+    if (!this.SelectedPaymentCollectionList || this.SelectedPaymentCollectionList.length === 0) {
+      this.toastr.error('Please add at least one payment collection item!');
+      return;
+    }
+
     if (this.PaymentCollection.PayableAmount == null) {
-      this.toastr.warning('Paid  Amount is required!!');
+      this.toastr.warning('Payable Amount is required!!');
       return;
     }
-    if (this.PaymentMedicineList.length == 0) {
-      this.toastr.warning('No product is added!!');
-      return;
-    }
+
+    const totalPaid = this.SelectedPaymentCollectionList.reduce(
+      (sum, payment) => sum + (Number(payment.PaidAmount) || 0),
+      0
+    );
+    this.PaymentCollection.PaidAmount = totalPaid;
+    this.PaymentCollection.DueAmount = Math.max(
+      0,
+      this.loadData.round(this.PaymentCollection.PayableAmount - totalPaid, 2)
+    );
+
     var data = {
       PaymentCollection: this.PaymentCollection,
       PaymentMedicineList: this.PaymentMedicineList,
@@ -1064,11 +1087,19 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
   addToPaymentList() {
     if (
       this.currentPayment.PaidAmount != null &&
+      this.currentPayment.PaidAmount !== '' &&
       this.currentPayment.PaymentMode
     ) {
+      const paidAmt = Number(this.currentPayment.PaidAmount);
+
+      if (isNaN(paidAmt) || paidAmt < 0) {
+        this.toastr.warning('Please enter a valid non-negative amount!');
+        return;
+      }
+
       // Calculate the sum of already paid amounts
       const totalPaid = this.SelectedPaymentCollectionList.reduce(
-        (sum, payment) => sum + (payment.PaidAmount || 0),
+        (sum, payment) => sum + (Number(payment.PaidAmount) || 0),
         0
       );
 
@@ -1076,19 +1107,27 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
       const remainingAmount = this.PaymentCollection.PayableAmount - totalPaid;
 
       // Validate that PaidAmount does not exceed remaining
-      if (this.currentPayment.PaidAmount > remainingAmount) {
-        alert('Paid amount cannot exceed remaining payable amount!');
+      if (paidAmt > remainingAmount) {
+        this.toastr.warning('Paid amount cannot exceed remaining payable amount!');
         this.currentPayment.PaidAmount = remainingAmount;
         return;
       }
 
       // Push a copy of the current payment into the list
-      this.SelectedPaymentCollectionList.push({ ...this.currentPayment });
+      this.SelectedPaymentCollectionList.push({
+        ...this.currentPayment,
+        PaidAmount: paidAmt,
+      });
 
       // Calculate the new remaining amount after this payment
-      const newTotalPaid = totalPaid + this.currentPayment.PaidAmount;
-      const newRemainingAmount =
-        this.PaymentCollection.PayableAmount - newTotalPaid;
+      const newTotalPaid = totalPaid + paidAmt;
+      const newRemainingAmount = Math.max(
+        0,
+        this.loadData.round(this.PaymentCollection.PayableAmount - newTotalPaid, 2)
+      );
+
+      this.PaymentCollection.PaidAmount = newTotalPaid;
+      this.PaymentCollection.DueAmount = newRemainingAmount;
 
       // Reset currentPayment
       this.currentPayment = {
@@ -1097,7 +1136,7 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
         PaidAmount: newRemainingAmount > 0 ? newRemainingAmount : 0,
       };
     } else {
-      alert('Please fill all fields!');
+      this.toastr.warning('Please fill all payment fields!');
     }
   }
 
@@ -1106,11 +1145,22 @@ changeQuantity(PaymentMedicineModel: any, IsDiscountAmountChange?: boolean) {
 
     // Restore the amount to currentPayment.PaidAmount
     if (removedItem && removedItem.PaidAmount != null) {
-      this.currentPayment.PaidAmount += removedItem.PaidAmount;
+      this.currentPayment.PaidAmount =
+        (this.currentPayment.PaidAmount || 0) + Number(removedItem.PaidAmount);
     }
 
     // Remove the item from the list
     this.SelectedPaymentCollectionList.splice(index, 1);
+
+    const totalPaid = this.SelectedPaymentCollectionList.reduce(
+      (sum, payment) => sum + (Number(payment.PaidAmount) || 0),
+      0
+    );
+    this.PaymentCollection.PaidAmount = totalPaid;
+    this.PaymentCollection.DueAmount = Math.max(
+      0,
+      this.loadData.round(this.PaymentCollection.PayableAmount - totalPaid, 2)
+    );
   }
 
   getPatientList() {
