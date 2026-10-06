@@ -1121,5 +1121,8 @@
       return this.http.post(this.apiUrl + 'Dosage/SaveDosage', obj, { headers: this.headers })
     }
 
+    getDashboardData(obj: any) {
+      return this.http.post(this.apiUrl + 'Dashboard/GetDashboardData', obj, { headers: this.headers });
+    }
 
   }
