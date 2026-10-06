@@ -1,18 +1,470 @@
 <app-progress *ngIf="dataLoading"></app-progress>
-<main id="main" class="main">
 
-    <div class="pagetitle">
-      <h1>Dashboard</h1>
+<main id="main" class="main">
+  <!-- Page Header -->
+  <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="dashboard-header-title">
+        <i class="bi bi-hospital me-2 text-primary"></i>Admin Dashboard
+      </h1>
       <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a>Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Hospital Overview</li>
         </ol>
       </nav>
     </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-light text-dark border px-3 py-2 fs-7 shadow-sm">
+        <i class="bi bi-calendar3 me-1 text-primary"></i> {{ currentDate | date:'fullDate' }}
+      </span>
+      <button class="btn btn-outline-primary btn-sm px-3 py-2 shadow-sm d-flex align-items-center gap-1"
+        (click)="getDashboardData()" [disabled]="dataLoading" title="Refresh Dashboard Data">
+        <i class="bi bi-arrow-clockwise" [class.spin]="dataLoading"></i>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
 
-    <section class="section dashboard">
-     
-    </section>
+  <section class="section dashboard">
+    <!-- Quick Action Launchpad -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card shadow-sm border-0 mb-0 quick-actions-card">
+          <div class="card-body p-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span class="fw-semibold text-secondary px-2 fs-7">
+              <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Actions:
+            </span>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-sm btn-primary-soft" (click)="navigate('/admin/opd-booking')">
+                <i class="bi bi-person-plus-fill me-1 text-primary"></i>New OPD Booking
+              </button>
+              <button class="btn btn-sm btn-success-soft" (click)="navigate('/admin/patient-medicine-sale')">
+                <i class="bi bi-capsule me-1 text-success"></i>New Medicine Sale
+              </button>
+              <button class="btn btn-sm btn-info-soft" (click)="navigate('/admin/optical-billing')">
+                <i class="bi bi-eyeglasses me-1 text-info"></i>Optical Billing
+              </button>
+              <button class="btn btn-sm btn-warning-soft" (click)="navigate('/admin/manage-patient')">
+                <i class="bi bi-person-vcard me-1 text-warning"></i>Register Patient
+              </button>
+              <button class="btn btn-sm btn-secondary-soft" (click)="navigate('/admin/medicine-stock-list')">
+                <i class="bi bi-boxes me-1 text-secondary"></i>Medicine Stock
+              </button>
+              <button class="btn btn-sm btn-danger-soft" (click)="navigate('/admin/opd-List-today')">
+                <i class="bi bi-clock-history me-1 text-danger"></i>Today's OPD List
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  </main>
+    <!-- Primary Top 4 KPI Metrics -->
+    <div class="row g-3 mb-3">
+      <!-- Total Hospital Revenue -->
+      <div class="col-xxl-3 col-md-6">
+        <div class="card info-card revenue-card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="card-title text-muted text-uppercase fs-7 mb-0">Total Collection</h5>
+              <span class="badge bg-success-light text-success fs-8">All Time</span>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+              <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-primary-soft text-primary">
+                <i class="bi bi-currency-rupee fs-3"></i>
+              </div>
+              <div class="ps-3">
+                <h3 class="mb-0 fw-bold text-dark">₹{{ metrics.TotalRevenue | number:'1.2-2' }}</h3>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-success small pt-1 fw-bold">
+                    <i class="bi bi-arrow-up-right me-1"></i>₹{{ metrics.TodayRevenue | number:'1.0-0' }}
+                  </span>
+                  <span class="text-muted small">today</span>
+                  <span *ngIf="metrics.TotalDue > 0" class="badge bg-danger-light text-danger ms-auto fs-9">
+                    Due: ₹{{ metrics.TotalDue | number:'1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Patients -->
+      <div class="col-xxl-3 col-md-6">
+        <div class="card info-card patients-card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="card-title text-muted text-uppercase fs-7 mb-0">Patient Footfall</h5>
+              <span class="badge bg-info-light text-info fs-8">Registered</span>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+              <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-info-soft text-info">
+                <i class="bi bi-people-fill fs-3"></i>
+              </div>
+              <div class="ps-3">
+                <h3 class="mb-0 fw-bold text-dark">{{ metrics.TotalPatients | number }}</h3>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-info small pt-1 fw-bold">+{{ metrics.TodayPatients }} new</span>
+                  <span class="text-muted small">registered today</span>
+                  <a routerLink="/admin/manage-patient" class="text-link ms-auto small">View all</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPD Consultations -->
+      <div class="col-xxl-3 col-md-6">
+        <div class="card info-card opd-card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="card-title text-muted text-uppercase fs-7 mb-0">OPD Consultations</h5>
+              <span class="badge bg-primary-light text-primary fs-8">Visits</span>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+              <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-primary-soft text-primary">
+                <i class="bi bi-calendar2-check-fill fs-3"></i>
+              </div>
+              <div class="ps-3">
+                <h3 class="mb-0 fw-bold text-dark">{{ metrics.TotalOpdVisits | number }}</h3>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-primary small pt-1 fw-bold">{{ metrics.TodayOpdVisits }} today</span>
+                  <span class="text-muted small">| ₹{{ departmentRevenue.OpdRevenue | number:'1.0-0' }}</span>
+                  <a routerLink="/admin/opd-List" class="text-link ms-auto small">OPD List</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pharmacy Sales -->
+      <div class="col-xxl-3 col-md-6">
+        <div class="card info-card pharmacy-card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="card-title text-muted text-uppercase fs-7 mb-0">Pharmacy Revenue</h5>
+              <span class="badge bg-success-light text-success fs-8">{{ metrics.TotalPharmacySales }} Bills</span>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+              <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-success-soft text-success">
+                <i class="bi bi-capsule fs-3"></i>
+              </div>
+              <div class="ps-3">
+                <h3 class="mb-0 fw-bold text-dark">₹{{ departmentRevenue.PharmacyRevenue | number:'1.2-2' }}</h3>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-success small pt-1 fw-bold">{{ pharmacyShare }}%</span>
+                  <span class="text-muted small">of hospital sales</span>
+                  <a routerLink="/admin/patient-medicine-sale-list" class="text-link ms-auto small">Sales</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Metric Badges Strip -->
+    <div class="row g-3 mb-3">
+      <!-- Optical Sales -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm secondary-kpi-card p-3">
+          <div class="d-flex align-items-center">
+            <div class="kpi-mini-icon bg-purple-soft text-purple me-3">
+              <i class="bi bi-eyeglasses fs-4"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 text-uppercase fw-semibold">Optical Center</div>
+              <div class="fw-bold fs-6 text-dark">₹{{ departmentRevenue.OpticalRevenue | number:'1.0-0' }}</div>
+              <div class="text-muted fs-8">{{ metrics.TotalOpticalSales }} Optical Bills</div>
+            </div>
+            <a routerLink="/admin/optical-billing-list" class="ms-auto btn btn-sm btn-light border p-1" title="View Optical Bills">
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Surgeries -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm secondary-kpi-card p-3">
+          <div class="d-flex align-items-center">
+            <div class="kpi-mini-icon bg-danger-soft text-danger me-3">
+              <i class="bi bi-heart-pulse-fill fs-4"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 text-uppercase fw-semibold">Eye Surgeries</div>
+              <div class="fw-bold fs-6 text-dark">{{ metrics.TotalSurgeries }} Cases</div>
+              <div class="text-muted fs-8">OT Operations & Procedures</div>
+            </div>
+            <a routerLink="/admin/surgery-List" class="ms-auto btn btn-sm btn-light border p-1" title="View Surgeries">
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical Inventory Alerts -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm secondary-kpi-card p-3">
+          <div class="d-flex align-items-center">
+            <div class="kpi-mini-icon bg-warning-soft text-warning me-3">
+              <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 text-uppercase fw-semibold">Inventory Alerts</div>
+              <div class="fw-bold fs-6 text-dark">{{ lowStockMedicines.length }} Medicines Low</div>
+              <div class="text-muted fs-8">Reorder required soon</div>
+            </div>
+            <a routerLink="/admin/medicine-stock-list" class="ms-auto btn btn-sm btn-light border p-1" title="View Stock">
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specialist Doctors -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm secondary-kpi-card p-3">
+          <div class="d-flex align-items-center">
+            <div class="kpi-mini-icon bg-teal-soft text-teal me-3">
+              <i class="bi bi-person-badge-fill fs-4"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 text-uppercase fw-semibold">Medical Staff</div>
+              <div class="fw-bold fs-6 text-dark">{{ doctors.length }} Specialists</div>
+              <div class="text-muted fs-8">Surgeons & Optometrists</div>
+            </div>
+            <a routerLink="/admin/doctor" class="ms-auto btn btn-sm btn-light border p-1" title="View Doctors">
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Layout (Col-8 Left, Col-4 Right) -->
+    <div class="row g-3">
+      <!-- Left Column (8 Columns) -->
+      <div class="col-lg-8">
+        <!-- 7-Day Revenue & Collection Trend -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+              <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Weekly Revenue & Collection Trend
+            </h5>
+            <span class="badge bg-light text-muted border fs-8">Last 7 Days</span>
+          </div>
+          <div class="card-body">
+            <div *ngIf="weeklyTrend.length === 0" class="text-center py-4 text-muted">
+              No recent collection data recorded in the last 7 days.
+            </div>
+            <div *ngIf="weeklyTrend.length > 0" class="trend-bars-container pt-3 pb-2">
+              <div class="row text-center g-2 align-items-end" style="min-height: 160px;">
+                <div *ngFor="let item of weeklyTrend" class="col">
+                  <div class="trend-bar-wrapper d-flex flex-column align-items-center">
+                    <div class="trend-val fs-9 text-muted mb-1">₹{{ item.TotalCollected | number:'1.0-0' }}</div>
+                    <div class="trend-bar rounded-top"
+                      [style.height.px]="getBarHeight(item.TotalCollected)"
+                      [title]="(item.Date | date:'mediumDate') + ' - ₹' + item.TotalCollected">
+                    </div>
+                    <div class="trend-date fs-9 text-muted mt-2 fw-semibold">
+                      {{ item.Date | date:'dd MMM' }}
+                    </div>
+                    <div class="fs-10 text-secondary">{{ item.BillsCount }} bills</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+                <i class="bi bi-receipt me-2 text-primary"></i>Recent Hospital Transactions
+              </h5>
+              <div class="text-muted fs-8">Latest billing activity across all departments</div>
+            </div>
+            <a routerLink="/admin/patient-medicine-sale-list" class="btn btn-sm btn-outline-primary fs-8">
+              View All Bills <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 dashboard-table">
+                <thead class="table-light fs-8 text-uppercase">
+                  <tr>
+                    <th class="ps-3">Receipt / Bill #</th>
+                    <th>Patient</th>
+                    <th>Dept</th>
+                    <th>Date</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center pe-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="fs-8">
+                  <tr *ngIf="recentTransactions.length === 0">
+                    <td colspan="7" class="text-center py-4 text-muted">No recent transactions found.</td>
+                  </tr>
+                  <tr *ngFor="let item of recentTransactions">
+                    <td class="ps-3 fw-bold text-dark">
+                      #{{ item.ReceiptNo || item.PaymentCollectionId }}
+                      <div class="fs-9 text-muted fw-normal">{{ item.InvoiceNo }}</div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold text-dark">{{ item.PatientName }}</div>
+                      <div class="fs-9 text-muted">{{ item.UHID }}</div>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="{
+                        'bg-primary-soft text-primary': item.Department === 'OPD',
+                        'bg-success-soft text-success': item.Department === 'Pharmacy',
+                        'bg-purple-soft text-purple': item.Department === 'Optical',
+                        'bg-danger-soft text-danger': item.Department === 'Surgery',
+                        'bg-warning-soft text-warning': item.Department === 'Canteen',
+                        'bg-secondary-soft text-secondary': item.Department === 'Billing'
+                      }">
+                        {{ item.Department }}
+                      </span>
+                    </td>
+                    <td class="text-muted">{{ item.PaymentDate | date:'dd-MM-yyyy' }}</td>
+                    <td class="text-end fw-bold text-dark">₹{{ item.PaidAmount | number:'1.2-2' }}</td>
+                    <td class="text-center">
+                      <span class="badge" [ngClass]="item.Status === 'Paid' ? 'bg-success' : 'bg-danger'">
+                        {{ item.Status }}
+                      </span>
+                    </td>
+                    <td class="text-center pe-3">
+                      <button class="btn btn-sm btn-light border py-0 px-2" (click)="printReceipt(item)" title="Print Receipt">
+                        <i class="bi bi-printer text-primary"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column (4 Columns) -->
+      <div class="col-lg-4">
+        <!-- Department Revenue Share -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-header bg-white border-0 pt-3 pb-2">
+            <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+              <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Revenue Contribution
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Pharmacy -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center fs-8 mb-1">
+                <span class="fw-semibold text-dark"><i class="bi bi-capsule text-success me-1"></i> Pharmacy</span>
+                <span class="fw-bold text-dark">₹{{ departmentRevenue.PharmacyRevenue | number:'1.0-0' }} ({{ pharmacyShare }}%)</span>
+              </div>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-success" [style.width.%]="pharmacyShare"></div>
+              </div>
+            </div>
+
+            <!-- Optical -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center fs-8 mb-1">
+                <span class="fw-semibold text-dark"><i class="bi bi-eyeglasses text-purple me-1"></i> Optical Center</span>
+                <span class="fw-bold text-dark">₹{{ departmentRevenue.OpticalRevenue | number:'1.0-0' }} ({{ opticalShare }}%)</span>
+              </div>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-purple" [style.width.%]="opticalShare"></div>
+              </div>
+            </div>
+
+            <!-- OPD -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center fs-8 mb-1">
+                <span class="fw-semibold text-dark"><i class="bi bi-calendar2-check text-primary me-1"></i> OPD Consultations</span>
+                <span class="fw-bold text-dark">₹{{ departmentRevenue.OpdRevenue | number:'1.0-0' }} ({{ opdShare }}%)</span>
+              </div>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-primary" [style.width.%]="opdShare"></div>
+              </div>
+            </div>
+
+            <!-- Other / Canteen / Services -->
+            <div class="mb-1">
+              <div class="d-flex justify-content-between align-items-center fs-8 mb-1">
+                <span class="fw-semibold text-dark"><i class="bi bi-three-dots text-secondary me-1"></i> Other Services & Canteen</span>
+                <span class="fw-bold text-dark">₹{{ departmentRevenue.OtherRevenue | number:'1.0-0' }} ({{ otherShare }}%)</span>
+              </div>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-secondary" [style.width.%]="otherShare"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Low Stock / Reorder Alerts -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+              <i class="bi bi-shield-exclamation me-2 text-warning"></i>Low Stock Inventory
+            </h5>
+            <a routerLink="/admin/medicine-stock-list" class="fs-8 text-link">Manage</a>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush fs-8">
+              <li *ngIf="lowStockMedicines.length === 0" class="list-group-item text-center py-3 text-muted">
+                All medicines are in sufficient stock.
+              </li>
+              <li *ngFor="let item of lowStockMedicines" class="list-group-item d-flex justify-content-between align-items-center px-3 py-2">
+                <div>
+                  <div class="fw-semibold text-dark">{{ item.MedicineName }}</div>
+                  <div class="fs-9 text-muted">Batch: {{ item.BatchNo }} | Exp: {{ item.ExpiredDate | date:'MM/yy' }}</div>
+                </div>
+                <span class="badge rounded-pill bg-danger-light text-danger fs-8 fw-bold">
+                  {{ item.AvailableQuantity }} {{ item.UnitName }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Specialist Doctors on Roster -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+              <i class="bi bi-person-badge me-2 text-teal"></i>Medical Specialists
+            </h5>
+            <a routerLink="/admin/doctor" class="fs-8 text-link">Doctors</a>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush fs-8">
+              <li *ngIf="doctors.length === 0" class="list-group-item text-center py-3 text-muted">
+                No doctors registered.
+              </li>
+              <li *ngFor="let doc of doctors" class="list-group-item d-flex align-items-center px-3 py-2">
+                <div class="doctor-avatar bg-teal-soft text-teal rounded-circle me-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold text-dark">{{ doc.DoctorName }}</div>
+                  <div class="fs-9 text-muted text-capitalize">{{ doc.Specialization || 'Eye Specialist' }}</div>
+                </div>
+                <a [href]="'tel:' + doc.MobileNo" class="btn btn-sm btn-light border py-0 px-2" title="Call Doctor">
+                  <i class="bi bi-telephone text-success"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
